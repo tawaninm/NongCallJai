@@ -27,8 +27,16 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CareGo Hospital Platform - ระบบติดตามดูแลผู้ป่วย" },
+      { title: "CareGo Hospital" },
       { name: "description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
+      { property: "og:title", content: "CareGo Hospital" },
+      { name: "twitter:title", content: "CareGo Hospital" },
+      { property: "og:description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
+      { name: "twitter:description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1a118b2d-7a56-4b32-bd94-fb52b2a5f2b0/id-preview-154f4e2d--ad0a089c-3abf-4c7a-a615-47e77372a4a0.lovable.app-1778057841982.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1a118b2d-7a56-4b32-bd94-fb52b2a5f2b0/id-preview-154f4e2d--ad0a089c-3abf-4c7a-a615-47e77372a4a0.lovable.app-1778057841982.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
