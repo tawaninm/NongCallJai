@@ -9,16 +9,43 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PatientsRouteImport } from './routes/patients'
+import { Route as MedicationRouteImport } from './routes/medication'
+import { Route as FamilyRouteImport } from './routes/family'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CasesRouteImport } from './routes/cases'
+import { Route as CarePlansRouteImport } from './routes/care-plans'
+import { Route as AppointmentsRouteImport } from './routes/appointments'
 import { Route as AiFollowupRouteImport } from './routes/ai-followup'
+import { Route as AiAgentsRouteImport } from './routes/ai-agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatientsPatientIdRouteImport } from './routes/patients.$patientId'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PatientsRoute = PatientsRouteImport.update({
   id: '/patients',
   path: '/patients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MedicationRoute = MedicationRouteImport.update({
+  id: '/medication',
+  path: '/medication',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FamilyRoute = FamilyRouteImport.update({
+  id: '/family',
+  path: '/family',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -31,9 +58,24 @@ const CasesRoute = CasesRouteImport.update({
   path: '/cases',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CarePlansRoute = CarePlansRouteImport.update({
+  id: '/care-plans',
+  path: '/care-plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppointmentsRoute = AppointmentsRouteImport.update({
+  id: '/appointments',
+  path: '/appointments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AiFollowupRoute = AiFollowupRouteImport.update({
   id: '/ai-followup',
   path: '/ai-followup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiAgentsRoute = AiAgentsRouteImport.update({
+  id: '/ai-agents',
+  path: '/ai-agents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,71 +91,148 @@ const PatientsPatientIdRoute = PatientsPatientIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-agents': typeof AiAgentsRoute
   '/ai-followup': typeof AiFollowupRoute
+  '/appointments': typeof AppointmentsRoute
+  '/care-plans': typeof CarePlansRoute
   '/cases': typeof CasesRoute
   '/dashboard': typeof DashboardRoute
+  '/family': typeof FamilyRoute
+  '/medication': typeof MedicationRoute
   '/patients': typeof PatientsRouteWithChildren
+  '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-agents': typeof AiAgentsRoute
   '/ai-followup': typeof AiFollowupRoute
+  '/appointments': typeof AppointmentsRoute
+  '/care-plans': typeof CarePlansRoute
   '/cases': typeof CasesRoute
   '/dashboard': typeof DashboardRoute
+  '/family': typeof FamilyRoute
+  '/medication': typeof MedicationRoute
   '/patients': typeof PatientsRouteWithChildren
+  '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai-agents': typeof AiAgentsRoute
   '/ai-followup': typeof AiFollowupRoute
+  '/appointments': typeof AppointmentsRoute
+  '/care-plans': typeof CarePlansRoute
   '/cases': typeof CasesRoute
   '/dashboard': typeof DashboardRoute
+  '/family': typeof FamilyRoute
+  '/medication': typeof MedicationRoute
   '/patients': typeof PatientsRouteWithChildren
+  '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-agents'
     | '/ai-followup'
+    | '/appointments'
+    | '/care-plans'
     | '/cases'
     | '/dashboard'
+    | '/family'
+    | '/medication'
     | '/patients'
+    | '/reports'
+    | '/settings'
     | '/patients/$patientId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ai-agents'
     | '/ai-followup'
+    | '/appointments'
+    | '/care-plans'
     | '/cases'
     | '/dashboard'
+    | '/family'
+    | '/medication'
     | '/patients'
+    | '/reports'
+    | '/settings'
     | '/patients/$patientId'
   id:
     | '__root__'
     | '/'
+    | '/ai-agents'
     | '/ai-followup'
+    | '/appointments'
+    | '/care-plans'
     | '/cases'
     | '/dashboard'
+    | '/family'
+    | '/medication'
     | '/patients'
+    | '/reports'
+    | '/settings'
     | '/patients/$patientId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiAgentsRoute: typeof AiAgentsRoute
   AiFollowupRoute: typeof AiFollowupRoute
+  AppointmentsRoute: typeof AppointmentsRoute
+  CarePlansRoute: typeof CarePlansRoute
   CasesRoute: typeof CasesRoute
   DashboardRoute: typeof DashboardRoute
+  FamilyRoute: typeof FamilyRoute
+  MedicationRoute: typeof MedicationRoute
   PatientsRoute: typeof PatientsRouteWithChildren
+  ReportsRoute: typeof ReportsRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/patients': {
       id: '/patients'
       path: '/patients'
       fullPath: '/patients'
       preLoaderRoute: typeof PatientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medication': {
+      id: '/medication'
+      path: '/medication'
+      fullPath: '/medication'
+      preLoaderRoute: typeof MedicationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/family': {
+      id: '/family'
+      path: '/family'
+      fullPath: '/family'
+      preLoaderRoute: typeof FamilyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -130,11 +249,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CasesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/care-plans': {
+      id: '/care-plans'
+      path: '/care-plans'
+      fullPath: '/care-plans'
+      preLoaderRoute: typeof CarePlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/appointments': {
+      id: '/appointments'
+      path: '/appointments'
+      fullPath: '/appointments'
+      preLoaderRoute: typeof AppointmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ai-followup': {
       id: '/ai-followup'
       path: '/ai-followup'
       fullPath: '/ai-followup'
       preLoaderRoute: typeof AiFollowupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-agents': {
+      id: '/ai-agents'
+      path: '/ai-agents'
+      fullPath: '/ai-agents'
+      preLoaderRoute: typeof AiAgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -168,11 +308,27 @@ const PatientsRouteWithChildren = PatientsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiAgentsRoute: AiAgentsRoute,
   AiFollowupRoute: AiFollowupRoute,
+  AppointmentsRoute: AppointmentsRoute,
+  CarePlansRoute: CarePlansRoute,
   CasesRoute: CasesRoute,
   DashboardRoute: DashboardRoute,
+  FamilyRoute: FamilyRoute,
+  MedicationRoute: MedicationRoute,
   PatientsRoute: PatientsRouteWithChildren,
+  ReportsRoute: ReportsRoute,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
