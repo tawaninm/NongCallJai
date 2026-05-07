@@ -5,6 +5,7 @@ const styles: Record<CaseStatus, string> = {
   pending: 'bg-muted text-muted-foreground',
   contacted: 'bg-teal-light text-teal',
   callback: 'bg-risk-yellow-bg text-risk-yellow',
+  nurse_review: 'bg-risk-yellow-bg text-risk-yellow',
   referred_doctor: 'bg-risk-red-bg text-risk-red',
   referred_pharmacist: 'bg-accent text-accent-foreground',
   family_notified: 'bg-teal-light text-teal',
