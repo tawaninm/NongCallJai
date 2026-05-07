@@ -3,7 +3,8 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Bell } from "lucide-react";
+import { Bell, Shield } from "lucide-react";
+import { roleLabels } from "@/lib/mock-data";
 
 function NotFoundComponent() {
   return (
@@ -27,14 +28,12 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CareGo Hospital" },
+      { title: "CareGo Hospital Platform v2.0" },
       { name: "description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
-      { property: "og:title", content: "CareGo Hospital" },
-      { name: "twitter:title", content: "CareGo Hospital" },
+      { property: "og:title", content: "CareGo Hospital Platform v2.0" },
+      { name: "twitter:title", content: "CareGo Hospital Platform v2.0" },
       { property: "og:description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
       { name: "twitter:description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1a118b2d-7a56-4b32-bd94-fb52b2a5f2b0/id-preview-154f4e2d--ad0a089c-3abf-4c7a-a615-47e77372a4a0.lovable.app-1778057841982.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1a118b2d-7a56-4b32-bd94-fb52b2a5f2b0/id-preview-154f4e2d--ad0a089c-3abf-4c7a-a615-47e77372a4a0.lovable.app-1778057841982.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],
@@ -67,7 +66,7 @@ function RootComponent() {
 }
 
 function AppLayout() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, role, userName } = useAuth();
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
 
   if (!isLoggedIn || currentPath === '/') {
@@ -78,9 +77,14 @@ function AppLayout() {
     <div className="flex h-screen w-full overflow-hidden">
       <AppSidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-14 items-center justify-between border-b bg-card px-6">
-          <div />
+        <header className="flex h-14 items-center justify-between border-b bg-card px-6 shrink-0">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4 text-primary" />
+            <span className="text-sm text-muted-foreground">เข้าสู่ระบบในฐานะ:</span>
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{roleLabels[role]}</span>
+          </div>
           <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">{userName}</span>
             <button className="relative rounded-lg p-2 hover:bg-muted">
               <Bell className="h-5 w-5 text-muted-foreground" />
               <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-risk-red text-[10px] font-bold text-white">3</span>
