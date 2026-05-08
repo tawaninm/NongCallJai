@@ -1,13 +1,14 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
-import { patients, carePlanTemplates } from '@/lib/mock-data';
+import { useState, useSyncExternalStore } from 'react';
+import { mockStore } from '@/lib/mock-store';
+import { carePlanTemplates } from '@/lib/mock-data';
 import type { RiskLevel, CaseStatus, CarePlanType } from '@/lib/mock-data';
 import { RiskBadge } from '@/components/RiskBadge';
 import { CaseStatusBadge } from '@/components/CaseStatusBadge';
-import { Search, Eye, Phone, UserPlus, Pill, Heart, XCircle, Stethoscope } from 'lucide-react';
-import { toast } from 'sonner';
+import { Search, Eye, Phone, UserPlus, Pill, Heart, Stethoscope, Filter } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { useActionModals } from '@/components/ActionModals';
+import { CallPatientModal } from '@/components/prototype/CallPatientModal';
 
 export const Route = createFileRoute('/patients')({
   component: PatientsPage,
@@ -17,17 +18,19 @@ function PatientsPage() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const { open: openModal, Modals } = useActionModals();
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients);
+  
   const [search, setSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskLevel | 'all'>('all');
   const [deptFilter, setDeptFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<CaseStatus | 'all'>('all');
   const [diseaseFilter, setDiseaseFilter] = useState<CarePlanType | 'all'>('all');
+  
+  const [callModalData, setCallModalData] = useState<any>(null);
 
   const departments = [...new Set(patients.map(p => p.department))];
 
   let filteredPatients = patients;
-
-  // Doctor default filter: Red/Yellow/Referred
   if (role === 'doctor') {
     filteredPatients = filteredPatients.filter(p =>
       p.riskLevel === 'red' || p.riskLevel === 'yellow' ||
@@ -46,9 +49,14 @@ function PatientsPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">คิวผู้ป่วย</h1>
-        <span className="text-sm text-muted-foreground">{filtered.length} รายการ</span>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">คิวผู้ป่วย</h1>
+          <p className="text-sm text-muted-foreground">{filtered.length} รายการ จากทั้งหมด {patients.length} รายการ</p>
+        </div>
+        <button onClick={() => navigate({ to: '/register' })} className="action-btn action-btn-primary">
+          <UserPlus className="h-4 w-4" /> เพิ่มผู้ป่วยใหม่
+        </button>
       </div>
 
       <div className="filter-bar">
@@ -57,104 +65,103 @@ function PatientsPage() {
           <input
             type="text" placeholder="ค้นหา HN / ชื่อ / เบอร์โทร / อาการ..."
             value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm"
+            className="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
           />
         </div>
-        <select value={riskFilter} onChange={e => setRiskFilter(e.target.value as RiskLevel | 'all')} className="rounded-lg border bg-background px-3 py-2 text-sm">
-          <option value="all">ทุกระดับความเสี่ยง</option>
-          <option value="green">🟢 เขียว</option>
-          <option value="yellow">🟡 เหลือง</option>
-          <option value="red">🔴 แดง</option>
-        </select>
-        <select value={diseaseFilter} onChange={e => setDiseaseFilter(e.target.value as CarePlanType | 'all')} className="rounded-lg border bg-background px-3 py-2 text-sm">
-          <option value="all">ทุกโรค</option>
-          <option value="hypertension">🫀 ความดันโลหิตสูง</option>
-          <option value="diabetes">🩸 เบาหวานชนิดที่ 2</option>
-          <option value="heart_failure">❤️‍🩹 ภาวะหัวใจล้มเหลว</option>
-          <option value="post_op">🩹 หลังผ่าตัด</option>
-        </select>
-        <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="rounded-lg border bg-background px-3 py-2 text-sm">
-          <option value="all">ทุกแผนก</option>
-          {departments.map(d => <option key={d} value={d}>{d}</option>)}
-        </select>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as CaseStatus | 'all')} className="rounded-lg border bg-background px-3 py-2 text-sm">
-          <option value="all">ทุกสถานะ</option>
-          <option value="pending">รอติดตาม</option>
-          <option value="contacted">ติดต่อแล้ว</option>
-          <option value="callback">รอโทรกลับ</option>
-          <option value="nurse_review">รอพยาบาลตรวจ</option>
-          <option value="referred_doctor">ส่งแพทย์</option>
-          <option value="referred_pharmacist">ส่งเภสัชกร</option>
-          <option value="closed">ปิดเคส</option>
-        </select>
+        <div className="flex items-center gap-2 border-l pl-3">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <select value={riskFilter} onChange={e => setRiskFilter(e.target.value as RiskLevel | 'all')} className="rounded-lg border bg-background px-3 py-2 text-sm outline-none">
+            <option value="all">ทุกระดับความเสี่ยง</option>
+            <option value="green">🟢 ปกติ (Green)</option>
+            <option value="yellow">🟡 ต้องติดตาม (Yellow)</option>
+            <option value="red">🔴 เร่งด่วน (Red)</option>
+          </select>
+          <select value={diseaseFilter} onChange={e => setDiseaseFilter(e.target.value as CarePlanType | 'all')} className="rounded-lg border bg-background px-3 py-2 text-sm outline-none">
+            <option value="all">ทุกโรค</option>
+            <option value="hypertension">🫀 ความดันโลหิตสูง</option>
+            <option value="diabetes">🩸 เบาหวานชนิดที่ 2</option>
+            <option value="heart_failure">❤️‍🩹 ภาวะหัวใจล้มเหลว</option>
+          </select>
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as CaseStatus | 'all')} className="rounded-lg border bg-background px-3 py-2 text-sm outline-none">
+            <option value="all">ทุกสถานะ</option>
+            <option value="pending">รอติดตาม</option>
+            <option value="callback">รอโทรกลับ</option>
+            <option value="nurse_review">รอพยาบาลตรวจ</option>
+          </select>
+        </div>
       </div>
 
-      <div className="rounded-xl border bg-card overflow-hidden">
+      <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b bg-muted/50">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-muted/50 border-b">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">HN</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">ผู้ป่วย</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">อายุ</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">โรค / Care Plan</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">อาการล่าสุด</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">ค่าล่าสุด</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">สถานะยา</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">ความเสี่ยง</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">สถานะเคส</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">ผู้ดูแล</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">การกระทำ</th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">HN / ผู้ป่วย</th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">อายุ/เพศ</th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">โรค / Care Plan</th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground max-w-[200px]">อาการล่าสุด</th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">ความเสี่ยง</th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">สถานะ</th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground text-right">การจัดการ</th>
               </tr>
             </thead>
-            <tbody>
-              {filtered.map(p => {
-                const diseaseIcon = p.carePlanType === 'hypertension' ? '🫀' : p.carePlanType === 'diabetes' ? '🩸' : p.carePlanType === 'heart_failure' ? '❤️‍🩹' : p.carePlanType === 'post_op' ? '🩹' : '💊';
-                const vitalValue = p.carePlanType === 'hypertension' ? `BP ${p.latestBP}` : p.carePlanType === 'diabetes' ? `FBS ${p.latestBloodSugar}` : p.carePlanType === 'heart_failure' ? `Wt ${p.latestWeightChange}` : p.latestBP;
-                return (
-                  <tr key={p.id} className={`border-b last:border-0 hover:bg-muted/30 transition-colors cursor-pointer border-l-4 ${p.riskLevel === 'red' ? 'border-l-risk-red' : p.riskLevel === 'yellow' ? 'border-l-risk-yellow' : 'border-l-risk-green'}`}
-                    onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })}
-                  >
-                    <td className="px-4 py-3 font-mono text-xs">{p.hn}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary shrink-0">
-                          {p.name.charAt(0)}
-                        </div>
-                        <span className="font-medium">{p.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">{p.age}</td>
-                    <td className="px-4 py-3 text-xs">
-                      <span className="mr-1">{diseaseIcon}</span>{p.carePlan}
-                    </td>
-                    <td className="px-4 py-3 text-xs max-w-[180px] truncate">{p.symptomSummary}</td>
-                    <td className="px-4 py-3 text-xs font-mono">{vitalValue}</td>
-                    <td className="px-4 py-3">
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${p.medicationStatus === 'ทานยาครบ' ? 'bg-risk-green-bg text-risk-green' : 'bg-risk-yellow-bg text-risk-yellow'}`}>
-                        {p.medicationStatus}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3"><RiskBadge level={p.riskLevel} /></td>
-                    <td className="px-4 py-3"><CaseStatusBadge status={p.caseStatus} /></td>
-                    <td className="px-4 py-3 text-xs">{p.assignedNurse}</td>
-                    <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })} className="rounded p-1.5 hover:bg-muted" title="ดูเคส"><Eye className="h-4 w-4" /></button>
-                        <button onClick={() => openModal('call', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="โทรกลับ"><Phone className="h-4 w-4" /></button>
-                        <button onClick={() => openModal('referDoctor', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="ส่งแพทย์"><Stethoscope className="h-4 w-4" /></button>
-                        <button onClick={() => openModal('referPharmacist', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="ส่งเภสัชกร"><Pill className="h-4 w-4" /></button>
-                        <button onClick={() => openModal('family', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="แจ้งญาติ"><Heart className="h-4 w-4" /></button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+            <tbody className="divide-y">
+              {filtered.map(p => (
+                <tr key={p.id} onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })}
+                  className={`hover:bg-muted/30 transition-colors cursor-pointer border-l-4 ${p.riskLevel === 'red' ? 'border-l-risk-red' : p.riskLevel === 'yellow' ? 'border-l-risk-yellow' : 'border-l-risk-green'}`}
+                >
+                  <td className="px-4 py-4">
+                    <p className="font-semibold text-foreground">{p.name}</p>
+                    <p className="text-xs text-muted-foreground">{p.hn} • {p.phone}</p>
+                  </td>
+                  <td className="px-4 py-4">{p.age} / {p.gender.charAt(0)}</td>
+                  <td className="px-4 py-4 text-xs">
+                    <span className="rounded bg-muted px-2 py-1">{p.carePlan}</span>
+                  </td>
+                  <td className="px-4 py-4 text-xs max-w-[200px] truncate" title={p.symptomSummary}>
+                    {p.symptomSummary}
+                  </td>
+                  <td className="px-4 py-4"><RiskBadge level={p.riskLevel} /></td>
+                  <td className="px-4 py-4"><CaseStatusBadge status={p.caseStatus} /></td>
+                  <td className="px-4 py-4 text-right" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-end gap-1">
+                      <button onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })} className="rounded-lg p-2 hover:bg-muted text-muted-foreground hover:text-primary transition-colors" title="ดูเคส">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => setCallModalData(p)} className="rounded-lg p-2 hover:bg-teal-light/50 text-teal transition-colors" title="โทรกลับ">
+                        <Phone className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => openModal('referDoctor', p.id, p.name)} className="rounded-lg p-2 hover:bg-blue-50 text-blue-600 transition-colors" title="ส่งแพทย์">
+                        <Stethoscope className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => openModal('family', p.id, p.name)} className="rounded-lg p-2 hover:bg-pink-50 text-pink-600 transition-colors" title="แจ้งญาติ">
+                        <Heart className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                    ไม่พบผู้ป่วยที่ตรงกับเงื่อนไขการค้นหา
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
       <Modals />
+      {callModalData && (
+        <CallPatientModal 
+          open={true} onClose={() => setCallModalData(null)}
+          patientId={callModalData.id} patientName={callModalData.name}
+          hn={callModalData.hn} age={callModalData.age}
+          riskLevel={callModalData.riskLevel} appointment={callModalData.appointmentStatus}
+        />
+      )}
     </div>
   );
 }

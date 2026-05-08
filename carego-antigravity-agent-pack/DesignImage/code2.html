@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CareGo Platform - AI Care Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#70d8c8",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#70d8c8",
+                        "surface": "#f3faff",
+                        "inverse-on-surface": "#dff4ff",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#f4fffb",
+                        "tertiary-fixed": "#afefdd",
+                        "background": "#f3faff",
+                        "on-error": "#ffffff",
+                        "on-surface": "#071e27",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#005048",
+                        "surface-container-low": "#e6f6ff",
+                        "on-secondary-container": "#56656e",
+                        "primary": "#00685d",
+                        "tertiary-container": "#417f70",
+                        "tertiary": "#266658",
+                        "tertiary-fixed-dim": "#94d3c1",
+                        "secondary-fixed": "#d6e5ef",
+                        "primary-container": "#008376",
+                        "surface-tint": "#006b5f",
+                        "surface-container-highest": "#cfe6f2",
+                        "on-secondary-fixed": "#0f1d25",
+                        "secondary-fixed-dim": "#bac9d3",
+                        "primary-fixed": "#8df5e4",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#00201c",
+                        "surface-dim": "#c7dde9",
+                        "secondary-container": "#d3e2ed",
+                        "on-tertiary-container": "#f4fffa",
+                        "on-secondary-fixed-variant": "#3b4951",
+                        "inverse-surface": "#1e333c",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#6d7a77",
+                        "on-background": "#071e27",
+                        "on-tertiary-fixed-variant": "#065043",
+                        "on-tertiary-fixed": "#00201a",
+                        "surface-variant": "#cfe6f2",
+                        "outline-variant": "#bcc9c5",
+                        "error": "#ba1a1a",
+                        "surface-container": "#dbf1fe",
+                        "surface-bright": "#f3faff",
+                        "on-surface-variant": "#3d4946",
+                        "surface-container-high": "#d5ecf8",
+                        "secondary": "#526069"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "24px",
+                        "stack-sm": "4px",
+                        "stack-lg": "24px",
+                        "gutter": "24px",
+                        "container-max": "1440px",
+                        "stack-md": "12px",
+                        "margin-page": "40px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Manrope"],
+                        "label-caps": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "title-sm": ["Manrope"],
+                        "data-tabular": ["Manrope"],
+                        "headline-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["36px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "title-sm": ["18px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "data-tabular": ["14px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex w-full min-h-screen overflow-x-hidden">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-screen fixed left-0 top-0 overflow-y-auto bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline docked full-height w-72 z-50">
+<div class="p-6">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary font-display-lg font-bold">C</div>
+<div>
+<h1 class="font-display-lg text-display-lg font-bold text-primary dark:text-primary-fixed">CareGo</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant">ศูนย์บัญชาการการแพทย์</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-4 p-3 rounded-lg text-primary dark:text-primary-fixed font-bold border-r-4 border-primary dark:border-primary-fixed bg-surface-container-low dark:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-body-md text-body-md">แผงควบคุม</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">คิวผู้ป่วย</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-body-md text-body-md">การจัดการเคส</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-body-md text-body-md">ติดตามผล AI</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-body-md text-body-md">สร้างแผนการดูแล</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">medication</span>
+<span class="font-body-md text-body-md">ยา</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-body-md text-body-md">นัดหมาย</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">family_restroom</span>
+<span class="font-body-md text-body-md">แจ้งเตือนครอบครัว</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md text-body-md">รายงาน</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">memory</span>
+<span class="font-body-md text-body-md">ศูนย์ตัวแทน AI</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-lg text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200 mt-auto" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">การตั้งค่า</span>
+</a>
+</nav>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 ml-72">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-10 h-16 fixed top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant dark:border-outline">
+<div class="flex items-center gap-6">
+<h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">CareGo Platform</h2>
+<nav class="hidden md:flex gap-6 h-full items-center">
+<a class="h-full flex items-center font-title-sm text-title-sm text-primary font-bold border-b-2 border-primary pb-1" href="#">ศูนย์ติดตามผู้ป่วยแบบเรียลไทม์</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative focus-within:ring-2 focus-within:ring-primary/20 rounded-full bg-surface-container-low px-4 py-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+<input class="bg-transparent border-none focus:outline-none text-body-md text-on-surface placeholder:text-on-surface-variant w-64" placeholder="ค้นหาผู้ป่วย, แผนการดูแล..." type="text"/>
+</div>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="รูปโปรไฟล์แพทย์" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uiRRxHj1-3CwaD6rTQs4YLDCdt2uDSysV3qMvir21BIu7H8YUe4cgRDaFddwCRRZyhIeQawo61pFdfHN6n1ObV--Y6cAnd2uw50LdZcIuyqfUU7Eym3FMdKU_y7A25lffHcg6kqAOCpVSsopMMDp_6xK5O8pdlOQHvtFdLpfwBzGQYdeHkR44xeD1QRa6SOvFEqlmsJrMwTYie4k_8Hse7mTeBVU02WoKqLWdCIciLnjDLIKyZBa5h7YCi9"/>
+</div>
+</div>
+</header>
+<!-- Main Dashboard Canvas -->
+<main class="pt-24 px-10 pb-10 min-h-screen">
+<!-- Filters -->
+<div class="flex items-center justify-between mb-8">
+<div class="flex gap-4">
+<select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option>All Departments</option>
+<option>Cardiology</option>
+<option>Neurology</option>
+</select>
+<select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option>All Care Plans</option>
+<option>Post-Op Care</option>
+<option>Chronic Management</option>
+</select>
+<select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option>All Risk Levels</option>
+<option>High Risk (Red)</option>
+<option>Moderate (Yellow)</option>
+</select>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-secondary-container text-on-secondary-container rounded-lg font-title-sm text-title-sm hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        Filters
+                    </button>
+</div>
+</div>
+<!-- Top Row: Metric Cards -->
+<div class="grid grid-cols-4 gap-6 mb-8">
+<!-- Total -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Total Patients</span>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+</div>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">1,248</div>
+<div class="font-body-sm text-body-sm text-secondary mt-1">+12 from yesterday</div>
+</div>
+</div>
+<!-- Green -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-4 border-l-4 border-l-[#4CAF50]">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Stable (Green)</span>
+<div class="w-10 h-10 rounded-full bg-[#E8F5E9] flex items-center justify-center text-[#2E7D32]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">982</div>
+<div class="font-body-sm text-body-sm text-secondary mt-1">Routine monitoring</div>
+</div>
+</div>
+<!-- Yellow -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-4 border-l-4 border-l-[#FFC107]">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Watch (Yellow)</span>
+<div class="w-10 h-10 rounded-full bg-[#FFF8E1] flex items-center justify-center text-[#F57F17]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">214</div>
+<div class="font-body-sm text-body-sm text-secondary mt-1">Needs attention soon</div>
+</div>
+</div>
+<!-- Red -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-4 border-l-4 border-l-error">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-error uppercase">Critical (Red)</span>
+<div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-on-error-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">emergency</span>
+</div>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-error">52</div>
+<div class="font-body-sm text-body-sm text-error mt-1">Immediate action required</div>
+</div>
+</div>
+</div>
+<!-- Main Layout Grid -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Left/Middle Column: Real-time Risk Queue & AI Status -->
+<div class="col-span-8 flex flex-col gap-8">
+<!-- Real-time Risk Queue -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+<div class="p-card-padding border-b border-outline-variant flex justify-between items-center bg-surface-bright">
+<h3 class="font-title-sm text-title-sm text-on-surface">Real-time Risk Queue</h3>
+<button class="text-primary hover:bg-surface-container-low px-3 py-1 rounded-md font-body-md transition-colors">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low border-b border-outline-variant">
+<tr>
+<th class="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase">Patient</th>
+<th class="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase">Risk Level</th>
+<th class="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase">Vitals</th>
+<th class="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase">AI Insight</th>
+<th class="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase">Action</th>
+</tr>
+</thead>
+<tbody class="font-data-tabular text-data-tabular text-on-surface">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant hover:bg-surface/50 transition-colors">
+<td class="p-4">
+<div class="font-title-sm">Somsri P.</div>
+<div class="text-secondary font-body-sm">Ward 4, Bed 12</div>
+</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-[#FFEBEE] text-[#C62828] text-xs font-bold border border-[#FFCDD2]">
+<span class="w-2 h-2 rounded-full bg-[#C62828] mr-2"></span> RED
+                                            </span>
+</td>
+<td class="p-4">
+<div class="flex gap-2 text-error">
+<span class="material-symbols-outlined text-[16px]">favorite</span> 120 bpm
+                                            </div>
+</td>
+<td class="p-4 text-body-md text-on-surface-variant">SpO2 dropping rapidly. Immediate review suggested.</td>
+<td class="p-4">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-title-sm text-sm hover:bg-surface-tint transition-colors">Review</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant bg-[#E3F2FD]/30 hover:bg-surface/50 transition-colors">
+<td class="p-4">
+<div class="font-title-sm">Wichai T.</div>
+<div class="text-secondary font-body-sm">ICU, Bed 2</div>
+</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-[#FFEBEE] text-[#C62828] text-xs font-bold border border-[#FFCDD2]">
+<span class="w-2 h-2 rounded-full bg-[#C62828] mr-2"></span> RED
+                                            </span>
+</td>
+<td class="p-4">
+<div class="flex gap-2 text-error">
+<span class="material-symbols-outlined text-[16px]">blood_pressure</span> 180/110
+                                            </div>
+</td>
+<td class="p-4 text-body-md text-on-surface-variant">BP critical. Medication check required.</td>
+<td class="p-4">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-title-sm text-sm hover:bg-surface-tint transition-colors">Review</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- AI Agent Status -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding">
+<h3 class="font-title-sm text-title-sm text-on-surface mb-6">AI Agent Status</h3>
+<div class="grid grid-cols-2 gap-6">
+<!-- Voice Agent -->
+<div class="border border-outline-variant rounded-lg p-4 flex items-center gap-4 bg-surface-bright">
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">record_voice_over</span>
+</div>
+<div class="flex-1">
+<div class="font-title-sm text-on-surface">Voice Agents</div>
+<div class="font-body-md text-secondary">42 Active Calls</div>
+</div>
+<div class="text-right">
+<div class="font-data-tabular text-primary font-bold">98%</div>
+<div class="font-body-sm text-secondary text-xs">Uptime</div>
+</div>
+</div>
+<!-- Chatbot Agent -->
+<div class="border border-outline-variant rounded-lg p-4 flex items-center gap-4 bg-surface-bright">
+<div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+</div>
+<div class="flex-1">
+<div class="font-title-sm text-on-surface">Chatbot Agents</div>
+<div class="font-body-md text-secondary">156 Active Chats</div>
+</div>
+<div class="text-right">
+<div class="font-data-tabular text-tertiary font-bold">99.9%</div>
+<div class="font-body-sm text-secondary text-xs">Uptime</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Red Alert Notification Panel -->
+<div class="col-span-4 flex flex-col gap-6">
+<div class="bg-error-container border border-error rounded-xl p-card-padding flex flex-col gap-4 shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
+<div class="flex justify-between items-center mb-2">
+<h3 class="font-title-sm text-title-sm text-on-error-container font-bold flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+                                Red Alerts
+                            </h3>
+<span class="bg-error text-on-error px-2 py-0.5 rounded-full text-xs font-bold">3 New</span>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Alert Item -->
+<div class="bg-surface-container-lowest rounded-lg p-3 border-l-4 border-error flex flex-col gap-2 shadow-sm">
+<div class="flex justify-between">
+<span class="font-label-caps text-error font-bold">Code Blue</span>
+<span class="text-xs text-secondary">Just now</span>
+</div>
+<div class="font-body-md text-on-surface">Room 402 - Cardiac Arrest Detected by Monitor.</div>
+<div class="flex gap-2 mt-2">
+<button class="bg-error text-on-error px-3 py-1 rounded text-sm font-bold w-full">Acknowledge</button>
+</div>
+</div>
+<!-- Alert Item -->
+<div class="bg-surface-container-lowest rounded-lg p-3 border-l-4 border-error flex flex-col gap-2 shadow-sm">
+<div class="flex justify-between">
+<span class="font-label-caps text-error font-bold">Critical Vitals</span>
+<span class="text-xs text-secondary">2 mins ago</span>
+</div>
+<div class="font-body-md text-on-surface">Patient Mali W. SpO2 dropped below 88%.</div>
+<div class="flex gap-2 mt-2">
+<button class="bg-surface-container text-on-surface px-3 py-1 rounded text-sm border border-outline w-full hover:bg-surface-variant transition-colors">Review Chart</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Vital Sign Mini-Monitor Focal Point -->
+<div class="bg-inverse-surface rounded-xl p-card-padding flex flex-col gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-outline">
+<div class="flex justify-between items-center mb-2">
+<h3 class="font-title-sm text-title-sm text-inverse-on-surface">Focus Monitor</h3>
+<span class="material-symbols-outlined text-inverse-primary text-[18px]">monitor_heart</span>
+</div>
+<div class="flex flex-col items-center py-4 border-b border-outline/30">
+<div class="text-xs text-secondary-fixed-dim uppercase tracking-wider mb-1">Heart Rate</div>
+<div class="text-5xl font-bold text-inverse-primary font-data-tabular">110 <span class="text-lg text-secondary-fixed-dim font-normal">bpm</span></div>
+</div>
+<div class="flex justify-between px-2 pt-2 text-secondary-fixed-dim text-sm">
+<span>Trend: Rising</span>
+<span class="text-error-container">High Alert</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

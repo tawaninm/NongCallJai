@@ -58,55 +58,60 @@
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.5rem;
   --font-family-sans: "Manrope", "Noto Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  --background: oklch(0.99 0.002 240);
-  --foreground: oklch(0.2 0.02 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 250);
+  /* DESIGN.md: Clinical White + Soft Blue */
+  --background: #F3FAFF;
+  --foreground: #071E27;
+  --card: #FFFFFF;
+  --card-foreground: #071E27;
+  --popover: #FFFFFF;
+  --popover-foreground: #071E27;
 
-  --primary: oklch(0.55 0.15 200);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.96 0.01 240);
-  --secondary-foreground: oklch(0.3 0.03 250);
-  --muted: oklch(0.96 0.008 240);
-  --muted-foreground: oklch(0.5 0.02 250);
-  --accent: oklch(0.94 0.02 200);
-  --accent-foreground: oklch(0.3 0.1 200);
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.92 0.01 240);
-  --input: oklch(0.92 0.01 240);
-  --ring: oklch(0.55 0.15 200);
+  /* DESIGN.md: Teal primary */
+  --primary: #00897B;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E6F6FF;
+  --secondary-foreground: #3D4946;
+  --muted: #E6F6FF;
+  --muted-foreground: #455A64;
+  --accent: #DBF1FE;
+  --accent-foreground: #00685D;
+  --destructive: #F44336;
+  --destructive-foreground: #FFFFFF;
+  --border: #CFE6F2;
+  --input: #CFE6F2;
+  --ring: #00897B;
 
-  --chart-1: oklch(0.55 0.15 200);
-  --chart-2: oklch(0.65 0.18 160);
-  --chart-3: oklch(0.7 0.15 80);
-  --chart-4: oklch(0.6 0.2 300);
-  --chart-5: oklch(0.65 0.22 30);
+  --chart-1: #00897B;
+  --chart-2: #4CAF50;
+  --chart-3: #FFC107;
+  --chart-4: #42A5F5;
+  --chart-5: #AB47BC;
 
-  --sidebar: oklch(0.18 0.04 220);
-  --sidebar-foreground: oklch(0.9 0.01 240);
-  --sidebar-primary: oklch(0.65 0.15 200);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.25 0.04 220);
-  --sidebar-accent-foreground: oklch(0.9 0.01 240);
-  --sidebar-border: oklch(0.3 0.03 220);
-  --sidebar-ring: oklch(0.55 0.15 200);
+  /* Light sidebar matching reference screenshots */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #3D4946;
+  --sidebar-primary: #00897B;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E6F6FF;
+  --sidebar-accent-foreground: #00897B;
+  --sidebar-border: #CFE6F2;
+  --sidebar-ring: #00897B;
 
-  --risk-green: oklch(0.55 0.2 150);
-  --risk-green-bg: oklch(0.95 0.04 150);
-  --risk-yellow: oklch(0.7 0.18 80);
-  --risk-yellow-bg: oklch(0.95 0.04 80);
-  --risk-red: oklch(0.55 0.22 25);
-  --risk-red-bg: oklch(0.95 0.04 25);
+  /* Risk colors from DESIGN.md */
+  --risk-green: #4CAF50;
+  --risk-green-bg: #E8F5E9;
+  --risk-yellow: #FFC107;
+  --risk-yellow-bg: #FFF8E1;
+  --risk-red: #F44336;
+  --risk-red-bg: #FFEBEE;
 
-  --teal: oklch(0.55 0.15 200);
-  --teal-light: oklch(0.94 0.03 200);
-  --teal-foreground: oklch(1 0 0);
+  /* Teal system */
+  --teal: #00897B;
+  --teal-light: #E0F2F1;
+  --teal-foreground: #FFFFFF;
 }
 
 @layer base {
@@ -117,12 +122,16 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    line-height: 1.55;
   }
 }
 
 @layer components {
   .stat-card {
-    @apply rounded-xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md;
+    @apply rounded-xl border bg-card p-5 shadow-sm transition-all hover:shadow-md cursor-pointer;
+  }
+  .stat-card-active {
+    @apply ring-2 ring-primary shadow-md;
   }
   .risk-badge-green {
     @apply inline-flex items-center rounded-full bg-risk-green-bg px-2.5 py-0.5 text-xs font-semibold text-risk-green;
@@ -146,7 +155,7 @@
     @apply flex flex-wrap items-center gap-3 rounded-xl border bg-card p-4 mb-6;
   }
   .kanban-column {
-    @apply flex flex-col gap-3 min-w-[280px] rounded-xl bg-muted/50 p-3;
+    @apply flex flex-col gap-3 min-w-[260px] rounded-xl bg-muted/50 p-3;
   }
   .kanban-card {
     @apply rounded-lg border bg-card p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow;
@@ -155,6 +164,42 @@
     @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground;
   }
   .sidebar-nav-item-active {
-    @apply bg-sidebar-accent text-sidebar-primary;
+    @apply bg-sidebar-accent text-sidebar-primary font-semibold;
   }
+  /* Dark vitals monitor card */
+  .vitals-dark-card {
+    @apply rounded-xl p-5 text-white;
+    background: linear-gradient(135deg, #1a3a3a 0%, #0d2626 100%);
+  }
+  .vitals-value {
+    @apply text-3xl font-bold tracking-tight;
+  }
+  .vitals-value-alert {
+    @apply text-risk-red;
+  }
+  /* Modal overlay */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm;
+  }
+  .modal-content {
+    @apply relative w-full max-w-md rounded-xl bg-card p-6 shadow-2xl;
+  }
+  /* Action button group matching reference */
+  .action-btn {
+    @apply inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted;
+  }
+  .action-btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 border-primary;
+  }
+  .action-btn-danger {
+    @apply border-risk-red/30 text-risk-red hover:bg-risk-red-bg;
+  }
+  /* Timeline */
+  .timeline-dot {
+    @apply h-3 w-3 rounded-full border-2 border-card shrink-0;
+  }
+  .timeline-dot-red { @apply bg-risk-red; }
+  .timeline-dot-teal { @apply bg-teal; }
+  .timeline-dot-blue { @apply bg-blue-400; }
+  .timeline-dot-muted { @apply bg-muted-foreground/40; }
 }
