@@ -22,8 +22,8 @@ function DashboardPage() {
   const navigate = useNavigate();
 
   // Use mockStore reactively
-  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients);
-  const alerts = useSyncExternalStore(mockStore.subscribe, mockStore.getAlerts);
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
+  const alerts = useSyncExternalStore(mockStore.subscribe, mockStore.getAlerts, mockStore.getAlerts);
 
   // Stats
   const total = patients.length;

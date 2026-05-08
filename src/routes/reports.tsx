@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { patients, aiFollowUps } from '@/lib/mock-data';
+import { useSyncExternalStore } from 'react';
+import { mockStore } from '@/lib/mock-store';
 import { BarChart3, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
@@ -12,6 +13,8 @@ const COLORS_RISK = ['#4CAF50', '#FFC107', '#F44336'];
 const COLORS_DISEASE = ['#00897B', '#42A5F5', '#AB47BC', '#FF7043', '#66BB6A'];
 
 function ReportsPage() {
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
+  
   // Risk distribution
   const riskData = [
     { name: 'เขียว · ปกติ', value: patients.filter(p => p.riskLevel === 'green').length },

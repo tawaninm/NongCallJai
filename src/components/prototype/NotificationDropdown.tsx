@@ -26,7 +26,7 @@ interface Props {
 
 export function NotificationDropdown({ open, onClose }: Props) {
   const navigate = useNavigate();
-  const notifications = useSyncExternalStore(mockStore.subscribe, mockStore.getTopNotifications);
+  const notifications = useSyncExternalStore(mockStore.subscribe, mockStore.getTopNotifications, mockStore.getTopNotifications);
   const unread = notifications.filter(n => !n.read);
 
   if (!open) return null;

@@ -4,15 +4,17 @@ import {
   CalendarCheck, Heart, BarChart3, Settings, BrainCircuit, LogOut, Activity, UserPlus,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { roleMenuConfig, patients, aiFollowUps } from '@/lib/mock-data';
+import { roleMenuConfig } from '@/lib/mock-data';
 import type { UserRole } from '@/lib/mock-data';
+import { useSyncExternalStore } from 'react';
+import { mockStore } from '@/lib/mock-store';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Users, Columns3, Bot, ClipboardList, Pill,
   CalendarCheck, Heart, BarChart3, Settings, BrainCircuit, UserPlus,
 };
 
-function getBadgeCount(url: string): number | undefined {
+function getBadgeCount(url: string, patients: any[], aiFollowUps: any[]): number | undefined {
   switch (url) {
     case '/patients': return patients.filter(p => p.riskLevel === 'red' || p.riskLevel === 'yellow').length;
     case '/cases': return patients.filter(p => p.caseStatus === 'pending' || p.caseStatus === 'callback' || p.caseStatus === 'nurse_review').length;
@@ -25,6 +27,9 @@ export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { userName, role, logout } = useAuth();
+  
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
+  const aiFollowUps = useSyncExternalStore(mockStore.subscribe, mockStore.getFollowUps, mockStore.getFollowUps);
 
   const visibleItems = roleMenuConfig.filter(item => item.roles.includes(role));
 
@@ -49,7 +54,7 @@ export function AppSidebar() {
         {visibleItems.map((item) => {
           const active = currentPath === item.url || currentPath.startsWith(item.url + '/');
           const Icon = iconMap[item.icon] || LayoutDashboard;
-          const badge = getBadgeCount(item.url);
+          const badge = getBadgeCount(item.url, patients, aiFollowUps);
           return (
             <Link key={item.url} to={item.url} className={`sidebar-nav-item ${active ? 'sidebar-nav-item-active' : ''}`}>
               <Icon className="h-5 w-5 shrink-0" />

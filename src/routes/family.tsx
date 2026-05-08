@@ -13,8 +13,8 @@ export const Route = createFileRoute('/family')({
 function FamilyNotificationPage() {
   const navigate = useNavigate();
   const { userName } = useAuth();
-  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients);
-  const notifications = useSyncExternalStore(mockStore.subscribe, mockStore.getNotificationLog);
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
+  const notifications = useSyncExternalStore(mockStore.subscribe, mockStore.getNotificationLog, mockStore.getNotificationLog);
   const [selectedTemplate, setSelectedTemplate] = useState(familyMessageTemplates[0]);
 
   // Patients with caregivers

@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { carePlanTemplates, patients } from '@/lib/mock-data';
-import { useState } from 'react';
+import { carePlanTemplates } from '@/lib/mock-data';
+import { useSyncExternalStore, useState } from 'react';
+import { mockStore } from '@/lib/mock-store';
 import { toast } from 'sonner';
 import { Plus, Edit, Copy, Eye, ChevronDown, ChevronUp, Mic } from 'lucide-react';
 
@@ -10,6 +11,7 @@ export const Route = createFileRoute('/care-plans')({
 
 function CarePlansPage() {
   const navigate = useNavigate();
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (

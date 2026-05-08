@@ -129,7 +129,16 @@ function saveToStorage() {
   } catch { /* ignore */ }
 }
 
-function emitAndSave() { saveToStorage(); emit(); }
+function emitAndSave() { 
+  _patients = [..._patients];
+  _followUps = [..._followUps];
+  _actionLog = [..._actionLog];
+  _notificationLog = [..._notificationLog];
+  _alerts = [..._alerts];
+  _topNotifications = [..._topNotifications];
+  saveToStorage(); 
+  emit(); 
+}
 
 // Initialize
 loadFromStorage();

@@ -17,8 +17,8 @@ const statusLabels = { completed: 'สำเร็จ', no_answer: 'ไม่ร
 function AIFollowUpPage() {
   const navigate = useNavigate();
   const { userName } = useAuth();
-  const followUps = useSyncExternalStore(mockStore.subscribe, mockStore.getFollowUps);
-  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients);
+  const followUps = useSyncExternalStore(mockStore.subscribe, mockStore.getFollowUps, mockStore.getFollowUps);
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
   const { open: openModal, Modals } = useActionModals();
   
   const [selected, setSelected] = useState<string | null>(followUps[0]?.id || null);

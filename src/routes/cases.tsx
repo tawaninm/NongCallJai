@@ -26,7 +26,7 @@ const kanbanColumns: { status: CaseStatus; color: string }[] = [
 function CasesPage() {
   const navigate = useNavigate();
   const { userName } = useAuth();
-  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients);
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
 
   const moveCase = (patientId: string, newStatus: CaseStatus) => {
     mockStore.updatePatientStatus(patientId, newStatus, userName, `ย้ายเป็น ${caseStatusLabels[newStatus]}`);

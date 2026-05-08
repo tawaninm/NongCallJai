@@ -86,7 +86,7 @@ function AppLayout() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
-  const unreadCount = useSyncExternalStore(mockStore.subscribe, mockStore.getUnreadCount);
+  const unreadCount = useSyncExternalStore(mockStore.subscribe, mockStore.getUnreadCount, mockStore.getUnreadCount);
 
   useEffect(() => {
     if (!isLoggedIn && currentPath !== '/') {

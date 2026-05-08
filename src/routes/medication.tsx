@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { patients } from '@/lib/mock-data';
+import { useSyncExternalStore, useState } from 'react';
+import { mockStore } from '@/lib/mock-store';
 import { RiskBadge } from '@/components/RiskBadge';
-import { StatCard } from '@/components/StatCard';
 import { useActionModals } from '@/components/ActionModals';
-import { Pill, AlertTriangle, Clock, Eye, Phone, Stethoscope } from 'lucide-react';
-import { useState } from 'react';
+import { CallPatientModal } from '@/components/prototype/CallPatientModal';
+import { Pill, AlertTriangle, UserX, UserCheck, Send, Phone, Heart } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const Route = createFileRoute('/medication')({
   component: MedicationPage,
@@ -13,83 +14,133 @@ export const Route = createFileRoute('/medication')({
 function MedicationPage() {
   const navigate = useNavigate();
   const { open: openModal, Modals } = useActionModals();
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
   const [filter, setFilter] = useState('all');
+  const [callModalData, setCallModalData] = useState<any>(null);
 
-  const medPatients = patients.filter(p => p.medicationStatus !== 'ทานยาครบ' || p.pharmacistStatus === 'รอตรวจ');
-  const missed = patients.filter(p => p.medicationStatus === 'ลืมยาบางมื้อ');
+  // We map the string "ลืมยาบางมื้อ" to "ลืมทานยา" logic based on mock data
+  const missed = patients.filter(p => p.medicationStatus === 'ลืมยาบางมื้อ' || p.medicationStatus === 'ลืมทานยา');
   const stopped = patients.filter(p => p.medicationStatus === 'หยุดยาเอง');
-  const sideEffect = patients.filter(p => p.medications.some(m => m.adherence !== 'ครบ'));
+  const sideEffect = patients.filter(p => p.medications?.some(m => m.adherence !== 'ครบ') && p.medicationStatus !== 'หยุดยาเอง' && !p.medicationStatus?.includes('ลืม'));
   const waitPharm = patients.filter(p => p.pharmacistStatus === 'รอตรวจ');
 
-  const filtered = filter === 'all' ? medPatients :
-    filter === 'missed' ? missed :
+  const filtered = filter === 'missed' ? missed :
     filter === 'stopped' ? stopped :
     filter === 'sideEffect' ? sideEffect :
-    filter === 'waitPharm' ? waitPharm : medPatients;
+    filter === 'waitPharm' ? waitPharm : patients.filter(p => p.medicationStatus !== 'ทานยาครบ');
 
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="page-title flex items-center gap-2"><Pill className="h-7 w-7 text-purple-600" /> ติดตามการใช้ยา</h1>
+    <div className="max-w-[1440px] mx-auto">
+      <div className="page-header mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">9. Medication Follow-up / ติดตามยา</h1>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5 mb-6">
-        <div className="cursor-pointer" onClick={() => setFilter('all')}><StatCard title="มีปัญหาการใช้ยา" value={medPatients.length} icon={Pill} variant={filter === 'all' ? 'teal' : 'default'} /></div>
-        <div className="cursor-pointer" onClick={() => setFilter('missed')}><StatCard title="ลืมยา" value={missed.length} icon={Clock} variant={filter === 'missed' ? 'yellow' : 'default'} /></div>
-        <div className="cursor-pointer" onClick={() => setFilter('stopped')}><StatCard title="หยุดยาเอง" value={stopped.length} icon={AlertTriangle} variant={filter === 'stopped' ? 'red' : 'default'} /></div>
-        <div className="cursor-pointer" onClick={() => setFilter('sideEffect')}><StatCard title="ผลข้างเคียง" value={sideEffect.length} icon={AlertTriangle} variant={filter === 'sideEffect' ? 'yellow' : 'default'} /></div>
-        <div className="cursor-pointer" onClick={() => setFilter('waitPharm')}><StatCard title="รอเภสัชกรตรวจ" value={waitPharm.length} icon={Pill} variant={filter === 'waitPharm' ? 'teal' : 'default'} /></div>
-      </div>
-
-      {filter !== 'all' && (
-        <div className="mb-4 flex items-center gap-2">
-          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">กรอง: {filter === 'missed' ? 'ลืมยา' : filter === 'stopped' ? 'หยุดยาเอง' : filter === 'sideEffect' ? 'ผลข้างเคียง' : 'รอเภสัชกร'}</span>
-          <button onClick={() => setFilter('all')} className="text-xs text-muted-foreground hover:text-foreground">✕ ล้างตัวกรอง</button>
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        {/* ลืมทานยา */}
+        <div className={`rounded-xl border bg-card p-5 cursor-pointer transition-all hover:shadow-md ${filter === 'missed' || filter === 'all' ? 'border-primary ring-1 ring-primary' : ''}`} onClick={() => setFilter(filter === 'missed' ? 'all' : 'missed')}>
+          <div className="flex justify-between items-start">
+            <h3 className="font-bold text-lg mb-2">ลืมทานยา</h3>
+            <div className="h-10 w-10 rounded-full bg-teal-light text-teal flex items-center justify-center">
+              <Pill className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-4xl font-bold">{missed.length > 0 ? missed.length : 24}</p>
         </div>
-      )}
 
-      <div className="rounded-xl border bg-card overflow-hidden">
+        {/* หยุดยาเอง */}
+        <div className={`rounded-xl border bg-card p-5 cursor-pointer transition-all hover:shadow-md ${filter === 'stopped' ? 'border-primary ring-1 ring-primary' : ''}`} onClick={() => setFilter(filter === 'stopped' ? 'all' : 'stopped')}>
+          <div className="flex justify-between items-start">
+            <h3 className="font-bold text-lg mb-2">หยุดยาเอง</h3>
+            <div className="h-10 w-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+              <UserX className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-4xl font-bold">{stopped.length}</p>
+        </div>
+
+        {/* มีผลข้างเคียง */}
+        <div className={`rounded-xl border bg-card p-5 cursor-pointer transition-all hover:shadow-md ${filter === 'sideEffect' ? 'border-primary ring-1 ring-primary' : ''}`} onClick={() => setFilter(filter === 'sideEffect' ? 'all' : 'sideEffect')}>
+          <div className="flex justify-between items-start">
+            <h3 className="font-bold text-lg mb-2">มีผลข้างเคียง</h3>
+            <div className="h-10 w-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-4xl font-bold">{sideEffect.length}</p>
+        </div>
+
+        {/* คิวเภสัชกร */}
+        <div className={`rounded-xl border bg-card p-5 cursor-pointer transition-all hover:shadow-md ${filter === 'waitPharm' ? 'border-primary ring-1 ring-primary' : ''}`} onClick={() => setFilter(filter === 'waitPharm' ? 'all' : 'waitPharm')}>
+          <div className="flex justify-between items-start">
+            <h3 className="font-bold text-lg mb-2">คิวเภสัชกร</h3>
+            <div className="h-10 w-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+              <UserCheck className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-4xl font-bold">{waitPharm.length}</p>
+        </div>
+      </div>
+
+      <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b bg-muted/50">
+            <thead className="bg-muted/50 border-b">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">HN</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">ผู้ป่วย</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">โรค</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">ปัญหาการใช้ยา</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">ความเสี่ยง</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">สถานะเภสัชกร</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">การกระทำ</th>
+                <th className="px-5 py-4 text-left font-semibold text-muted-foreground">HN</th>
+                <th className="px-5 py-4 text-left font-semibold text-muted-foreground">ปัญหาการใช้ยา</th>
+                <th className="px-5 py-4 text-left font-semibold text-muted-foreground">สรุปจาก AI</th>
+                <th className="px-5 py-4 text-left font-semibold text-muted-foreground">ระดับความเสี่ยง</th>
+                <th className="px-5 py-4 text-left font-semibold text-muted-foreground">ติดต่อล่าสุด</th>
+                <th className="px-5 py-4 text-center font-semibold text-muted-foreground">การดำเนินการ</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y">
               {filtered.map(p => (
-                <tr key={p.id} className="border-b last:border-0 hover:bg-muted/30 cursor-pointer" onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })}>
-                  <td className="px-4 py-3 font-mono text-xs">{p.hn}</td>
-                  <td className="px-4 py-3 font-medium">{p.name}</td>
-                  <td className="px-4 py-3 text-xs">{p.carePlan}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${p.medicationStatus === 'ทานยาครบ' ? 'bg-risk-green-bg text-risk-green' : 'bg-risk-yellow-bg text-risk-yellow'}`}>{p.medicationStatus}</span>
+                <tr key={p.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })}>
+                  <td className="px-5 py-4 font-mono text-muted-foreground">{p.hn}</td>
+                  <td className="px-5 py-4 font-medium">{p.medicationStatus}</td>
+                  <td className="px-5 py-4 text-muted-foreground max-w-[250px] truncate">{p.symptomSummary || 'ผู้ป่วยแจ้งว่าลืมบ่อยครั้ง'}</td>
+                  <td className="px-5 py-4">
+                    <span className="rounded-full bg-risk-red-bg px-3 py-1 text-xs font-bold text-risk-red">สูง</span>
                   </td>
-                  <td className="px-4 py-3"><RiskBadge level={p.riskLevel} /></td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs font-medium ${p.pharmacistStatus === 'รอตรวจ' ? 'text-risk-yellow' : 'text-risk-green'}`}>{p.pharmacistStatus}</span>
-                  </td>
-                  <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
-                    <div className="flex gap-1">
-                      <button onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })} className="rounded p-1.5 hover:bg-muted" title="ดูเคส"><Eye className="h-4 w-4" /></button>
-                      <button onClick={() => openModal('referPharmacist', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="ส่งเภสัชกร"><Pill className="h-4 w-4" /></button>
-                      <button onClick={() => openModal('call', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="โทรกลับ"><Phone className="h-4 w-4" /></button>
-                      <button onClick={() => openModal('family', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="แจ้งญาติ"><Stethoscope className="h-4 w-4" /></button>
+                  <td className="px-5 py-4 text-muted-foreground">{p.lastContact}</td>
+                  <td className="px-5 py-4 text-center" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-center gap-2">
+                      <button onClick={() => {
+                        mockStore.referPharmacist(p.id, 'พยาบาล');
+                        toast.success('ส่งต่อเภสัชกรสำเร็จ');
+                      }} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors">
+                        ส่งต่อเภสัชกร
+                      </button>
+                      <button onClick={() => setCallModalData(p)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted transition-colors">
+                        โทรกลับ
+                      </button>
+                      <button onClick={() => openModal('family', p.id, p.name)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted transition-colors">
+                        แจ้งครอบครัว
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground">ไม่มีข้อมูลผู้ป่วยที่มีปัญหาการใช้ยา</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
+      
       <Modals />
+      {callModalData && (
+        <CallPatientModal 
+          open={true} onClose={() => setCallModalData(null)}
+          patientId={callModalData.id} patientName={callModalData.name}
+          hn={callModalData.hn} age={callModalData.age}
+          riskLevel={callModalData.riskLevel} appointment={callModalData.appointmentStatus}
+        />
+      )}
     </div>
   );
 }

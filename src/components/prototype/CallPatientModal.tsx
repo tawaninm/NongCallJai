@@ -53,7 +53,7 @@ export function CallPatientModal({ open, onClose, patientId, patientName, hn, ag
         </div>
 
         <div className="flex justify-between text-sm mb-4">
-          <div><span className="text-muted-foreground">ความเสี่ยง</span><p className="font-medium">{age || '-'}</p></div>
+          <div><span className="text-muted-foreground">อายุ</span><p className="font-medium">{age || '-'}</p></div>
           <div><span className="text-muted-foreground">นัดหมายถัดไป</span><p className="font-medium">{appointment || '-'}</p></div>
         </div>
 

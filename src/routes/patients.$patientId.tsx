@@ -14,8 +14,9 @@ export const Route = createFileRoute('/patients/$patientId')({
 
 function PatientDetailPage() {
   const { patientId } = Route.useParams();
-  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients);
-  const actionLog = useSyncExternalStore(mockStore.subscribe, () => mockStore.getActionLogForPatient(patientId));
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
+  const allActionLogs = useSyncExternalStore(mockStore.subscribe, mockStore.getActionLog, mockStore.getActionLog);
+  const actionLog = allActionLogs.filter(a => a.patientId === patientId);
   const patient = patients.find(p => p.id === patientId);
   const { open, Modals } = useActionModals();
   const [callModalOpen, setCallModalOpen] = useState(false);
