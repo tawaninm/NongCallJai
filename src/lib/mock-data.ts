@@ -455,6 +455,7 @@ export interface NavItem {
 export const roleMenuConfig: NavItem[] = [
   { title: 'แดชบอร์ด', url: '/dashboard', icon: 'LayoutDashboard', roles: ['admin', 'nurse', 'doctor', 'pharmacist', 'callcenter'] },
   { title: 'คิวผู้ป่วย', url: '/patients', icon: 'Users', roles: ['admin', 'nurse', 'doctor', 'pharmacist'] },
+  { title: 'ลงทะเบียนใหม่', url: '/register', icon: 'UserPlus', roles: ['admin', 'nurse'] },
   { title: 'จัดการเคส', url: '/cases', icon: 'Columns3', roles: ['admin', 'nurse', 'doctor'] },
   { title: 'ผลติดตาม AI', url: '/ai-followup', icon: 'Bot', roles: ['admin', 'nurse', 'callcenter'] },
   { title: 'แผนการดูแล', url: '/care-plans', icon: 'ClipboardList', roles: ['admin', 'nurse'] },

@@ -1,11 +1,13 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Toaster } from "sonner";
+import { useEffect } from "react";
 import appCss from "../styles.css?url";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Bell, Shield, Stethoscope, Users, Pill, Headphones } from "lucide-react";
+import { Bell, Shield, Stethoscope, Users, Pill, Headphones, Search } from "lucide-react";
 import { roleLabels, patients, aiFollowUps } from "@/lib/mock-data";
 import type { UserRole } from "@/lib/mock-data";
+import { BotnoiChat } from "@/components/BotnoiChat";
 
 function NotFoundComponent() {
   return (
@@ -29,10 +31,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CareGo Hospital Platform v2.0" },
+      { title: "CareGo Hospital Platform v2.1" },
       { name: "description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
-      { property: "og:title", content: "CareGo Hospital Platform v2.0" },
-      { name: "twitter:title", content: "CareGo Hospital Platform v2.0" },
+      { property: "og:title", content: "CareGo Hospital Platform v2.1" },
+      { name: "twitter:title", content: "CareGo Hospital Platform v2.1" },
       { property: "og:description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
       { name: "twitter:description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -40,7 +42,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" },
     ],
   }),
   shellComponent: RootShell,
@@ -62,6 +64,7 @@ function RootComponent() {
     <AuthProvider>
       <AppLayout />
       <Toaster position="top-right" richColors />
+      <BotnoiChat />
     </AuthProvider>
   );
 }
@@ -86,7 +89,16 @@ const roleIcons: Record<UserRole, React.ComponentType<{ className?: string }>> =
 function AppLayout() {
   const { isLoggedIn, role, userName } = useAuth();
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
 
+  // Auth guard: redirect to login if not authenticated (except on login page)
+  useEffect(() => {
+    if (!isLoggedIn && currentPath !== '/') {
+      navigate({ to: '/' });
+    }
+  }, [isLoggedIn, currentPath, navigate]);
+
+  // Show login page without sidebar
   if (!isLoggedIn || currentPath === '/') {
     return <Outlet />;
   }
@@ -102,12 +114,20 @@ function AppLayout() {
       <AppSidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-14 items-center justify-between border-b bg-card px-6 shrink-0">
-          {/* Left: role badge */}
-          <div className="flex items-center gap-2">
+          {/* Left: role badge + search */}
+          <div className="flex items-center gap-3">
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${roleBadgeColors[role]}`}>
               <RoleIcon className="h-3.5 w-3.5" />
               {roleLabels[role]}
             </span>
+            <div className="hidden md:flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-1.5">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="ค้นหาผู้ป่วย, HN, อาการ..."
+                className="bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none w-48"
+              />
+            </div>
           </div>
 
           {/* Right: username + notifications */}

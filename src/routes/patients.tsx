@@ -7,6 +7,7 @@ import { CaseStatusBadge } from '@/components/CaseStatusBadge';
 import { Search, Eye, Phone, UserPlus, Pill, Heart, XCircle, Stethoscope } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth-context';
+import { useActionModals } from '@/components/ActionModals';
 
 export const Route = createFileRoute('/patients')({
   component: PatientsPage,
@@ -15,6 +16,7 @@ export const Route = createFileRoute('/patients')({
 function PatientsPage() {
   const navigate = useNavigate();
   const { role } = useAuth();
+  const { open: openModal, Modals } = useActionModals();
   const [search, setSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskLevel | 'all'>('all');
   const [deptFilter, setDeptFilter] = useState('all');
@@ -139,10 +141,10 @@ function PatientsPage() {
                     <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center gap-1">
                         <button onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })} className="rounded p-1.5 hover:bg-muted" title="ดูเคส"><Eye className="h-4 w-4" /></button>
-                        <button onClick={() => toast.success(`กำลังโทรกลับ ${p.name}`)} className="rounded p-1.5 hover:bg-muted" title="โทรกลับ"><Phone className="h-4 w-4" /></button>
-                        <button onClick={() => toast.info(`ส่งต่อแพทย์: ${p.name}`)} className="rounded p-1.5 hover:bg-muted" title="ส่งแพทย์"><Stethoscope className="h-4 w-4" /></button>
-                        <button onClick={() => toast.info(`ส่งต่อเภสัชกร: ${p.name}`)} className="rounded p-1.5 hover:bg-muted" title="ส่งเภสัชกร"><Pill className="h-4 w-4" /></button>
-                        <button onClick={() => toast.info(`แจ้งญาติ: ${p.name}`)} className="rounded p-1.5 hover:bg-muted" title="แจ้งญาติ"><Heart className="h-4 w-4" /></button>
+                        <button onClick={() => openModal('call', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="โทรกลับ"><Phone className="h-4 w-4" /></button>
+                        <button onClick={() => openModal('referDoctor', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="ส่งแพทย์"><Stethoscope className="h-4 w-4" /></button>
+                        <button onClick={() => openModal('referPharmacist', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="ส่งเภสัชกร"><Pill className="h-4 w-4" /></button>
+                        <button onClick={() => openModal('family', p.id, p.name)} className="rounded p-1.5 hover:bg-muted" title="แจ้งญาติ"><Heart className="h-4 w-4" /></button>
                       </div>
                     </td>
                   </tr>
@@ -152,6 +154,7 @@ function PatientsPage() {
           </table>
         </div>
       </div>
+      <Modals />
     </div>
   );
 }

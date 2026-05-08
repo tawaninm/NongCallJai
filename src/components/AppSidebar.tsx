@@ -1,7 +1,7 @@
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import {
   LayoutDashboard, Users, Columns3, Bot, ClipboardList, Pill,
-  CalendarCheck, Heart, BarChart3, Settings, BrainCircuit, LogOut, Activity,
+  CalendarCheck, Heart, BarChart3, Settings, BrainCircuit, LogOut, Activity, UserPlus,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { roleMenuConfig, patients, aiFollowUps } from '@/lib/mock-data';
@@ -9,7 +9,7 @@ import type { UserRole } from '@/lib/mock-data';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Users, Columns3, Bot, ClipboardList, Pill,
-  CalendarCheck, Heart, BarChart3, Settings, BrainCircuit,
+  CalendarCheck, Heart, BarChart3, Settings, BrainCircuit, UserPlus,
 };
 
 function getBadgeCount(url: string): number | undefined {
@@ -41,7 +41,7 @@ export function AppSidebar() {
         </div>
         <div>
           <p className="text-sm font-bold">CareGo Hospital</p>
-          <p className="text-xs text-sidebar-foreground/60">AI Care Platform v2.0</p>
+          <p className="text-xs text-sidebar-foreground/60">AI Care Platform v2.1</p>
         </div>
       </div>
 

@@ -3,6 +3,9 @@ import { aiFollowUps, patients } from '@/lib/mock-data';
 import { RiskBadge } from '@/components/RiskBadge';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useActionModals } from '@/components/ActionModals';
+import { mockStore } from '@/lib/mock-store';
+import { useAuth } from '@/lib/auth-context';
 import { CheckCircle, PhoneOff, XCircle, Phone, Eye, Send, Stethoscope, Pill, Heart, AlertTriangle, Filter } from 'lucide-react';
 
 export const Route = createFileRoute('/ai-followup')({
@@ -14,6 +17,8 @@ const statusLabels = { completed: 'สำเร็จ', no_answer: 'ไม่ร
 
 function AIFollowUpPage() {
   const navigate = useNavigate();
+  const { userName } = useAuth();
+  const { open: openModal, Modals } = useActionModals();
   const [selected, setSelected] = useState<string | null>(null);
   const [riskFilter, setRiskFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -112,10 +117,11 @@ function AIFollowUpPage() {
 
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: current.patientId } })} className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"><Eye className="h-4 w-4" /> เปิดเคสผู้ป่วย</button>
-                <button onClick={() => toast.success('ส่งเข้าคิวพยาบาลแล้ว')} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Send className="h-3.5 w-3.5" /> ส่งคิวพยาบาล</button>
-                <button onClick={() => toast.info('ส่งต่อแพทย์แล้ว')} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Stethoscope className="h-3.5 w-3.5" /> ส่งแพทย์</button>
-                <button onClick={() => toast.info('ส่งต่อเภสัชกรแล้ว')} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Pill className="h-3.5 w-3.5" /> ส่งเภสัชกร</button>
-                <button onClick={() => toast.info('แจ้งญาติแล้ว')} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Heart className="h-3.5 w-3.5" /> แจ้งญาติ</button>
+                <button onClick={() => { mockStore.sendToNurseQueue(current.id, userName); toast.success('ส่งเข้าคิวพยาบาลแล้ว'); }} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Send className="h-3.5 w-3.5" /> ส่งคิวพยาบาล</button>
+                <button onClick={() => openModal('referDoctor', current.patientId, current.patientName)} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Stethoscope className="h-3.5 w-3.5" /> ส่งแพทย์</button>
+                <button onClick={() => openModal('referPharmacist', current.patientId, current.patientName)} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Pill className="h-3.5 w-3.5" /> ส่งเภสัชกร</button>
+                <button onClick={() => openModal('family', current.patientId, current.patientName)} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Heart className="h-3.5 w-3.5" /> แจ้งญาติ</button>
+                <button onClick={() => openModal('closeCase', current.patientId, current.patientName)} className="inline-flex items-center gap-1.5 rounded-lg border border-risk-red/30 px-3 py-2 text-xs font-medium text-risk-red hover:bg-risk-red-bg"><XCircle className="h-3.5 w-3.5" /> ปิดรอบติดตาม</button>
               </div>
 
               {current.transcript && (
@@ -145,6 +151,7 @@ function AIFollowUpPage() {
           )}
         </div>
       </div>
+      <Modals />
     </div>
   );
 }

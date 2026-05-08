@@ -1,61 +1,73 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { patients, caseStatusLabels } from '@/lib/mock-data';
-import type { CaseStatus } from '@/lib/mock-data';
+import { useState, useSyncExternalStore } from 'react';
+import { mockStore } from '@/lib/mock-store';
+import { caseStatusLabels, type CaseStatus } from '@/lib/mock-data';
 import { RiskBadge } from '@/components/RiskBadge';
-import { CaseStatusBadge } from '@/components/CaseStatusBadge';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth-context';
+import { Columns3, ArrowRight } from 'lucide-react';
 
 export const Route = createFileRoute('/cases')({
-  component: CaseManagementPage,
+  component: CasesPage,
 });
 
-const columns: CaseStatus[] = ['pending', 'contacted', 'callback', 'nurse_review', 'referred_doctor', 'referred_pharmacist', 'family_notified', 'escalated', 'closed'];
+const kanbanColumns: { status: CaseStatus; color: string }[] = [
+  { status: 'pending', color: 'border-t-muted-foreground' },
+  { status: 'contacted', color: 'border-t-blue-400' },
+  { status: 'callback', color: 'border-t-risk-yellow' },
+  { status: 'nurse_review', color: 'border-t-teal' },
+  { status: 'referred_doctor', color: 'border-t-blue-600' },
+  { status: 'referred_pharmacist', color: 'border-t-purple-600' },
+  { status: 'family_notified', color: 'border-t-pink-500' },
+  { status: 'escalated', color: 'border-t-risk-red' },
+  { status: 'closed', color: 'border-t-risk-green' },
+];
 
-function CaseManagementPage() {
+function CasesPage() {
   const navigate = useNavigate();
+  const { userName } = useAuth();
+  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients);
+
+  const moveCase = (patientId: string, newStatus: CaseStatus) => {
+    mockStore.updatePatientStatus(patientId, newStatus, userName, `ย้ายเป็น ${caseStatusLabels[newStatus]}`);
+    toast.success(`ย้ายเป็น "${caseStatusLabels[newStatus]}" แล้ว`);
+  };
 
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">จัดการเคส</h1>
-        <span className="text-sm text-muted-foreground">{patients.length} เคสทั้งหมด</span>
+        <h1 className="page-title flex items-center gap-2"><Columns3 className="h-7 w-7 text-primary" /> Case Management</h1>
       </div>
-
       <div className="flex gap-3 overflow-x-auto pb-4">
-        {columns.map(col => {
-          const items = patients.filter(p => p.caseStatus === col);
+        {kanbanColumns.map(col => {
+          const cards = patients.filter(p => p.caseStatus === col.status);
           return (
-            <div key={col} className="kanban-column min-w-[260px]">
-              <div className="mb-2 flex items-center justify-between">
-                <h3 className="text-sm font-semibold">{caseStatusLabels[col]}</h3>
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-xs font-medium">{items.length}</span>
+            <div key={col.status} className={`kanban-column border-t-4 ${col.color}`}>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider">{caseStatusLabels[col.status]}</h3>
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-muted text-[10px] font-bold px-1">{cards.length}</span>
               </div>
-              <div className="space-y-2">
-                {items.map(p => {
-                  const diseaseIcon = p.carePlanType === 'hypertension' ? '🫀' : p.carePlanType === 'diabetes' ? '🩸' : p.carePlanType === 'heart_failure' ? '❤️‍🩹' : '🩹';
-                  return (
-                    <div
-                      key={p.id}
-                      className={`kanban-card border-l-4 ${p.riskLevel === 'red' ? 'border-l-risk-red' : p.riskLevel === 'yellow' ? 'border-l-risk-yellow' : 'border-l-risk-green'}`}
-                      onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-semibold">{p.name}</span>
-                        <RiskBadge level={p.riskLevel} showLabel={false} />
-                      </div>
-                      <p className="text-xs text-muted-foreground">{p.hn} — อายุ {p.age}</p>
-                      <p className="text-xs mt-0.5">{diseaseIcon} {p.carePlan}</p>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.symptomSummary}</p>
-                      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{p.assignedNurse}</span>
-                        <span>{p.lastContact.split(' ')[1]}</span>
-                      </div>
+              <div className="space-y-2 min-h-[100px]">
+                {cards.map(p => (
+                  <div key={p.id} className="kanban-card" onClick={() => navigate({ to: '/patients/$patientId', params: { patientId: p.id } })}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-mono text-muted-foreground">{p.hn}</span>
+                      <RiskBadge level={p.riskLevel} showLabel={false} />
                     </div>
-                  );
-                })}
-                {items.length === 0 && (
-                  <div className="rounded-lg border-2 border-dashed p-4 text-center text-xs text-muted-foreground">ไม่มีรายการ</div>
-                )}
+                    <p className="text-sm font-semibold truncate">{p.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{p.carePlan}</p>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{p.symptomSummary}</p>
+                    <div className="mt-2" onClick={e => e.stopPropagation()}>
+                      <select
+                        value={p.caseStatus}
+                        onChange={e => moveCase(p.id, e.target.value as CaseStatus)}
+                        className="w-full rounded border bg-background px-2 py-1 text-xs"
+                      >
+                        {kanbanColumns.map(c => <option key={c.status} value={c.status}>{caseStatusLabels[c.status]}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           );

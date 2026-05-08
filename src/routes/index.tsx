@@ -2,10 +2,11 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '@/lib/auth-context';
 import type { UserRole } from '@/lib/mock-data';
 import { roleLabels } from '@/lib/mock-data';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import {
   Activity, ChevronRight, Shield, Users, Stethoscope, Pill,
-  Headphones, Lock, BadgeCheck, AlertTriangle,
+  Headphones, Lock, BadgeCheck, Info,
 } from 'lucide-react';
 
 export const Route = createFileRoute('/')({
@@ -28,12 +29,13 @@ const roleDescriptions: Record<UserRole, string> = {
   callcenter: 'จัดการคิวโทร ผลติดตาม AI ติดตามนัด',
 };
 
-const roleColors: Record<UserRole, string> = {
-  admin: 'from-slate-600 to-slate-800',
-  nurse: 'from-teal-500 to-teal-700',
-  doctor: 'from-blue-500 to-blue-700',
-  pharmacist: 'from-purple-500 to-purple-700',
-  callcenter: 'from-orange-500 to-orange-700',
+// Where each role lands after login
+const roleLandingRoutes: Record<UserRole, string> = {
+  admin: '/dashboard',
+  nurse: '/dashboard',
+  doctor: '/dashboard',
+  pharmacist: '/medication',
+  callcenter: '/ai-followup',
 };
 
 const roleBgActive: Record<UserRole, string> = {
@@ -54,18 +56,35 @@ const roleIconActive: Record<UserRole, string> = {
 
 const roleIconInactive = 'bg-muted text-muted-foreground';
 
+const roleColors: Record<UserRole, string> = {
+  admin: 'from-slate-600 to-slate-800',
+  nurse: 'from-teal-500 to-teal-700',
+  doctor: 'from-blue-500 to-blue-700',
+  pharmacist: 'from-purple-500 to-purple-700',
+  callcenter: 'from-orange-500 to-orange-700',
+};
+
 function LoginPage() {
-  const { login } = useAuth();
+  const { login, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<UserRole>('nurse');
-  const [isLoading, setIsLoading] = useState(false);
+
+  // If already logged in, redirect to dashboard immediately
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate({ to: '/dashboard' });
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
+    try {
       login(selectedRole);
-      navigate({ to: '/dashboard' });
-    }, 500);
+      const landingRoute = roleLandingRoutes[selectedRole];
+      navigate({ to: landingRoute });
+      toast.success(`เข้าสู่ระบบสำเร็จ — ${roleLabels[selectedRole]}`);
+    } catch {
+      toast.error('เกิดข้อผิดพลาด กรุณาลองอีกครั้ง');
+    }
   };
 
   const roles: UserRole[] = ['admin', 'nurse', 'doctor', 'pharmacist', 'callcenter'];
@@ -86,7 +105,7 @@ function LoginPage() {
             </p>
             <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               <BadgeCheck className="h-3.5 w-3.5" />
-              Ver 2.0 — Demo Mode
+              Ver 2.1 — Demo Mode
             </div>
           </div>
 
@@ -112,8 +131,8 @@ function LoginPage() {
             {/* Role selector */}
             <div>
               <p className="mb-2 text-sm font-semibold">
-                เลือกบทบาท (Demo Mode)
-                <span className="ml-2 text-xs font-normal text-muted-foreground">— เลือก 1 บทบาท</span>
+                เลือกบทบาท
+                <span className="ml-2 text-xs font-normal text-muted-foreground">— Demo Mode</span>
               </p>
               <div className="grid grid-cols-1 gap-2">
                 {roles.map((role) => {
@@ -145,7 +164,7 @@ function LoginPage() {
             {/* Role info banner */}
             <div className={`rounded-xl bg-gradient-to-r ${roleColors[selectedRole]} p-4 text-white transition-all`}>
               <div className="flex items-start gap-3">
-                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 opacity-80" />
+                <Info className="h-4 w-4 mt-0.5 shrink-0 opacity-80" />
                 <p className="text-xs leading-relaxed opacity-90">
                   <span className="font-semibold">{roleLabels[selectedRole]}</span>
                   {' '}— คุณจะเข้าสู่ Dashboard เฉพาะบทบาทนี้ และเห็นเมนูที่สอดคล้องกับสิทธิ์ที่กำหนด
@@ -157,22 +176,14 @@ function LoginPage() {
             <button
               id="login-submit-btn"
               onClick={handleLogin}
-              disabled={isLoading}
-              className="w-full rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl flex items-center justify-center gap-2"
             >
-              {isLoading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  กำลังเข้าสู่ระบบ...
-                </>
-              ) : (
-                'เข้าสู่ระบบ'
-              )}
+              เข้าสู่ระบบ
             </button>
           </div>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            CareGo Hospital Platform v2.0 — AI Care Follow-up System
+            CareGo Hospital Platform v2.1 — AI Care Follow-up System
           </p>
         </div>
       </div>

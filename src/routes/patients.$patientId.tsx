@@ -5,6 +5,8 @@ import { CaseStatusBadge } from '@/components/CaseStatusBadge';
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useActionModals } from '@/components/ActionModals';
+import { mockStore } from '@/lib/mock-store';
 import {
   ArrowLeft, Phone, Bell, UserPlus, Pill, CalendarPlus, XCircle,
   User, FileText, MessageSquare, HeartPulse, Calendar, Users as UsersIcon,
@@ -24,6 +26,7 @@ function PatientDetailPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [nurseNote, setNurseNote] = useState('');
   const [doctorNote, setDoctorNote] = useState('');
+  const { open: openModal, Modals } = useActionModals();
 
   if (!patient) {
     return (
@@ -155,12 +158,12 @@ function PatientDetailPage() {
 
         {/* Action buttons */}
         <div className="mt-4 flex flex-wrap gap-2">
-          <button onClick={() => toast.success(`กำลังโทร ${patient.name}`)} className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"><Phone className="h-3.5 w-3.5" /> โทรผู้ป่วย</button>
-          <button onClick={() => toast.info('ส่งต่อแพทย์แล้ว')} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Stethoscope className="h-3.5 w-3.5" /> ส่งแพทย์</button>
-          <button onClick={() => toast.info('ส่งต่อเภสัชกรแล้ว')} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Pill className="h-3.5 w-3.5" /> ส่งเภสัชกร</button>
-          <button onClick={() => toast.info('ส่งแจ้งเตือนญาติแล้ว')} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Bell className="h-3.5 w-3.5" /> แจ้งญาติ</button>
+          <button onClick={() => openModal('call', patient.id, patient.name)} className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"><Phone className="h-3.5 w-3.5" /> โทรผู้ป่วย</button>
+          <button onClick={() => openModal('referDoctor', patient.id, patient.name)} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Stethoscope className="h-3.5 w-3.5" /> ส่งแพทย์</button>
+          <button onClick={() => openModal('referPharmacist', patient.id, patient.name)} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Pill className="h-3.5 w-3.5" /> ส่งเภสัชกร</button>
+          <button onClick={() => openModal('family', patient.id, patient.name)} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><Bell className="h-3.5 w-3.5" /> แจ้งญาติ</button>
           <button onClick={() => toast.success('ตั้งเวลานัดติดตามแล้ว')} className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"><CalendarPlus className="h-3.5 w-3.5" /> นัดติดตาม</button>
-          <button onClick={() => toast.success(`ปิดเคส ${patient.name}`)} className="inline-flex items-center gap-1.5 rounded-lg border border-risk-red/30 px-3 py-2 text-xs font-medium text-risk-red hover:bg-risk-red-bg"><XCircle className="h-3.5 w-3.5" /> ปิดเคส</button>
+          <button onClick={() => openModal('closeCase', patient.id, patient.name)} className="inline-flex items-center gap-1.5 rounded-lg border border-risk-red/30 px-3 py-2 text-xs font-medium text-risk-red hover:bg-risk-red-bg"><XCircle className="h-3.5 w-3.5" /> ปิดเคส</button>
         </div>
       </div>
 
@@ -393,14 +396,14 @@ function PatientDetailPage() {
         <div className="rounded-xl border bg-card p-5">
           <h3 className="section-title">บันทึกกิจกรรม</h3>
           <div className="space-y-3">
-            {actionLog.map((log, i) => (
+            {[...mockStore.getActionLogForPatient(patientId), ...actionLog].map((log, i) => (
               <div key={i} className="flex gap-3 text-sm">
                 <div className="flex flex-col items-center">
                   <div className="h-2.5 w-2.5 rounded-full bg-primary mt-1.5" />
                   {i < actionLog.length - 1 && <div className="w-px flex-1 bg-border" />}
                 </div>
                 <div className="pb-3">
-                  <p className="text-xs text-muted-foreground">{log.time} — {log.by}</p>
+                  <p className="text-xs text-muted-foreground">{'timestamp' in log ? log.timestamp : log.time} — {'performedBy' in log ? log.performedBy : log.by}</p>
                   <p>{log.action}</p>
                 </div>
               </div>
@@ -408,6 +411,7 @@ function PatientDetailPage() {
           </div>
         </div>
       )}
+      <Modals />
     </div>
   );
 }
