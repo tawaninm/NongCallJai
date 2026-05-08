@@ -33,6 +33,15 @@ function DashboardPage() {
 /* ============================================================
    NURSE DASHBOARD
    ============================================================ */
+const aiAgents = [
+  { name: 'Voice Follow-up Agent', status: 'online' as const, calls: 6, success: 5 },
+  { name: 'Risk Scoring Agent', status: 'online' as const, calls: 6, success: 6 },
+  { name: 'Appointment Reminder Agent', status: 'online' as const, calls: 3, success: 3 },
+  { name: 'Chatbot Triage Agent', status: 'soon' as const, calls: 0, success: 0 },
+  { name: 'Medication Adherence Agent', status: 'soon' as const, calls: 0, success: 0 },
+  { name: 'Family Notification Agent', status: 'soon' as const, calls: 0, success: 0 },
+];
+
 function NurseDashboard({ userName }: { userName: string }) {
   const navigate = useNavigate();
   const greenCount = patients.filter(p => p.riskLevel === 'green').length;
@@ -205,10 +214,44 @@ function NurseDashboard({ userName }: { userName: string }) {
             })}
           </div>
         </div>
+
+        {/* Panel 5: AI Agent Status */}
+        <div className="rounded-xl border bg-card p-5">
+          <h2 className="section-title flex items-center gap-2">
+            <Bot className="h-5 w-5 text-primary" /> สถานะ AI Agent
+          </h2>
+          <div className="space-y-2">
+            {aiAgents.map((agent, i) => (
+              <div key={i} className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className={`h-2 w-2 rounded-full shrink-0 ${agent.status === 'online' ? 'bg-risk-green' : 'bg-muted-foreground'}`} />
+                  <span className="text-sm truncate">{agent.name}</span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {agent.status === 'online' ? (
+                    <>
+                      <span className="text-xs text-muted-foreground">{agent.success}/{agent.calls} สาย</span>
+                      <span className="rounded-full bg-risk-green-bg px-2 py-0.5 text-xs font-semibold text-risk-green">ออนไลน์</span>
+                    </>
+                  ) : (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">เร็วๆ นี้</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => navigate({ to: '/ai-agents' })}
+            className="mt-3 w-full text-center text-xs text-primary hover:underline flex items-center justify-center gap-1"
+          >
+            จัดการ AI Agents <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
 
 /* ============================================================
    DOCTOR DASHBOARD

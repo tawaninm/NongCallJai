@@ -3,8 +3,9 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Bell, Shield } from "lucide-react";
-import { roleLabels } from "@/lib/mock-data";
+import { Bell, Shield, Stethoscope, Users, Pill, Headphones } from "lucide-react";
+import { roleLabels, patients, aiFollowUps } from "@/lib/mock-data";
+import type { UserRole } from "@/lib/mock-data";
 
 function NotFoundComponent() {
   return (
@@ -65,6 +66,23 @@ function RootComponent() {
   );
 }
 
+// Role badge colors for the top bar
+const roleBadgeColors: Record<UserRole, string> = {
+  admin: 'bg-slate-100 text-slate-700 border border-slate-300',
+  nurse: 'bg-teal-100 text-teal-700 border border-teal-300',
+  doctor: 'bg-blue-100 text-blue-700 border border-blue-300',
+  pharmacist: 'bg-purple-100 text-purple-700 border border-purple-300',
+  callcenter: 'bg-orange-100 text-orange-700 border border-orange-300',
+};
+
+const roleIcons: Record<UserRole, React.ComponentType<{ className?: string }>> = {
+  admin: Shield,
+  nurse: Users,
+  doctor: Stethoscope,
+  pharmacist: Pill,
+  callcenter: Headphones,
+};
+
 function AppLayout() {
   const { isLoggedIn, role, userName } = useAuth();
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
@@ -73,21 +91,39 @@ function AppLayout() {
     return <Outlet />;
   }
 
+  // Dynamic notification count based on mock data
+  const urgentCount = patients.filter(p => p.riskLevel === 'red').length +
+    aiFollowUps.filter(f => f.humanReviewRequired).length;
+
+  const RoleIcon = roleIcons[role];
+
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <AppSidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-14 items-center justify-between border-b bg-card px-6 shrink-0">
+          {/* Left: role badge */}
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-primary" />
-            <span className="text-sm text-muted-foreground">เข้าสู่ระบบในฐานะ:</span>
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{roleLabels[role]}</span>
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${roleBadgeColors[role]}`}>
+              <RoleIcon className="h-3.5 w-3.5" />
+              {roleLabels[role]}
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{userName}</span>
-            <button className="relative rounded-lg p-2 hover:bg-muted">
+
+          {/* Right: username + notifications */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground hidden sm:block">{userName}</span>
+            <button
+              id="header-notification-btn"
+              className="relative rounded-lg p-2 hover:bg-muted transition-colors"
+              title={`${urgentCount} การแจ้งเตือนที่ต้องดำเนินการ`}
+            >
               <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-risk-red text-[10px] font-bold text-white">3</span>
+              {urgentCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-risk-red text-[10px] font-bold text-white animate-pulse">
+                  {urgentCount > 9 ? '9+' : urgentCount}
+                </span>
+              )}
             </button>
           </div>
         </header>
