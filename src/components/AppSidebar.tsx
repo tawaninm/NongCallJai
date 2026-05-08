@@ -1,4 +1,4 @@
-import { Link, useRouterState } from '@tanstack/react-router';
+import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import {
   LayoutDashboard, Users, Columns3, Bot, ClipboardList, Pill,
   CalendarCheck, Heart, BarChart3, Settings, BrainCircuit, LogOut, Activity,
@@ -23,9 +23,15 @@ function getBadgeCount(url: string): number | undefined {
 
 export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const { userName, role, logout } = useAuth();
 
   const visibleItems = roleMenuConfig.filter(item => item.roles.includes(role));
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: '/' });
+  };
 
   return (
     <aside className="flex h-screen w-64 flex-col bg-sidebar text-sidebar-foreground shrink-0">
@@ -66,7 +72,7 @@ export function AppSidebar() {
               {role === 'admin' ? 'ผู้ดูแลระบบ' : role === 'nurse' ? 'พยาบาล' : role === 'doctor' ? 'แพทย์' : role === 'pharmacist' ? 'เภสัชกร' : 'Call Center'}
             </p>
           </div>
-          <button onClick={logout} className="rounded-lg p-2 hover:bg-sidebar-accent" title="ออกจากระบบ">
+          <button onClick={handleLogout} className="rounded-lg p-2 hover:bg-sidebar-accent" title="ออกจากระบบ">
             <LogOut className="h-4 w-4" />
           </button>
         </div>
