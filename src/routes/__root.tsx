@@ -1,4 +1,12 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState, useNavigate } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+  useRouterState,
+  useNavigate,
+} from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import appCss from "../styles.css?url";
@@ -10,6 +18,7 @@ import type { UserRole } from "@/lib/mock-data";
 import { BotnoiChat } from "@/components/BotnoiChat";
 import { NotificationDropdown } from "@/components/prototype/NotificationDropdown";
 import { mockStore } from "@/lib/mock-store";
+import { APP_VERSION } from "@/lib/patch-log";
 
 function NotFoundComponent() {
   return (
@@ -19,7 +28,10 @@ function NotFoundComponent() {
         <h2 className="mt-4 text-xl font-semibold text-foreground">ไม่พบหน้าที่ต้องการ</h2>
         <p className="mt-2 text-sm text-muted-foreground">หน้าที่คุณค้นหาไม่มีอยู่ในระบบ</p>
         <div className="mt-6">
-          <Link to="/dashboard" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
             กลับแดชบอร์ด
           </Link>
         </div>
@@ -33,12 +45,15 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CareGo Hospital Platform v2.1" },
+      { title: `CareGo Hospital Platform ${APP_VERSION}` },
       { name: "description", content: "แพลตฟอร์มติดตามดูแลผู้ป่วยอัจฉริยะ สำหรับโรงพยาบาล" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -49,8 +64,13 @@ export const Route = createRootRoute({
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th">
-      <head><HeadContent /></head>
-      <body>{children}<Scripts /></body>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
     </html>
   );
 }
@@ -66,11 +86,11 @@ function RootComponent() {
 }
 
 const roleBadgeColors: Record<UserRole, string> = {
-  admin: 'bg-slate-100 text-slate-700 border border-slate-300',
-  nurse: 'bg-teal-light text-teal border border-teal/20',
-  doctor: 'bg-blue-50 text-blue-700 border border-blue-200',
-  pharmacist: 'bg-purple-50 text-purple-700 border border-purple-200',
-  callcenter: 'bg-orange-50 text-orange-700 border border-orange-200',
+  admin: "bg-slate-100 text-slate-700 border border-slate-300",
+  nurse: "bg-teal-light text-teal border border-teal/20",
+  doctor: "bg-blue-50 text-blue-700 border border-blue-200",
+  pharmacist: "bg-purple-50 text-purple-700 border border-purple-200",
+  callcenter: "bg-orange-50 text-orange-700 border border-orange-200",
 };
 
 const roleIcons: Record<UserRole, React.ComponentType<{ className?: string }>> = {
@@ -87,15 +107,19 @@ function AppLayout() {
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const unreadCount = useSyncExternalStore(mockStore.subscribe, mockStore.getUnreadCount, mockStore.getUnreadCount);
+  const unreadCount = useSyncExternalStore(
+    mockStore.subscribe,
+    mockStore.getUnreadCount,
+    mockStore.getUnreadCount,
+  );
 
   useEffect(() => {
-    if (!isLoggedIn && currentPath !== '/') {
-      navigate({ to: '/' });
+    if (!isLoggedIn && currentPath !== "/") {
+      navigate({ to: "/" });
     }
   }, [isLoggedIn, currentPath, navigate]);
 
-  if (!isLoggedIn || currentPath === '/') {
+  if (!isLoggedIn || currentPath === "/") {
     return <Outlet />;
   }
 
@@ -108,24 +132,37 @@ function AppLayout() {
         {/* Top bar matching reference screenshots */}
         <header className="flex h-14 items-center justify-between border-b bg-card px-4 md:px-6 shrink-0">
           <div className="flex items-center gap-2 md:gap-4">
-            <button className="md:hidden p-2 -ml-2 rounded-lg hover:bg-muted" onClick={() => setMobileMenuOpen(true)}>
+            <button
+              className="md:hidden p-2 -ml-2 rounded-lg hover:bg-muted"
+              onClick={() => setMobileMenuOpen(true)}
+            >
               <Menu className="h-5 w-5" />
             </button>
-            <span className="text-lg font-bold text-primary truncate">CareGo Platform</span>
-            <span className="hidden md:block text-sm text-muted-foreground truncate">ศูนย์ติดตามผู้ป่วยแบบเรียลไทม์</span>
+            <span className="text-lg font-bold text-primary truncate">CareGo Command Center</span>
+            <span className="hidden md:block text-sm text-muted-foreground truncate">
+              ศูนย์บัญชาการ AI Care Follow-up
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-1.5">
               <Search className="h-4 w-4 text-muted-foreground" />
-              <input type="text" placeholder="ค้นหาผู้ป่วย, แผนการดูแล..." className="bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none w-48" />
+              <input
+                type="text"
+                placeholder="ค้นหา HN, ผู้ป่วย, เคสเร่งด่วน..."
+                className="bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none w-52"
+              />
             </div>
             {/* Notification bell */}
             <div className="relative">
-              <button onClick={() => setNotifOpen(!notifOpen)} className="relative rounded-lg p-2 hover:bg-muted transition-colors" title={`${unreadCount} การแจ้งเตือน`}>
+              <button
+                onClick={() => setNotifOpen(!notifOpen)}
+                className="relative rounded-lg p-2 hover:bg-muted transition-colors"
+                title={`${unreadCount} การแจ้งเตือน`}
+              >
                 <Bell className="h-5 w-5 text-muted-foreground" />
                 {unreadCount > 0 && (
                   <span className="absolute -right-0.5 -top-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-risk-red text-[10px] font-bold text-white px-1 animate-pulse">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                    {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
               </button>
@@ -133,7 +170,9 @@ function AppLayout() {
             </div>
             {/* User avatar */}
             <div className="flex items-center gap-2">
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${roleBadgeColors[role]}`}>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${roleBadgeColors[role]}`}
+              >
                 <RoleIcon className="h-3.5 w-3.5" />
                 {roleLabels[role]}
               </span>

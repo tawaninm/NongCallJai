@@ -35,11 +35,16 @@ export type Patient = {
   hn: string;
   name: string;
   age: number;
-  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  gender: "MALE" | "FEMALE" | "OTHER";
   phone?: string;
-  disease: 'HYPERTENSION' | 'TYPE_2_DIABETES' | 'HEART_FAILURE' | 'POST_OP_WOUND' | 'MEDICATION_ADHERENCE';
+  disease:
+    | "HYPERTENSION"
+    | "TYPE_2_DIABETES"
+    | "HEART_FAILURE"
+    | "POST_OP_WOUND"
+    | "MEDICATION_ADHERENCE";
   carePlanName: string;
-  currentRiskLevel: 'GREEN' | 'YELLOW' | 'RED';
+  currentRiskLevel: "GREEN" | "YELLOW" | "RED";
   caseStatus: string;
   latestSummary: string;
   assignedNurse?: string;

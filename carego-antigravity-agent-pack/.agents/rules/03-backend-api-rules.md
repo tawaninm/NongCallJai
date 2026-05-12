@@ -153,18 +153,18 @@ GET    /api/agents/:id/logs
 
 ```ts
 class RiskAssessmentService {
-  classify(input: RiskAssessmentInput): RiskAssessmentResult
+  classify(input: RiskAssessmentInput): RiskAssessmentResult;
 }
 
 class CaseActionService {
-  referToDoctor(caseId, actorId, payload)
-  referToPharmacist(caseId, actorId, payload)
-  notifyFamily(caseId, actorId, payload)
-  closeCase(caseId, actorId, reason)
+  referToDoctor(caseId, actorId, payload);
+  referToPharmacist(caseId, actorId, payload);
+  notifyFamily(caseId, actorId, payload);
+  closeCase(caseId, actorId, reason);
 }
 
 class AuditLogService {
-  log(actorId, action, entityType, entityId, metadata)
+  log(actorId, action, entityType, entityId, metadata);
 }
 ```
 

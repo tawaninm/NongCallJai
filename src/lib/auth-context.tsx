@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { UserRole } from './mock-data';
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import type { UserRole } from "./mock-data";
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -14,17 +14,17 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const STORAGE_KEY = 'carego_auth';
+const STORAGE_KEY = "carego_auth";
 
 const roleNames: Record<UserRole, string> = {
-  admin: 'ผู้ดูแลระบบ',
-  nurse: 'พว.สมหญิง',
-  doctor: 'นพ.วิชัย',
-  pharmacist: 'ภก.สมศรี',
-  callcenter: 'คุณสมใจ',
+  admin: "ผู้ดูแลระบบ",
+  nurse: "พว.สมหญิง",
+  doctor: "นพ.วิชัย",
+  pharmacist: "ภก.สมศรี",
+  callcenter: "คุณสมใจ",
 };
 
-const defaultAuth: AuthState = { isLoggedIn: false, role: 'nurse', userName: '' };
+const defaultAuth: AuthState = { isLoggedIn: false, role: "nurse", userName: "" };
 
 function loadAuth(): AuthState {
   try {
@@ -76,6 +76,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }

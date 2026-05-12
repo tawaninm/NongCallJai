@@ -13,6 +13,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PatientsRouteImport } from './routes/patients'
+import { Route as PatchLogRouteImport } from './routes/patch-log'
 import { Route as MedicationRouteImport } from './routes/medication'
 import { Route as FamilyRouteImport } from './routes/family'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -43,6 +44,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const PatientsRoute = PatientsRouteImport.update({
   id: '/patients',
   path: '/patients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PatchLogRoute = PatchLogRouteImport.update({
+  id: '/patch-log',
+  path: '/patch-log',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MedicationRoute = MedicationRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/family': typeof FamilyRoute
   '/medication': typeof MedicationRoute
+  '/patch-log': typeof PatchLogRoute
   '/patients': typeof PatientsRouteWithChildren
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/family': typeof FamilyRoute
   '/medication': typeof MedicationRoute
+  '/patch-log': typeof PatchLogRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/family': typeof FamilyRoute
   '/medication': typeof MedicationRoute
+  '/patch-log': typeof PatchLogRoute
   '/patients': typeof PatientsRouteWithChildren
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/family'
     | '/medication'
+    | '/patch-log'
     | '/patients'
     | '/register'
     | '/reports'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/family'
     | '/medication'
+    | '/patch-log'
     | '/register'
     | '/reports'
     | '/settings'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/family'
     | '/medication'
+    | '/patch-log'
     | '/patients'
     | '/register'
     | '/reports'
@@ -215,6 +227,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   FamilyRoute: typeof FamilyRoute
   MedicationRoute: typeof MedicationRoute
+  PatchLogRoute: typeof PatchLogRoute
   PatientsRoute: typeof PatientsRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRoute
@@ -249,6 +262,13 @@ declare module '@tanstack/react-router' {
       path: '/patients'
       fullPath: '/patients'
       preLoaderRoute: typeof PatientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/patch-log': {
+      id: '/patch-log'
+      path: '/patch-log'
+      fullPath: '/patch-log'
+      preLoaderRoute: typeof PatchLogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/medication': {
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   FamilyRoute: FamilyRoute,
   MedicationRoute: MedicationRoute,
+  PatchLogRoute: PatchLogRoute,
   PatientsRoute: PatientsRouteWithChildren,
   RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRoute,

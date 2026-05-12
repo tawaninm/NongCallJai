@@ -1,17 +1,21 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { carePlanTemplates } from '@/lib/mock-data';
-import { useSyncExternalStore, useState } from 'react';
-import { mockStore } from '@/lib/mock-store';
-import { toast } from 'sonner';
-import { Plus, Edit, Copy, Eye, ChevronDown, ChevronUp, Mic } from 'lucide-react';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { carePlanTemplates } from "@/lib/mock-data";
+import { useSyncExternalStore, useState } from "react";
+import { mockStore } from "@/lib/mock-store";
+import { toast } from "sonner";
+import { Plus, Edit, Copy, Eye, ChevronDown, ChevronUp, Mic } from "lucide-react";
 
-export const Route = createFileRoute('/care-plans')({
+export const Route = createFileRoute("/care-plans")({
   component: CarePlansPage,
 });
 
 function CarePlansPage() {
   const navigate = useNavigate();
-  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
+  const patients = useSyncExternalStore(
+    mockStore.subscribe,
+    mockStore.getPatients,
+    mockStore.getPatients,
+  );
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
@@ -24,11 +28,14 @@ function CarePlansPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
-        {carePlanTemplates.map(cp => {
-          const cpPatients = patients.filter(p => p.carePlanType === cp.type);
+        {carePlanTemplates.map((cp) => {
+          const cpPatients = patients.filter((p) => p.carePlanType === cp.type);
           const expanded = expandedId === cp.id;
           return (
-            <div key={cp.id} className="rounded-xl border bg-card overflow-hidden hover:shadow-md transition-shadow">
+            <div
+              key={cp.id}
+              className="rounded-xl border bg-card overflow-hidden hover:shadow-md transition-shadow"
+            >
               <div className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-2xl">{cp.icon}</span>
@@ -55,11 +62,24 @@ function CarePlansPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => setExpandedId(expanded ? null : cp.id)} className="flex-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-muted flex items-center justify-center gap-1">
-                    <Eye className="h-3.5 w-3.5" /> {expanded ? 'ซ่อน' : 'ดูรายละเอียด'}
+                  <button
+                    onClick={() => setExpandedId(expanded ? null : cp.id)}
+                    className="flex-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-muted flex items-center justify-center gap-1"
+                  >
+                    <Eye className="h-3.5 w-3.5" /> {expanded ? "ซ่อน" : "ดูรายละเอียด"}
                   </button>
-                  <button onClick={() => toast.info('แก้ไขแผน')} className="rounded-lg border px-3 py-1.5 text-xs hover:bg-muted"><Edit className="h-3.5 w-3.5" /></button>
-                  <button onClick={() => toast.info('คัดลอกแผน')} className="rounded-lg border px-3 py-1.5 text-xs hover:bg-muted"><Copy className="h-3.5 w-3.5" /></button>
+                  <button
+                    onClick={() => toast.info("แก้ไขแผน")}
+                    className="rounded-lg border px-3 py-1.5 text-xs hover:bg-muted"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => toast.info("คัดลอกแผน")}
+                    className="rounded-lg border px-3 py-1.5 text-xs hover:bg-muted"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
               {expanded && (
@@ -68,8 +88,13 @@ function CarePlansPage() {
                     <h4 className="text-sm font-semibold mb-2">คำถามที่ถาม</h4>
                     <ul className="space-y-1">
                       {cp.questions.map((q, i) => (
-                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-light text-xs font-medium text-teal">{i + 1}</span>
+                        <li
+                          key={i}
+                          className="text-sm text-muted-foreground flex items-start gap-2"
+                        >
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-light text-xs font-medium text-teal">
+                            {i + 1}
+                          </span>
                           {q}
                         </li>
                       ))}
@@ -78,23 +103,52 @@ function CarePlansPage() {
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <div>
                       <h4 className="text-sm font-semibold text-risk-red mb-1">🔴 Red Flag</h4>
-                      <ul className="space-y-0.5">{cp.redFlags.map((f, i) => <li key={i} className="text-xs text-muted-foreground">• {f}</li>)}</ul>
+                      <ul className="space-y-0.5">
+                        {cp.redFlags.map((f, i) => (
+                          <li key={i} className="text-xs text-muted-foreground">
+                            • {f}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-risk-yellow mb-1">🟡 Yellow Flag</h4>
-                      <ul className="space-y-0.5">{cp.yellowFlags.map((f, i) => <li key={i} className="text-xs text-muted-foreground">• {f}</li>)}</ul>
+                      <h4 className="text-sm font-semibold text-risk-yellow mb-1">
+                        🟡 Yellow Flag
+                      </h4>
+                      <ul className="space-y-0.5">
+                        {cp.yellowFlags.map((f, i) => (
+                          <li key={i} className="text-xs text-muted-foreground">
+                            • {f}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-risk-green mb-1">🟢 Green Criteria</h4>
-                      <ul className="space-y-0.5">{cp.greenCriteria.map((f, i) => <li key={i} className="text-xs text-muted-foreground">• {f}</li>)}</ul>
+                      <h4 className="text-sm font-semibold text-risk-green mb-1">
+                        🟢 Green Criteria
+                      </h4>
+                      <ul className="space-y-0.5">
+                        {cp.greenCriteria.map((f, i) => (
+                          <li key={i} className="text-xs text-muted-foreground">
+                            • {f}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
                   <div className="text-sm space-y-1">
-                    <p><span className="text-muted-foreground">การแจ้งญาติ:</span> {cp.familyNotification}</p>
-                    <p><span className="text-muted-foreground">กฎส่งต่อ:</span> {cp.handoffRule}</p>
+                    <p>
+                      <span className="text-muted-foreground">การแจ้งญาติ:</span>{" "}
+                      {cp.familyNotification}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">กฎส่งต่อ:</span> {cp.handoffRule}
+                    </p>
                   </div>
                   <div className="rounded-lg bg-teal-light p-3">
-                    <p className="text-xs font-semibold flex items-center gap-1 mb-1"><Mic className="h-3.5 w-3.5" /> AI Voice Script Preview</p>
+                    <p className="text-xs font-semibold flex items-center gap-1 mb-1">
+                      <Mic className="h-3.5 w-3.5" /> AI Voice Script Preview
+                    </p>
                     <p className="text-xs text-muted-foreground italic">{cp.voiceScript}</p>
                   </div>
                 </div>

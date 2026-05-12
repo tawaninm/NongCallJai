@@ -1,37 +1,59 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useSyncExternalStore, useState } from 'react';
-import { mockStore } from '@/lib/mock-store';
-import { useActionModals } from '@/components/ActionModals';
-import { CallPatientModal } from '@/components/prototype/CallPatientModal';
-import { VitalsMonitorCard } from '@/components/prototype/VitalsMonitorCard';
-import { PatientTimeline } from '@/components/prototype/PatientTimeline';
-import { RiskBadge } from '@/components/RiskBadge';
-import { Phone, Stethoscope, Bell, CheckCircle, Bot } from 'lucide-react';
+import { createFileRoute } from "@tanstack/react-router";
+import { useSyncExternalStore, useState } from "react";
+import { mockStore } from "@/lib/mock-store";
+import { useActionModals } from "@/components/ActionModals";
+import { CallPatientModal } from "@/components/prototype/CallPatientModal";
+import { VitalsMonitorCard } from "@/components/prototype/VitalsMonitorCard";
+import { PatientTimeline } from "@/components/prototype/PatientTimeline";
+import { RiskBadge } from "@/components/RiskBadge";
+import { Phone, Stethoscope, Bell, CheckCircle, Bot } from "lucide-react";
 
-export const Route = createFileRoute('/patients/$patientId')({
+export const Route = createFileRoute("/patients/$patientId")({
   component: PatientDetailPage,
 });
 
+type TimelineType = "red" | "teal" | "blue" | "muted";
+
 function PatientDetailPage() {
   const { patientId } = Route.useParams();
-  const patients = useSyncExternalStore(mockStore.subscribe, mockStore.getPatients, mockStore.getPatients);
-  const allActionLogs = useSyncExternalStore(mockStore.subscribe, mockStore.getActionLog, mockStore.getActionLog);
-  const actionLog = allActionLogs.filter(a => a.patientId === patientId);
-  const patient = patients.find(p => p.id === patientId);
+  const patients = useSyncExternalStore(
+    mockStore.subscribe,
+    mockStore.getPatients,
+    mockStore.getPatients,
+  );
+  const allActionLogs = useSyncExternalStore(
+    mockStore.subscribe,
+    mockStore.getActionLog,
+    mockStore.getActionLog,
+  );
+  const actionLog = allActionLogs.filter((a) => a.patientId === patientId);
+  const patient = patients.find((p) => p.id === patientId);
   const { open, Modals } = useActionModals();
   const [callModalOpen, setCallModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeTab, setActiveTab] = useState("Overview");
 
-  if (!patient) return <div className="p-8 text-center text-muted-foreground">ไม่พบข้อมูลผู้ป่วย</div>;
+  if (!patient)
+    return <div className="p-8 text-center text-muted-foreground">ไม่พบข้อมูลผู้ป่วย</div>;
 
-  const timelineEntries = actionLog.map(a => ({
-    title: a.action,
-    description: a.note || `ดำเนินการโดย: ${a.performedBy}`,
-    timestamp: a.timestamp,
-    type: (a.type === 'call' ? 'blue' : a.type === 'medical' ? 'red' : 'teal') as any,
-  })).concat([
-    { title: 'Initial Admission', description: 'รับเข้าแผนกอายุรกรรม', timestamp: patient.admitDate || 'N/A', type: 'muted' as any }
-  ]);
+  const timelineEntries = actionLog
+    .map((a) => ({
+      title: a.action,
+      description: a.note || `ดำเนินการโดย: ${a.performedBy}`,
+      timestamp: a.timestamp,
+      type: (a.type === "call"
+        ? "blue"
+        : a.type === "medical"
+          ? "red"
+          : "teal") satisfies TimelineType,
+    }))
+    .concat([
+      {
+        title: "Initial Admission",
+        description: "รับเข้าแผนกอายุรกรรม",
+        timestamp: patient.admitDate || "N/A",
+        type: "muted" satisfies TimelineType,
+      },
+    ]);
 
   return (
     <div className="max-w-[1200px] mx-auto pb-12">
@@ -47,16 +69,28 @@ function PatientDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 md:gap-3">
-          <button onClick={() => setCallModalOpen(true)} className="action-btn bg-teal-light/50 text-teal hover:bg-teal-light">
+          <button
+            onClick={() => setCallModalOpen(true)}
+            className="action-btn bg-teal-light/50 text-teal hover:bg-teal-light"
+          >
             <Phone className="h-4 w-4" /> โทรกลับ
           </button>
-          <button onClick={() => open('referDoctor', patient.id, patient.name)} className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100">
+          <button
+            onClick={() => open("referDoctor", patient.id, patient.name)}
+            className="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100"
+          >
             <Stethoscope className="h-4 w-4" /> ส่งต่อแพทย์
           </button>
-          <button onClick={() => open('family', patient.id, patient.name)} className="action-btn bg-pink-50 text-pink-600 hover:bg-pink-100">
+          <button
+            onClick={() => open("family", patient.id, patient.name)}
+            className="action-btn bg-pink-50 text-pink-600 hover:bg-pink-100"
+          >
             <Bell className="h-4 w-4" /> แจ้งครอบครัว
           </button>
-          <button onClick={() => open('closeCase', patient.id, patient.name)} className="action-btn action-btn-primary">
+          <button
+            onClick={() => open("closeCase", patient.id, patient.name)}
+            className="action-btn action-btn-primary"
+          >
             <CheckCircle className="h-4 w-4" /> ปิดเคส
           </button>
         </div>
@@ -73,7 +107,9 @@ function PatientDetailPage() {
               </div>
               <div>
                 <h3 className="font-bold">ข้อมูลพื้นฐาน</h3>
-                <p className="text-xs text-muted-foreground">Admitted: {patient.admitDate || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground">
+                  Admitted: {patient.admitDate || "N/A"}
+                </p>
               </div>
             </div>
             <div className="p-5 space-y-4">
@@ -102,27 +138,31 @@ function PatientDetailPage() {
           </div>
 
           {/* Vitals */}
-          <VitalsMonitorCard 
-            hr={115} hrAlert={true} 
-            bp={patient.latestBP !== '-' ? patient.latestBP : '160/95'} bpAlert={true}
-            spo2={92} temp={37.8} 
+          <VitalsMonitorCard
+            hr={115}
+            hrAlert={true}
+            bp={patient.latestBP !== "-" ? patient.latestBP : "160/95"}
+            bpAlert={true}
+            spo2={92}
+            temp={37.8}
           />
         </div>
 
         {/* Right Column - Tabs */}
         <div className="md:col-span-2">
           <div className="flex border-b mb-6 overflow-x-auto hide-scrollbar">
-            {['Overview', 'AI Summary', 'Transcript', 'Medication', 'Appointment'].map(t => (
+            {["Overview", "AI Summary", "Transcript", "Medication", "Appointment"].map((t) => (
               <button
-                key={t} onClick={() => setActiveTab(t)}
-                className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === t ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+                key={t}
+                onClick={() => setActiveTab(t)}
+                className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
               >
                 {t}
               </button>
             ))}
           </div>
 
-          {activeTab === 'Overview' && (
+          {activeTab === "Overview" && (
             <div className="space-y-6">
               {/* AI Summary Card */}
               <div className="rounded-xl border bg-card overflow-hidden">
@@ -132,11 +172,21 @@ function PatientDetailPage() {
                 </div>
                 <div className="p-5">
                   <p className="text-sm leading-relaxed mb-4">
-                    ผู้ป่วยชายอายุ 65 ปี มีประวัติความดันโลหิตสูงและเบาหวาน อาการล่าสุดรายงานว่ามีอาการวิงเวียนศีรษะและใจสั่นเมื่อเช้านี้ ผลการติดตาม Vitals ล่าสุดพบความดันโลหิตสูง ({patient.latestBP !== '-' ? patient.latestBP : '160/95'}) และอัตราการเต้นของหัวใจเร็วกว่าปกติ (115 bpm) AI ประเมินความเสี่ยงระดับ <strong>Critical</strong> แนะนำให้แพทย์พิจารณาปรับยาลดความดันและตรวจคลื่นไฟฟ้าหัวใจ (EKG) โดยด่วน
+                    ผู้ป่วยชายอายุ 65 ปี มีประวัติความดันโลหิตสูงและเบาหวาน
+                    อาการล่าสุดรายงานว่ามีอาการวิงเวียนศีรษะและใจสั่นเมื่อเช้านี้ ผลการติดตาม Vitals
+                    ล่าสุดพบความดันโลหิตสูง (
+                    {patient.latestBP !== "-" ? patient.latestBP : "160/95"})
+                    และอัตราการเต้นของหัวใจเร็วกว่าปกติ (115 bpm) AI ประเมินความเสี่ยงระดับ{" "}
+                    <strong>Critical</strong>{" "}
+                    แนะนำให้แพทย์พิจารณาปรับยาลดความดันและตรวจคลื่นไฟฟ้าหัวใจ (EKG) โดยด่วน
                   </p>
                   <div className="flex gap-2">
-                    <span className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">Confidence: 94%</span>
-                    <span className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">Generated: 10 mins ago</span>
+                    <span className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
+                      Confidence: 94%
+                    </span>
+                    <span className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
+                      Generated: 10 mins ago
+                    </span>
                   </div>
                 </div>
               </div>
@@ -149,7 +199,7 @@ function PatientDetailPage() {
             </div>
           )}
 
-          {activeTab !== 'Overview' && (
+          {activeTab !== "Overview" && (
             <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
               เนื้อหาส่วน {activeTab} อยู่ระหว่างการพัฒนา
             </div>
@@ -158,10 +208,15 @@ function PatientDetailPage() {
       </div>
 
       <Modals />
-      <CallPatientModal 
-        open={callModalOpen} onClose={() => setCallModalOpen(false)} 
-        patientId={patient.id} patientName={patient.name} 
-        hn={patient.hn} age={patient.age} riskLevel={patient.riskLevel} appointment={patient.appointmentStatus}
+      <CallPatientModal
+        open={callModalOpen}
+        onClose={() => setCallModalOpen(false)}
+        patientId={patient.id}
+        patientName={patient.name}
+        hn={patient.hn}
+        age={patient.age}
+        riskLevel={patient.riskLevel}
+        appointment={patient.appointmentStatus}
       />
     </div>
   );

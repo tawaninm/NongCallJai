@@ -281,7 +281,7 @@ type ExtractedEntities = {
     spo2?: number;
   };
   medication?: {
-    adherence: 'TAKEN' | 'MISSED' | 'STOPPED' | 'UNKNOWN';
+    adherence: "TAKEN" | "MISSED" | "STOPPED" | "UNKNOWN";
     issue?: string;
   };
   appointment?: {

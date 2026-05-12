@@ -1,64 +1,42 @@
-# CareGo Hospital Platform Ver 2.1
-**Frontend Complete Prototype**
+# CareGo Hospital Platform
 
-ศูนย์บัญชาการการแพทย์ (Clinical Command Center) ที่ออกแบบมาเพื่อบริหารจัดการคิวผู้ป่วย, เคสการรักษา, การติดตามยา, และระบบ AI ติดตามผล (AI Follow-up) โดยทุกหน้าและทุก Role มีการเชื่อมโยงข้อมูลกันแบบ Real-time ในระดับ Prototype (ใช้ Frontend State + LocalStorage)
+CareGo Hospital Platform is a hospital-side AI care follow-up platform for elderly patients, chronic disease follow-up, post-discharge follow-up, medication follow-up, nurse triage, doctor review, pharmacist review, family notification, and AI agent orchestration.
 
----
+Current version: v0.1.0
 
-## 🚀 วิธีการเปิดโปรเจกต์และรัน Localhost
+## Current App Stack
 
-1. **เปิด Terminal** ของเครื่อง (เช่น Command Prompt, PowerShell หรือ Terminal ใน VSCode)
-2. นำทาง (cd) เข้ามาที่โฟลเดอร์โปรเจกต์ `caregohospital`
-3. รันคำสั่งต่อไปนี้เพื่อเปิดเซิร์ฟเวอร์จำลอง:
-   ```bash
-   npm run dev
-   ```
-4. เปิดเว็บเบราว์เซอร์ แล้วเข้าไปที่ลิงก์ที่แสดงในหน้า Terminal (โดยปกติจะเป็น `http://localhost:8080` หรือพอร์ตใกล้เคียง)
+This repository is currently a Vite + TanStack Router + React + TypeScript + Tailwind CSS prototype with mock data and local/session state. Keep this prototype working while improving it incrementally.
 
-> ⚠️ **ข้อควรระวังสำคัญ (แจ้งเตือน):** 
-> เมื่อคุณทำงานเสร็จหรือ **เลิกใช้งาน Server แล้ว ให้กดปุ่ม `Ctrl + C` ใน Terminal ทุกครั้ง** และตอบ `Y` (ถ้ามีถาม) เพื่อเป็นการปิดการทำงานของระบบเซิร์ฟเวอร์ ป้องกันไม่ให้พอร์ตค้างหรือเครื่องทำงานหนักตลอดเวลา
+## Run Locally
 
----
-
-## 🤖 สำหรับ AI Agent (Prompt เริ่มต้น)
-
-หากคุณต้องการให้ AI (เช่น Gemini, Claude, ChatGPT) เข้ามาช่วยพัฒนาหรือแก้ไขโค้ดในโปรเจกต์นี้ ให้เริ่มต้นการสนทนาด้วย Prompt ด้านล่างนี้เสมอ เพื่อให้ AI เข้าใจบริบททั้งหมด:
-
-```text
-Read the project instructions first:
-- AGENTS.md
-- GEMINI.md
-- AI_AGENT_README.md
-- .agents/rules/*
-- DesignImage UX Ui iwant
-- .agents/workflows/*
-- DESIGN.md
-- docs/architecture/*
-- src/routes/index.tsx
-- src/routes/__root.tsx
-- src/lib/auth-context.tsx
-- src/lib/mock-data.ts
-- src/components/AppSidebar.tsx
-- src/styles.css
+```bash
+npm install
+npm run dev
 ```
 
----
+Open the local URL printed by Vite.
 
-## 🧩 รายละเอียดโปรเจกต์และโครงสร้างการทำงานหลัก (Key Features)
+## AI Agent Entry Points
 
-โปรเจกต์นี้พัฒนาด้วย **React + TanStack Router + Tailwind CSS** โดยไม่ต้องพึ่งพา Backend API ในขณะนี้ (Frontend-only Prototype)
+AI coding agents must read AGENTS.md first, then DESIGN.md, then relevant files under .agents/rules and .agents/workflows.
 
-1. **Role-based Architecture:** 
-   หน้าแดชบอร์ดและเมนู (Sidebar) จะปรับเปลี่ยนตามสิทธิ์ผู้ใช้งานอัตโนมัติ (Admin, พยาบาล, แพทย์, เภสัชกร, ศูนย์ตัวแทน)
+Recommended first reads: AGENTS.md, GEMINI.md, AI*AGENT_README.md, DESIGN.md, .agents/rules/*, .agents/workflows/\_, docs/API_CONTRACTS.md, docs/DATA_MODEL_OVERVIEW.md, docs/PROJECT_STRUCTURE.md, and docs/PATCH_LOG.md.
 
-2. **Global Reactivity (`mockStore`):** 
-   ข้อมูลทุกอย่างเชื่อมถึงกันหมด! ใช้ `useSyncExternalStore` ดึงข้อมูลจากไฟล์ `src/lib/mock-store.ts` เมื่อมีการเปลี่ยนสถานะผู้ป่วย (เช่น ลากการ์ดในบอร์ด Kanban หรือกดปุ่มรับทราบแจ้งเตือน) ทุกส่วนในระบบรวมถึงตัวเลขแจ้งเตือนจะอัปเดตแบบ Real-time ทันที
+## Product Direction
 
-3. **Cross-Page Routing:** 
-   ไม่ว่าผู้ใช้จะอยู่ที่หน้าไหน (คิวผู้ป่วย, จัดการเคส, ติดตามยา, นัดหมาย) ก็สามารถกดเพื่อเจาะลึกเข้าไปดูรายละเอียดของผู้ป่วย (Patient Detail) คนนั้นๆ ได้อย่างราบรื่น
+CareGo supports hospital-side workflows for Admin, Nurse/Case Manager, Doctor, Pharmacist, and Call Center users.
 
-4. **Clinical Design System:** 
-   หน้าตาเว็บถูกออกแบบโดยใช้คู่สีที่เป็นมิตรทางการแพทย์ (Soft Blue, Teal) จัดเรียงเป็นลักษณะ Command Center ที่ดูทันสมัย สะอาดตา และเป็นมืออาชีพ
+Core flow: Patient visit/discharge -> hospital registers patient -> assign care plan -> AI schedules follow-up -> patient answers -> AI summarizes and extracts data -> AI classifies Green/Yellow/Red by protocol -> dashboard queues human review/action -> family is notified when consent allows -> action log/report is updated.
 
-5. **AI Integration Ready:** 
-   รองรับระบบ Chatbot (Botnoi) แบบฝังตัวในหน้าจอ และมีหน้าต่างแสดงผลการแปลงเสียง/ข้อความที่ AI วิเคราะห์ความเสี่ยงของผู้ป่วยส่งมาให้พยาบาลรีวิว (AI Follow-up Transcript)
+MVP care plans: Hypertension, Type 2 Diabetes Mellitus, and Heart Failure. Medication follow-up is cross-cutting.
+
+## Safety
+
+CareGo AI is a follow-up assistant, not a clinician. It must not diagnose, prescribe, change medication, replace hospital staff judgment, or automatically dispatch emergency services. Red and uncertain cases require human review.
+
+## Version and Patch Log
+
+- Developer changelog: docs/CHANGELOG.md
+- Patch log: docs/PATCH_LOG.md
+- Admin UI: Patch Log / อัปเดต page in the app

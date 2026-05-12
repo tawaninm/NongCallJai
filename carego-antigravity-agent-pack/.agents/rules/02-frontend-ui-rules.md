@@ -20,16 +20,16 @@ Use:
 
 ```ts
 export const colors = {
-  background: '#F3FAFF',
-  card: '#FFFFFF',
-  softBlue: '#E6F6FF',
-  teal: '#00897B',
-  tealDark: '#00685D',
-  slateText: '#071E27',
-  mutedText: '#3D4946',
-  green: '#4CAF50',
-  yellow: '#FFC107',
-  red: '#F44336',
+  background: "#F3FAFF",
+  card: "#FFFFFF",
+  softBlue: "#E6F6FF",
+  teal: "#00897B",
+  tealDark: "#00685D",
+  slateText: "#071E27",
+  mutedText: "#3D4946",
+  green: "#4CAF50",
+  yellow: "#FFC107",
+  red: "#F44336",
 };
 ```
 

@@ -1,15 +1,24 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useAuth } from '@/lib/auth-context';
-import type { UserRole } from '@/lib/mock-data';
-import { roleLabels } from '@/lib/mock-data';
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/lib/auth-context";
+import type { UserRole } from "@/lib/mock-data";
+import { roleLabels } from "@/lib/mock-data";
+import { APP_VERSION } from "@/lib/patch-log";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
-  Activity, ChevronRight, Shield, Users, Stethoscope, Pill,
-  Headphones, Lock, BadgeCheck, Info,
-} from 'lucide-react';
+  Activity,
+  ChevronRight,
+  Shield,
+  Users,
+  Stethoscope,
+  Pill,
+  Headphones,
+  Lock,
+  BadgeCheck,
+  Info,
+} from "lucide-react";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   component: LoginPage,
 });
 
@@ -22,57 +31,57 @@ const roleIcons: Record<UserRole, React.ComponentType<{ className?: string }>> =
 };
 
 const roleDescriptions: Record<UserRole, string> = {
-  admin: 'จัดการระบบ ผู้ใช้ สิทธิ์ และ AI Agent',
-  nurse: 'ติดตามเคส ดูแลผู้ป่วย จัดการแผนการดูแล',
-  doctor: 'ตรวจสอบเคส Red/Yellow ให้คำแนะนำทางคลินิก',
-  pharmacist: 'ตรวจสอบปัญหาการใช้ยา ให้คำปรึกษา',
-  callcenter: 'จัดการคิวโทร ผลติดตาม AI ติดตามนัด',
+  admin: "จัดการระบบ ผู้ใช้ สิทธิ์ และ AI Agent",
+  nurse: "ติดตามเคส ดูแลผู้ป่วย จัดการแผนการดูแล",
+  doctor: "ตรวจสอบเคส Red/Yellow ให้คำแนะนำทางคลินิก",
+  pharmacist: "ตรวจสอบปัญหาการใช้ยา ให้คำปรึกษา",
+  callcenter: "จัดการคิวโทร ผลติดตาม AI ติดตามนัด",
 };
 
 // Where each role lands after login
 const roleLandingRoutes: Record<UserRole, string> = {
-  admin: '/dashboard',
-  nurse: '/dashboard',
-  doctor: '/dashboard',
-  pharmacist: '/medication',
-  callcenter: '/ai-followup',
+  admin: "/dashboard",
+  nurse: "/dashboard",
+  doctor: "/dashboard",
+  pharmacist: "/medication",
+  callcenter: "/ai-followup",
 };
 
 const roleBgActive: Record<UserRole, string> = {
-  admin: 'border-slate-500 bg-slate-50',
-  nurse: 'border-teal-500 bg-teal-50',
-  doctor: 'border-blue-500 bg-blue-50',
-  pharmacist: 'border-purple-500 bg-purple-50',
-  callcenter: 'border-orange-500 bg-orange-50',
+  admin: "border-slate-500 bg-slate-50",
+  nurse: "border-teal-500 bg-teal-50",
+  doctor: "border-blue-500 bg-blue-50",
+  pharmacist: "border-purple-500 bg-purple-50",
+  callcenter: "border-orange-500 bg-orange-50",
 };
 
 const roleIconActive: Record<UserRole, string> = {
-  admin: 'bg-slate-600 text-white',
-  nurse: 'bg-teal-600 text-white',
-  doctor: 'bg-blue-600 text-white',
-  pharmacist: 'bg-purple-600 text-white',
-  callcenter: 'bg-orange-600 text-white',
+  admin: "bg-slate-600 text-white",
+  nurse: "bg-teal-600 text-white",
+  doctor: "bg-blue-600 text-white",
+  pharmacist: "bg-purple-600 text-white",
+  callcenter: "bg-orange-600 text-white",
 };
 
-const roleIconInactive = 'bg-muted text-muted-foreground';
+const roleIconInactive = "bg-muted text-muted-foreground";
 
 const roleColors: Record<UserRole, string> = {
-  admin: 'from-slate-600 to-slate-800',
-  nurse: 'from-teal-500 to-teal-700',
-  doctor: 'from-blue-500 to-blue-700',
-  pharmacist: 'from-purple-500 to-purple-700',
-  callcenter: 'from-orange-500 to-orange-700',
+  admin: "from-slate-600 to-slate-800",
+  nurse: "from-teal-500 to-teal-700",
+  doctor: "from-blue-500 to-blue-700",
+  pharmacist: "from-purple-500 to-purple-700",
+  callcenter: "from-orange-500 to-orange-700",
 };
 
 function LoginPage() {
   const { login, isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState<UserRole>('nurse');
+  const [selectedRole, setSelectedRole] = useState<UserRole>("nurse");
 
   // If already logged in, redirect to dashboard immediately
   useEffect(() => {
     if (isLoggedIn) {
-      navigate({ to: '/dashboard' });
+      navigate({ to: "/dashboard" });
     }
   }, [isLoggedIn, navigate]);
 
@@ -83,17 +92,16 @@ function LoginPage() {
       navigate({ to: landingRoute });
       toast.success(`เข้าสู่ระบบสำเร็จ — ${roleLabels[selectedRole]}`);
     } catch {
-      toast.error('เกิดข้อผิดพลาด กรุณาลองอีกครั้ง');
+      toast.error("เกิดข้อผิดพลาด กรุณาลองอีกครั้ง");
     }
   };
 
-  const roles: UserRole[] = ['admin', 'nurse', 'doctor', 'pharmacist', 'callcenter'];
+  const roles: UserRole[] = ["admin", "nurse", "doctor", "pharmacist", "callcenter"];
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-teal-light to-background">
       <div className="w-full max-w-lg px-4">
         <div className="rounded-2xl border bg-card p-8 shadow-xl">
-
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg">
@@ -105,7 +113,7 @@ function LoginPage() {
             </p>
             <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               <BadgeCheck className="h-3.5 w-3.5" />
-              Ver 2.1 — Demo Mode
+              {APP_VERSION} — Demo Mode
             </div>
           </div>
 
@@ -144,15 +152,19 @@ function LoginPage() {
                       id={`role-btn-${role}`}
                       onClick={() => setSelectedRole(role)}
                       className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition-all
-                        ${isActive ? roleBgActive[role] : 'border-transparent hover:bg-muted/50'}`}
+                        ${isActive ? roleBgActive[role] : "border-transparent hover:bg-muted/50"}`}
                     >
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all
-                        ${isActive ? roleIconActive[role] : roleIconInactive}`}>
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all
+                        ${isActive ? roleIconActive[role] : roleIconInactive}`}
+                      >
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold">{roleLabels[role]}</p>
-                        <p className="text-xs text-muted-foreground truncate">{roleDescriptions[role]}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {roleDescriptions[role]}
+                        </p>
                       </div>
                       {isActive && <ChevronRight className="h-4 w-4 shrink-0 text-primary" />}
                     </button>
@@ -162,12 +174,14 @@ function LoginPage() {
             </div>
 
             {/* Role info banner */}
-            <div className={`rounded-xl bg-gradient-to-r ${roleColors[selectedRole]} p-4 text-white transition-all`}>
+            <div
+              className={`rounded-xl bg-gradient-to-r ${roleColors[selectedRole]} p-4 text-white transition-all`}
+            >
               <div className="flex items-start gap-3">
                 <Info className="h-4 w-4 mt-0.5 shrink-0 opacity-80" />
                 <p className="text-xs leading-relaxed opacity-90">
-                  <span className="font-semibold">{roleLabels[selectedRole]}</span>
-                  {' '}— คุณจะเข้าสู่ Dashboard เฉพาะบทบาทนี้ และเห็นเมนูที่สอดคล้องกับสิทธิ์ที่กำหนด
+                  <span className="font-semibold">{roleLabels[selectedRole]}</span> — คุณจะเข้าสู่
+                  Dashboard เฉพาะบทบาทนี้ และเห็นเมนูที่สอดคล้องกับสิทธิ์ที่กำหนด
                 </p>
               </div>
             </div>
@@ -183,7 +197,7 @@ function LoginPage() {
           </div>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            CareGo Hospital Platform v2.1 — AI Care Follow-up System
+            CareGo Hospital Platform {APP_VERSION} — AI Care Follow-up System
           </p>
         </div>
       </div>
