@@ -1,14 +1,20 @@
 import handlerImport from '../dist/server/server.js';
 
-const handler = handlerImport.default || handlerImport;
+// Extract the fetch handler from the imported module
+// It could be default.fetch, or just fetch depending on the build output.
+const handlerObj = handlerImport.default || handlerImport;
+const handler = typeof handlerObj === 'function' ? handlerObj : handlerObj.fetch;
 
 export default async function (req, res) {
   try {
+    if (typeof handler !== 'function') {
+      throw new Error('Could not find fetch handler. Export keys: ' + Object.keys(handlerObj).join(', '));
+    }
+
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
     const url = new URL(req.url || '/', `${protocol}://${host}`);
 
-    // Flatten headers to string values
     const flattenedHeaders = {};
     for (const [key, value] of Object.entries(req.headers)) {
       if (Array.isArray(value)) {
