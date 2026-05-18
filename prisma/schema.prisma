@@ -20,6 +20,7 @@ model Customer {
   lineConnections LineConnection[]
   botnoiMappings  BotnoiMapping[]
   notifications   NotificationLog[]
+  automationJobs  AutomationJob[]
   auditLogs       AuditLog[]
 }
 
@@ -61,9 +62,11 @@ model LineConnection {
   customerId  String
   lineUserId  String?
   displayName String?
+  pictureUrl  String?
   token       String    @unique
   expiresAt   DateTime
   usedAt      DateTime?
+  linkedAt    DateTime?
   status      String    @default("pending")
   createdAt   DateTime  @default(now())
   customer    Customer  @relation(fields: [customerId], references: [id])
@@ -103,8 +106,56 @@ model NotificationLog {
   alertLevel String
   audioUrl   String?
   safeNote   String
+  deliveryStatus String   @default("pending")
+  lineMessageId  String?
+  sentAt     DateTime?
   createdAt  DateTime @default(now())
   customer   Customer @relation(fields: [customerId], references: [id])
+}
+
+model AutomationJob {
+  id             String   @id @default(cuid())
+  type           String
+  status         String   @default("queued")
+  customerId     String?
+  elderProfileId String?
+  scheduledAt    DateTime @default(now())
+  startedAt      DateTime?
+  finishedAt     DateTime?
+  attemptCount   Int      @default(0)
+  maxAttempts    Int      @default(3)
+  lastError      String?
+  payload        Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  customer       Customer? @relation(fields: [customerId], references: [id])
+
+  @@index([status, scheduledAt])
+  @@index([customerId])
+}
+
+model ApiClient {
+  id            String          @id @default(cuid())
+  name          String
+  clientType    String
+  secretHash    String
+  status        String          @default("active")
+  createdAt     DateTime        @default(now())
+  requestLogs   ApiRequestLog[]
+}
+
+model ApiRequestLog {
+  id          String    @id @default(cuid())
+  apiClientId String?
+  method      String
+  endpoint    String
+  statusCode  Int
+  requestId   String
+  createdAt   DateTime  @default(now())
+  apiClient   ApiClient? @relation(fields: [apiClientId], references: [id])
+
+  @@index([apiClientId, createdAt])
+  @@index([requestId])
 }
 
 model AuditLog {

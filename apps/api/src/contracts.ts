@@ -15,6 +15,26 @@ export type ApiResponse<T> = {
 
 export type SetupStatus = "waiting_line" | "waiting_botnoi" | "ready";
 export type AlertLevel = "info" | "watch" | "urgent";
+export type LineLinkStatus = "pending" | "linked" | "expired" | "used" | "failed";
+export type AutomationJobStatus =
+  | "queued"
+  | "running"
+  | "success"
+  | "failed"
+  | "retrying"
+  | "cancelled"
+  | "blocked";
+
+export type AutomationJobType =
+  | "line_link_expire_check"
+  | "botnoi_contact_sync"
+  | "call_schedule_create"
+  | "call_feedback_process"
+  | "summary_generate"
+  | "line_push_send"
+  | "weekly_report_send"
+  | "retry_failed_notification"
+  | "botnoi_setup_task";
 
 export type CustomerRecord = {
   id: string;
@@ -43,10 +63,12 @@ export type LineConnectionRecord = {
   customerId: string;
   lineUserId?: string;
   displayName?: string;
+  pictureUrl?: string;
   token: string;
   expiresAt: string;
   usedAt?: string;
-  status: "pending" | "linked" | "expired";
+  linkedAt?: string;
+  status: LineLinkStatus;
   createdAt: string;
 };
 
@@ -70,4 +92,21 @@ export type NotificationPayloadRecord = {
   audioUrl?: string;
   safeNote: string;
   createdAt: string;
+};
+
+export type AutomationJobRecord = {
+  id: string;
+  type: AutomationJobType;
+  status: AutomationJobStatus;
+  customerId?: string;
+  elderProfileId?: string;
+  scheduledAt: string;
+  startedAt?: string;
+  finishedAt?: string;
+  attemptCount: number;
+  maxAttempts: number;
+  lastError?: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
 };

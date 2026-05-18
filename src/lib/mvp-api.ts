@@ -41,11 +41,47 @@ export type ElderProfileRequest = {
 
 export type LineLink = {
   id: string;
+  linkId?: string;
   customerId: string;
   token: string;
   expiresAt: string;
-  status: "pending" | "linked" | "expired";
+  status: "pending" | "linked" | "expired" | "used" | "failed";
   liffUrl?: string;
+  pollIntervalMs?: number;
+};
+
+export type LineLinkStatus = {
+  linkId: string;
+  customerId: string;
+  status: "pending" | "linked" | "expired" | "used" | "failed";
+  expiresAt: string;
+  linkedAt?: string;
+  displayName?: string;
+  pictureUrl?: string;
+};
+
+export type AutomationJob = {
+  id: string;
+  type: string;
+  status: "queued" | "running" | "success" | "failed" | "retrying" | "cancelled" | "blocked";
+  customerId?: string;
+  elderProfileId?: string;
+  scheduledAt: string;
+  attemptCount: number;
+  maxAttempts: number;
+  lastError?: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ApiEndpointDoc = {
+  group: string;
+  method: string;
+  path: string;
+  auth: string;
+  description: string;
+  sampleBody?: Record<string, unknown>;
 };
 
 export type AdminCustomer = Customer & {
@@ -182,16 +218,71 @@ export const mvpApi = {
       return data;
     } catch {
       const token = uid("line");
+      const linkId = uid("line");
       const link: LineLink = {
-        id: uid("line"),
+        id: linkId,
+        linkId,
         customerId,
         token,
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
         status: "pending",
         liffUrl: `https://liff.line.me/VOICE_MED_LIFF_ID?token=${token}`,
+        pollIntervalMs: 2500,
       };
       writeJson(LINE_KEY, link);
       return link;
+    }
+  },
+
+  async getLineLinkStatus(linkId: string) {
+    try {
+      return await request<LineLinkStatus>(
+        `/api/line/link/status?linkId=${encodeURIComponent(linkId)}`,
+      );
+    } catch {
+      const stored = readJson<LineLink>(LINE_KEY);
+      if (!stored) throw new Error("No LINE link found");
+      return {
+        linkId: stored.linkId || stored.id,
+        customerId: stored.customerId,
+        status: Date.parse(stored.expiresAt) < Date.now() ? "expired" : stored.status,
+        expiresAt: stored.expiresAt,
+      } satisfies LineLinkStatus;
+    }
+  },
+
+  async getApiEndpoints() {
+    try {
+      return await request<ApiEndpointDoc[]>("/api/admin/api-endpoints");
+    } catch {
+      return [
+        {
+          group: "LINE QR Connect",
+          method: "POST",
+          path: "/api/line/link/start",
+          auth: "family-session",
+          description: "Create one-time LIFF URL for QR linking.",
+          sampleBody: { customerId: "cus_xxxxxxxx" },
+        },
+        {
+          group: "Automation",
+          method: "GET",
+          path: "/api/admin/automation/jobs",
+          auth: "admin",
+          description: "List automation jobs.",
+        },
+      ];
+    }
+  },
+
+  async getAutomationJobs() {
+    try {
+      const data = await request<{ jobs: AutomationJob[]; total: number }>(
+        "/api/admin/automation/jobs",
+      );
+      return data.jobs;
+    } catch {
+      return [] as AutomationJob[];
     }
   },
 

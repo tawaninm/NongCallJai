@@ -1,6 +1,48 @@
 # Patch Log
 
-Current version: v0.3.1
+Current version: v0.3.2
+
+## v0.3.2 - 2026-05-18
+
+Type:
+Feature / Backend / Automation / UI / Data
+
+Summary:
+
+- Added seamless LINE QR connection on `/line-connect` with generated QR, countdown, status polling, QR refresh, and automatic continuation after link success.
+- Added automation job contracts, in-memory job queue support, and admin endpoints for queue listing, retry, cancel, run-now, and health checks.
+- Added internal `/admin/api-manager` route to copy endpoint paths, sample POST bodies, and cURL examples for Web, LINE QR, Voicebot/Botnoi, and Automation teams.
+- Extended Prisma schema for future production persistence of automation jobs, API clients, API request logs, LINE profile metadata, and LINE notification delivery status.
+
+Updated Markdown files:
+
+- docs/API_CONTRACTS.md
+- docs/CHANGELOG.md
+- docs/PATCH_LOG.md
+
+Updated app files:
+
+- apps/api/src/contracts.ts
+- apps/api/src/server.ts
+- apps/api/src/store.ts
+- prisma/schema.prisma
+- src/components/AppSidebar.tsx
+- src/lib/mvp-api.ts
+- src/lib/patch-log.ts
+- src/routes/admin.api-manager.tsx
+- src/routes/line-connect.tsx
+- vite.config.ts
+- package.json
+- package-lock.json
+
+Verification:
+
+- Lint: passed with `npm run lint` and 9 existing fast-refresh warnings.
+- API TypeScript: passed with `npx tsc -p apps/api/tsconfig.json --noEmit`.
+- Build: passed with `npm run build`; Vite reported the existing large chunk warning.
+- API smoke: passed `GET /api/health`, `GET /api/admin/api-endpoints`, and `GET /api/admin/automation/health` on `http://localhost:8787`.
+- Browser QA: passed checkout -> onboarding -> LINE connect QR render, and `/admin/api-manager` endpoint/queue display at `http://127.0.0.1:5173`.
+- Dependency install: `npm install qrcode @types/qrcode express` completed; npm reported 9 moderate audit warnings.
 
 ## v0.3.1 - 2026-05-18
 

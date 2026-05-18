@@ -37,6 +37,7 @@ import { Route as PatientsIndexRouteImport } from './routes/patients.index'
 import { Route as PatientsPatientIdRouteImport } from './routes/patients.$patientId'
 import { Route as ElderProfilesElderIdRouteImport } from './routes/elder-profiles.$elderId'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminApiManagerRouteImport } from './routes/admin.api-manager'
 
 const WaitingSetupRoute = WaitingSetupRouteImport.update({
   id: '/waiting-setup',
@@ -178,6 +179,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/admin/customers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminApiManagerRoute = AdminApiManagerRouteImport.update({
+  id: '/admin/api-manager',
+  path: '/admin/api-manager',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/waiting-setup': typeof WaitingSetupRoute
+  '/admin/api-manager': typeof AdminApiManagerRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/elder-profiles/$elderId': typeof ElderProfilesElderIdRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/waiting-setup': typeof WaitingSetupRoute
+  '/admin/api-manager': typeof AdminApiManagerRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/elder-profiles/$elderId': typeof ElderProfilesElderIdRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/waiting-setup': typeof WaitingSetupRoute
+  '/admin/api-manager': typeof AdminApiManagerRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/elder-profiles/$elderId': typeof ElderProfilesElderIdRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
@@ -296,6 +305,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/waiting-setup'
+    | '/admin/api-manager'
     | '/admin/customers'
     | '/elder-profiles/$elderId'
     | '/patients/$patientId'
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/waiting-setup'
+    | '/admin/api-manager'
     | '/admin/customers'
     | '/elder-profiles/$elderId'
     | '/patients/$patientId'
@@ -355,6 +366,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/waiting-setup'
+    | '/admin/api-manager'
     | '/admin/customers'
     | '/elder-profiles/$elderId'
     | '/patients/$patientId'
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
   WaitingSetupRoute: typeof WaitingSetupRoute
+  AdminApiManagerRoute: typeof AdminApiManagerRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
 }
 
@@ -587,6 +600,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/api-manager': {
+      id: '/admin/api-manager'
+      path: '/admin/api-manager'
+      fullPath: '/admin/api-manager'
+      preLoaderRoute: typeof AdminApiManagerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -641,6 +661,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
   WaitingSetupRoute: WaitingSetupRoute,
+  AdminApiManagerRoute: AdminApiManagerRoute,
   AdminCustomersRoute: AdminCustomersRoute,
 }
 export const routeTree = rootRouteImport

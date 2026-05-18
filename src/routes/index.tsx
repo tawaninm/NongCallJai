@@ -5,7 +5,6 @@ import { MarketingPricingCards } from "@/components/marketing/MarketingPricingCa
 import { NongCallJaiMascot } from "@/components/NongCallJaiMascot";
 import { APP_VERSION } from "@/lib/patch-log";
 import { motion } from "framer-motion";
-import { motion } from "framer-motion";
 
 import type { MascotVariant } from "@/components/MascotIcon";
 

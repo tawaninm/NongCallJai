@@ -11,9 +11,41 @@ export type PatchLogEntry = {
   notes?: string[];
 };
 
-export const APP_VERSION = "v0.3.1";
+export const APP_VERSION = "v0.3.2";
 
 export const patchLogs: PatchLogEntry[] = [
+  {
+    version: "v0.3.2",
+    date: "2026-05-18",
+    category: "Feature",
+    title: "Seamless LINE QR and automation foundation",
+    summary:
+      "Added a real QR-based LINE linking flow with status polling and refresh, introduced MVP automation job contracts/endpoints for LINE and Botnoi handoff work, added an internal API Manager surface, and extended the Prisma schema for production automation persistence.",
+    markdownFiles: ["docs/API_CONTRACTS.md", "docs/CHANGELOG.md", "docs/PATCH_LOG.md"],
+    appFiles: [
+      "apps/api/src/contracts.ts",
+      "apps/api/src/server.ts",
+      "apps/api/src/store.ts",
+      "prisma/schema.prisma",
+      "src/components/AppSidebar.tsx",
+      "src/lib/mvp-api.ts",
+      "src/lib/patch-log.ts",
+      "src/routes/admin.api-manager.tsx",
+      "src/routes/line-connect.tsx",
+      "vite.config.ts",
+      "package.json",
+      "package-lock.json",
+    ],
+    status: "Completed",
+    buildResult:
+      "Passed: npm run lint (9 existing fast-refresh warnings), npx tsc -p apps/api/tsconfig.json --noEmit, npm run build, API smoke checks for /api/health, /api/admin/api-endpoints, and /api/admin/automation/health, plus browser QA for checkout -> onboarding -> LINE QR and /admin/api-manager. npm install qrcode @types/qrcode express completed with 9 moderate audit warnings.",
+    notes: [
+      "LINE QR now generates from the LIFF URL, polls link status, refreshes expired QR links, and auto-continues after successful linking.",
+      "Automation jobs that require external LINE/Botnoi credentials are intentionally blocked until credentials and the real Botnoi outbound/callback API are configured.",
+      "API Manager exposes copyable endpoint paths, sample POST bodies, cURL examples, and the development automation queue.",
+      "Family-facing web still does not expose call feedback, transcript, audio, diagnosis, prescriptions, or medication changes.",
+    ],
+  },
   {
     version: "v0.3.1",
     date: "2026-05-18",

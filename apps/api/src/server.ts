@@ -2,15 +2,21 @@ import express from "express";
 import { z } from "zod";
 import {
   db,
+  cancelAutomationJob,
   completeLineLink,
+  createAutomationJob,
   createCustomer,
   createElder,
   createLineLink,
   createNotification,
+  getLineLinkStatus,
+  listAutomationJobs,
+  retryAutomationJob,
+  runDueAutomationJobs,
   updateSetupStatus,
   upsertBotnoiMapping,
 } from "./store.js";
-import type { AlertLevel, ApiResponse } from "./contracts.js";
+import type { AlertLevel, ApiResponse, AutomationJobStatus } from "./contracts.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 8787);
@@ -47,6 +53,59 @@ const plans = [
   { id: "family", name: "Family", priceThb: 990, billingCycle: "monthly" },
 ];
 
+const apiEndpointCatalog = [
+  {
+    group: "LINE QR Connect",
+    method: "POST",
+    path: "/api/line/link/start",
+    auth: "family-session",
+    description: "Create a one-time LIFF URL for QR linking.",
+    sampleBody: { customerId: "cus_xxxxxxxx" },
+  },
+  {
+    group: "LINE QR Connect",
+    method: "GET",
+    path: "/api/line/link/status?linkId=line_xxxxxxxx",
+    auth: "family-session",
+    description: "Poll the seamless QR linking status.",
+  },
+  {
+    group: "LINE QR Connect",
+    method: "POST",
+    path: "/api/line/link/complete",
+    auth: "LIFF profile",
+    description: "Complete LINE linking from LIFF profile data.",
+    sampleBody: {
+      token: "one-time-token",
+      lineUserId: "Uxxxxxxxx",
+      displayName: "Caregiver",
+      pictureUrl: "https://profile.line-scdn.net/...",
+    },
+  },
+  {
+    group: "Voicebot/Botnoi",
+    method: "POST",
+    path: "/api/botnoi/call-feedback",
+    auth: "botnoi-webhook-secret",
+    description: "Receive call feedback and queue summary/LINE push automation.",
+    sampleBody: {
+      botnoiBotId: "botnoi-bot-001",
+      botnoiContactId: "contact-elder-001",
+      callStatus: "answered",
+      startedAt: "2026-05-18T09:00:00+07:00",
+      summary: "Family-safe summary text",
+      tags: ["needs_review"],
+    },
+  },
+  {
+    group: "Automation",
+    method: "GET",
+    path: "/api/admin/automation/jobs",
+    auth: "admin",
+    description: "List queued, blocked, failed, and completed automation jobs.",
+  },
+];
+
 const checkoutSchema = z.object({
   payerName: z.string().min(1),
   phone: z.string().min(6),
@@ -70,6 +129,7 @@ app.get("/api/health", (_req, res) => {
       status: "ok",
       service: "voicemed-api",
       storage: "memory",
+      automationJobs: db.automationJobs.length,
       time: new Date().toISOString(),
     }),
   );
@@ -120,7 +180,22 @@ app.post(
     if (!customer) throw new Error("Customer not found");
     const link = createLineLink(customer.id);
     const liffBaseUrl = process.env.LIFF_BASE_URL ?? "https://liff.line.me/VOICE_MED_LIFF_ID";
-    return { ...link, liffUrl: `${liffBaseUrl}?token=${encodeURIComponent(link.token)}` };
+    return {
+      ...link,
+      linkId: link.id,
+      liffUrl: `${liffBaseUrl}?token=${encodeURIComponent(link.token)}`,
+      pollIntervalMs: 2500,
+    };
+  }),
+);
+
+app.get(
+  "/api/line/link/status",
+  route((req) => {
+    const input = z.object({ linkId: z.string().min(1) }).parse(req.query);
+    const result = getLineLinkStatus(input.linkId);
+    if ("error" in result) throw new Error(`Line link ${result.error}`);
+    return result;
   }),
 );
 
@@ -132,6 +207,7 @@ app.post(
         token: z.string().min(1),
         lineUserId: z.string().min(1),
         displayName: z.string().optional(),
+        pictureUrl: z.string().url().optional(),
       })
       .parse(req.body);
     const result = completeLineLink(input);
@@ -149,6 +225,63 @@ app.get("/api/admin/customers", (_req, res) => {
   }));
   res.json(ok(rows, { total: rows.length }));
 });
+
+app.get("/api/admin/api-endpoints", (_req, res) => {
+  res.json(ok(apiEndpointCatalog, { total: apiEndpointCatalog.length }));
+});
+
+app.get(
+  "/api/admin/automation/jobs",
+  route((req) => {
+    const status = req.query.status
+      ? z
+          .enum(["queued", "running", "success", "failed", "retrying", "cancelled", "blocked"])
+          .parse(req.query.status)
+      : undefined;
+    const jobs = listAutomationJobs(status as AutomationJobStatus | undefined);
+    return { jobs, total: jobs.length };
+  }),
+);
+
+app.post(
+  "/api/admin/automation/jobs/:id/retry",
+  route((req) => {
+    const result = retryAutomationJob(String(req.params.id));
+    if ("error" in result) throw new Error(`Automation retry ${result.error}`);
+    return result;
+  }),
+);
+
+app.post(
+  "/api/admin/automation/jobs/:id/cancel",
+  route((req) => {
+    const result = cancelAutomationJob(String(req.params.id));
+    if ("error" in result) throw new Error(`Automation cancel ${result.error}`);
+    return result;
+  }),
+);
+
+app.post(
+  "/api/admin/automation/run-now",
+  route(() => runDueAutomationJobs()),
+);
+
+app.get(
+  "/api/admin/automation/health",
+  route(() => ({
+    storage: "memory",
+    queue: {
+      total: db.automationJobs.length,
+      queued: db.automationJobs.filter((job) => job.status === "queued").length,
+      blocked: db.automationJobs.filter((job) => job.status === "blocked").length,
+      failed: db.automationJobs.filter((job) => job.status === "failed").length,
+    },
+    integrations: {
+      line: process.env.LINE_CHANNEL_ACCESS_TOKEN ? "configured" : "needs_config",
+      botnoi: process.env.BOTNOI_WEBHOOK_SECRET ? "configured" : "needs_config",
+    },
+  })),
+);
 
 app.patch(
   "/api/admin/customers/:id/botnoi-mapping",
@@ -214,6 +347,24 @@ app.post(
       audioUrl: input.audioUrl,
       safeNote:
         "NongCallJai เป็นบริการถามไถ่และส่งสรุปให้ครอบครัว ไม่วินิจฉัยโรค ไม่สั่งยา และไม่ปรับยา หากอาการรุนแรงควรติดต่อบุคลากรทางการแพทย์หรือช่องทางฉุกเฉินที่เหมาะสม",
+    });
+    createAutomationJob({
+      type: "call_feedback_process",
+      customerId: mapping.customerId,
+      elderProfileId: mapping.elderProfileId,
+      scheduledAt: new Date().toISOString(),
+      payload: {
+        botnoiBotId: input.botnoiBotId,
+        botnoiContactId: input.botnoiContactId,
+        callStatus: input.callStatus,
+      },
+    });
+    createAutomationJob({
+      type: "summary_generate",
+      customerId: mapping.customerId,
+      elderProfileId: mapping.elderProfileId,
+      scheduledAt: new Date().toISOString(),
+      payload: { notificationId: notification.id, alertLevel },
     });
     return { notification };
   }),

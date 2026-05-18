@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.3.2 - 2026-05-18
+
+### Added
+
+- Added seamless LINE QR connect flow with generated QR code, link status polling, countdown, refresh, and automatic continuation after linking.
+- Added MVP automation job contracts and in-memory queue endpoints for LINE/Botnoi handoff tasks.
+- Added internal API Manager route for copying endpoint paths, sample request bodies, cURL examples, and reviewing automation jobs.
+- Added Prisma models/fields for automation jobs, API clients, API request logs, LINE profile metadata, and notification delivery tracking.
+- Added direct `express` runtime dependency for the MVP API server and QR generation packages for the LINE connect page.
+- Added Vite dev proxy for `/api` to the Express API on `localhost:8787`.
+
+### Notes
+
+- LINE and Botnoi external credentials are still required before real push/call automation can run.
+- Automation jobs that require LINE/Botnoi credentials are marked blocked in the development store until those integrations are configured.
+- Family-facing web still does not expose call feedback, transcript, or audio directly.
+
 ## v0.3.1 - 2026-05-18
 
 ### Changed

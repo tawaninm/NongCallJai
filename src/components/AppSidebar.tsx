@@ -12,6 +12,7 @@ const navItems: { title: string; url: string; mascot: MascotVariant }[] = [
   { title: "Service request", url: "/onboarding", mascot: "heart" },
   { title: "LINE connect", url: "/line-connect", mascot: "link" },
   { title: "Admin customers", url: "/admin/customers", mascot: "people" },
+  { title: "API manager", url: "/admin/api-manager", mascot: "settings" },
   { title: "Billing", url: "/billing", mascot: "money" },
   { title: "Settings", url: "/settings", mascot: "settings" },
   { title: "Patch log", url: "/patch-log", mascot: "log" },
