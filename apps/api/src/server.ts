@@ -1,6 +1,9 @@
+import crypto from "node:crypto";
 import express from "express";
 import { z } from "zod";
+import { getLiffBaseUrl, isConfiguredEnv, port, readConfiguredEnv } from "./config.js";
 import {
+  audit,
   db,
   cancelAutomationJob,
   completeLineLink,
@@ -19,9 +22,17 @@ import {
 import type { AlertLevel, ApiResponse, AutomationJobStatus } from "./contracts.js";
 
 const app = express();
-const port = Number(process.env.PORT ?? 8787);
 
-app.use(express.json({ limit: "1mb" }));
+type RawBodyRequest = express.Request & { rawBody?: Buffer };
+
+app.use(
+  express.json({
+    limit: "1mb",
+    verify: (req, _res, buf) => {
+      (req as RawBodyRequest).rawBody = Buffer.from(buf);
+    },
+  }),
+);
 
 function ok<T>(data: T, meta?: ApiResponse<T>["meta"]): ApiResponse<T> {
   return { ok: true, data, meta };
@@ -98,11 +109,57 @@ const apiEndpointCatalog = [
     },
   },
   {
+    group: "LINE Messaging API",
+    method: "POST",
+    path: "/api/line/webhook",
+    auth: "LINE x-line-signature",
+    description: "Receive LINE OA webhook events with signature verification.",
+    sampleHeaders: { "x-line-signature": "<computed-by-line>" },
+    sampleBody: {
+      destination: "Uxxxxxxxx",
+      events: [
+        {
+          type: "follow",
+          timestamp: 1779094800000,
+          source: { type: "user", userId: "Uxxxxxxxx" },
+        },
+      ],
+    },
+  },
+  {
+    group: "LINE Messaging API",
+    method: "POST",
+    path: "/api/line/push-test",
+    auth: "admin",
+    description: "Create a LINE notification payload and queue backend push delivery.",
+    sampleBody: {
+      customerId: "cus_xxxxxxxx",
+      elderName: "Khun Mae",
+      title: "NongCallJai call summary",
+      summary: "Family-safe summary text",
+      alertLevel: "info",
+    },
+  },
+  {
     group: "Automation",
     method: "GET",
     path: "/api/admin/automation/jobs",
     auth: "admin",
     description: "List queued, blocked, failed, and completed automation jobs.",
+  },
+  {
+    group: "Automation",
+    method: "POST",
+    path: "/api/admin/automation/run-now",
+    auth: "admin",
+    description: "Run all due automation jobs immediately in the development queue.",
+  },
+  {
+    group: "Automation",
+    method: "GET",
+    path: "/api/admin/automation/health",
+    auth: "admin",
+    description: "Check queue counts and LINE/Botnoi credential configuration status.",
   },
 ];
 
@@ -122,6 +179,85 @@ const onboardingSchema = z.object({
   note: z.string().optional(),
   consentGranted: z.boolean(),
 });
+
+const lineWebhookSchema = z.object({
+  destination: z.string().optional(),
+  events: z
+    .array(
+      z
+        .object({
+          type: z.string().min(1),
+          timestamp: z.number().optional(),
+          replyToken: z.string().optional(),
+          source: z
+            .object({
+              type: z.string().optional(),
+              userId: z.string().optional(),
+              groupId: z.string().optional(),
+              roomId: z.string().optional(),
+            })
+            .passthrough()
+            .optional(),
+        })
+        .passthrough(),
+    )
+    .default([]),
+});
+
+const linePushTestSchema = z.object({
+  customerId: z.string().min(1),
+  elderName: z.string().min(1),
+  title: z.string().min(1),
+  summary: z.string().min(1),
+  alertLevel: z.enum(["info", "watch", "urgent"]).default("info"),
+  audioUrl: z.string().url().optional(),
+  safeNote: z
+    .string()
+    .min(1)
+    .default(
+      "NongCallJai is a family check-in and summary service. It does not diagnose, prescribe, or change medication. If symptoms are severe, contact an appropriate medical professional or emergency channel.",
+    ),
+});
+
+function verifyLineSignature(req: RawBodyRequest) {
+  const channelSecret = readConfiguredEnv("LINE_CHANNEL_SECRET");
+  if (!channelSecret) {
+    return {
+      ok: false,
+      status: 503,
+      code: "LINE_SECRET_MISSING",
+      message: "LINE_CHANNEL_SECRET is not configured.",
+    };
+  }
+
+  const rawBody = req.rawBody;
+  const signature = String(req.headers["x-line-signature"] ?? "");
+  if (!rawBody || !signature) {
+    return {
+      ok: false,
+      status: 401,
+      code: "LINE_SIGNATURE_MISSING",
+      message: "Missing LINE webhook signature.",
+    };
+  }
+
+  const expectedSignature = crypto
+    .createHmac("sha256", channelSecret)
+    .update(rawBody)
+    .digest("base64");
+  const expected = Buffer.from(expectedSignature);
+  const received = Buffer.from(signature);
+  const matches = expected.length === received.length && crypto.timingSafeEqual(expected, received);
+
+  return matches
+    ? { ok: true as const }
+    : {
+        ok: false,
+        status: 401,
+        code: "LINE_SIGNATURE_INVALID",
+        message: "Invalid LINE webhook signature.",
+      };
+}
 
 app.get("/api/health", (_req, res) => {
   res.json(
@@ -179,12 +315,57 @@ app.post(
     const customer = db.customers.find((item) => item.id === input.customerId);
     if (!customer) throw new Error("Customer not found");
     const link = createLineLink(customer.id);
-    const liffBaseUrl = process.env.LIFF_BASE_URL ?? "https://liff.line.me/VOICE_MED_LIFF_ID";
+    const liffBaseUrl = getLiffBaseUrl();
     return {
       ...link,
       linkId: link.id,
       liffUrl: `${liffBaseUrl}?token=${encodeURIComponent(link.token)}`,
       pollIntervalMs: 2500,
+    };
+  }),
+);
+
+app.post("/api/line/webhook", (req: RawBodyRequest, res) => {
+  const signature = verifyLineSignature(req);
+  if (!signature.ok) {
+    res.status(signature.status).json(fail(signature.code, signature.message));
+    return;
+  }
+
+  try {
+    const input = lineWebhookSchema.parse(req.body);
+    const processed = input.events.map((event) => {
+      audit(`line.webhook.${event.type}`);
+      return {
+        type: event.type,
+        sourceType: event.source?.type,
+        hasUserId: Boolean(event.source?.userId),
+      };
+    });
+    res.json(ok({ received: input.events.length, processed }));
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res
+        .status(400)
+        .json(fail("VALIDATION_ERROR", "Invalid LINE webhook payload", error.flatten()));
+      return;
+    }
+    const message = error instanceof Error ? error.message : "Unexpected LINE webhook error";
+    res.status(500).json(fail("INTERNAL_ERROR", message));
+  }
+});
+
+app.post(
+  "/api/line/push-test",
+  route((req) => {
+    const input = linePushTestSchema.parse(req.body);
+    const customer = db.customers.find((item) => item.id === input.customerId);
+    if (!customer) throw new Error("Customer not found");
+    const notification = createNotification(input);
+    return {
+      notification,
+      queued: true,
+      nextStep: "Call POST /api/admin/automation/run-now or wait for the worker scheduler.",
     };
   }),
 );
@@ -277,8 +458,11 @@ app.get(
       failed: db.automationJobs.filter((job) => job.status === "failed").length,
     },
     integrations: {
-      line: process.env.LINE_CHANNEL_ACCESS_TOKEN ? "configured" : "needs_config",
-      botnoi: process.env.BOTNOI_WEBHOOK_SECRET ? "configured" : "needs_config",
+      line:
+        isConfiguredEnv("LINE_CHANNEL_ACCESS_TOKEN") && isConfiguredEnv("LINE_CHANNEL_SECRET")
+          ? "configured"
+          : "needs_config",
+      botnoi: isConfiguredEnv("BOTNOI_WEBHOOK_SECRET") ? "configured" : "needs_config",
     },
   })),
 );

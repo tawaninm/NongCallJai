@@ -15,6 +15,12 @@ export type ApiResponse<T> = {
 
 export type SetupStatus = "waiting_line" | "waiting_botnoi" | "ready";
 export type AlertLevel = "info" | "watch" | "urgent";
+export type NotificationDeliveryStatus =
+  | "pending"
+  | "retrying"
+  | "sent"
+  | "failed"
+  | "acknowledged";
 export type LineLinkStatus = "pending" | "linked" | "expired" | "used" | "failed";
 export type AutomationJobStatus =
   | "queued"
@@ -91,6 +97,9 @@ export type NotificationPayloadRecord = {
   alertLevel: AlertLevel;
   audioUrl?: string;
   safeNote: string;
+  deliveryStatus: NotificationDeliveryStatus;
+  lineMessageId?: string;
+  sentAt?: string;
   createdAt: string;
 };
 

@@ -123,10 +123,19 @@ function ApiManagerPage() {
 }
 
 function EndpointRow({ endpoint }: { endpoint: ApiEndpointDoc }) {
+  const headersText = endpoint.sampleHeaders ? JSON.stringify(endpoint.sampleHeaders, null, 2) : "";
   const bodyText = endpoint.sampleBody ? JSON.stringify(endpoint.sampleBody, null, 2) : "";
-  const curl = endpoint.sampleBody
-    ? `curl -X ${endpoint.method} "$BASE_URL${endpoint.path}" \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(endpoint.sampleBody)}'`
-    : `curl -X ${endpoint.method} "$BASE_URL${endpoint.path}"`;
+  const headerLines = [
+    endpoint.sampleBody ? `  -H "Content-Type: application/json"` : "",
+    ...Object.entries(endpoint.sampleHeaders ?? {}).map(
+      ([key, value]) => `  -H "${key}: ${value}"`,
+    ),
+  ].filter(Boolean);
+  const curlLines = [`curl -X ${endpoint.method} "$BASE_URL${endpoint.path}"`, ...headerLines];
+  if (endpoint.sampleBody) {
+    curlLines.push(`  -d '${JSON.stringify(endpoint.sampleBody)}'`);
+  }
+  const curl = curlLines.join(" \\\n");
 
   const copy = async (value: string, label: string) => {
     await navigator.clipboard.writeText(value);
@@ -163,6 +172,15 @@ function EndpointRow({ endpoint }: { endpoint: ApiEndpointDoc }) {
             >
               <Copy className="h-4 w-4" />
               Body
+            </button>
+          )}
+          {headersText && (
+            <button
+              onClick={() => copy(headersText, "Headers")}
+              className="vm-secondary-btn px-3 py-2"
+            >
+              <Copy className="h-4 w-4" />
+              Headers
             </button>
           )}
           <button onClick={() => copy(curl, "cURL")} className="vm-secondary-btn px-3 py-2">

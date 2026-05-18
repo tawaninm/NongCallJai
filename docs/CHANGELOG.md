@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.3.3 - 2026-05-18
+
+### Added
+
+- Added `.env.local`-aware API configuration loading without committing real LINE or Botnoi secrets.
+- Added LINE Messaging API webhook endpoint with `x-line-signature` verification.
+- Added backend LINE push queue execution for notification payloads using the Messaging API channel access token.
+- Added admin test endpoint to create a notification payload and queue backend LINE push delivery.
+- Added LIFF client completion so QR scans can read the LINE profile and complete `/api/line/link/complete`.
+- Added API Manager support for copyable sample headers, including LINE webhook signature headers.
+- Added environment requirements for LIFF, LINE Login, LINE Messaging API, OA add-friend URL, public API base URL, and Botnoi webhook secret.
+
+### Notes
+
+- Real credentials must stay in `.env.local` or deployment secrets, not tracked files.
+- The exposed development token should be rotated before production use.
+- LINE webhook URL must be a public HTTPS URL ending in `/api/line/webhook`.
+
 ## v0.3.2 - 2026-05-18
 
 ### Added

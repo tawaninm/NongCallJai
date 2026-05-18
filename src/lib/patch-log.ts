@@ -11,9 +11,44 @@ export type PatchLogEntry = {
   notes?: string[];
 };
 
-export const APP_VERSION = "v0.3.2";
+export const APP_VERSION = "v0.3.3";
 
 export const patchLogs: PatchLogEntry[] = [
+  {
+    version: "v0.3.3",
+    date: "2026-05-18",
+    category: "Feature",
+    title: "LINE webhook and backend push automation",
+    summary:
+      "Added .env.local-aware API configuration loading, LINE webhook signature verification, backend LINE push delivery for queued notifications, LIFF client completion, a push-test endpoint, and API Manager support for copyable webhook headers.",
+    markdownFiles: [
+      ".env.example",
+      "docs/API_CONTRACTS.md",
+      "docs/CHANGELOG.md",
+      "docs/PATCH_LOG.md",
+    ],
+    appFiles: [
+      "apps/api/src/config.ts",
+      "apps/api/src/contracts.ts",
+      "apps/api/src/server.ts",
+      "apps/api/src/store.ts",
+      "package.json",
+      "package-lock.json",
+      "src/lib/mvp-api.ts",
+      "src/lib/patch-log.ts",
+      "src/routes/admin.api-manager.tsx",
+      "src/routes/line-connect.tsx",
+    ],
+    status: "Completed",
+    buildResult:
+      "Passed: npm run lint (9 existing fast-refresh warnings), npx tsc -p apps/api/tsconfig.json --noEmit, npm run build, API smoke checks for /api/health, /api/admin/api-endpoints, LINE webhook 401 on missing signature, valid signed LINE webhook event, /api/line/push-test, /api/admin/automation/run-now, and browser QA for /admin/api-manager showing Headers, /api/line/webhook, /api/line/push-test, and the automation queue. npm install @line/liff completed with 9 moderate audit warnings. Targeted Prettier applied to changed code/docs; .env.example was skipped because Prettier has no inferred env parser.",
+    notes: [
+      "Real LINE and Botnoi values belong in .env.local or deployment secrets, never tracked files.",
+      "The Messaging API channel secret is required for webhook verification; the channel access token is required for backend push delivery.",
+      "The scanned QR LIFF page now uses the public VITE_LIFF_ID to read the LINE profile and complete one-time account linking.",
+      "The token shared during setup should be rotated before production because it was exposed in chat.",
+    ],
+  },
   {
     version: "v0.3.2",
     date: "2026-05-18",

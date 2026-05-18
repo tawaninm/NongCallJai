@@ -81,6 +81,7 @@ export type ApiEndpointDoc = {
   path: string;
   auth: string;
   description: string;
+  sampleHeaders?: Record<string, string>;
   sampleBody?: Record<string, unknown>;
 };
 
@@ -251,6 +252,23 @@ export const mvpApi = {
     }
   },
 
+  async completeLineLink(input: {
+    token: string;
+    lineUserId: string;
+    displayName?: string;
+    pictureUrl?: string;
+  }) {
+    const data = await request<{ lineConnection: LineLink; setupStatus: SetupStatus }>(
+      "/api/line/link/complete",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+    writeJson(LINE_KEY, data.lineConnection);
+    return data;
+  },
+
   async getApiEndpoints() {
     try {
       return await request<ApiEndpointDoc[]>("/api/admin/api-endpoints");
@@ -270,6 +288,14 @@ export const mvpApi = {
           path: "/api/admin/automation/jobs",
           auth: "admin",
           description: "List automation jobs.",
+        },
+        {
+          group: "LINE Messaging API",
+          method: "POST",
+          path: "/api/line/webhook",
+          auth: "LINE x-line-signature",
+          description: "Receive LINE OA webhook events with signature verification.",
+          sampleHeaders: { "x-line-signature": "<computed-by-line>" },
         },
       ];
     }

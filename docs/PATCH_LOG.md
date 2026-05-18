@@ -1,6 +1,51 @@
 # Patch Log
 
-Current version: v0.3.2
+Current version: v0.3.3
+
+## v0.3.3 - 2026-05-18
+
+Type:
+Backend / Automation / Integration / Docs
+
+Summary:
+
+- Added API config loading from `.env.local` with placeholder detection so local and deployed secrets stay outside tracked files.
+- Added LINE Messaging API webhook verification using `x-line-signature` and the Messaging API channel secret.
+- Added backend LINE push delivery for queued notification payloads through the LINE Messaging API channel access token.
+- Added LIFF client completion for scanned QR links so LINE profile data can complete one-time line linking automatically.
+- Added `/api/line/push-test` to queue a safe test notification for a linked customer.
+- Extended API Manager endpoint docs with copyable sample headers for webhook-style integrations.
+- Documented required environment values for LIFF, LINE Login, LINE Messaging API, public webhook URL, OA add-friend URL, and Botnoi webhook credentials.
+
+Updated Markdown files:
+
+- .env.example
+- docs/API_CONTRACTS.md
+- docs/CHANGELOG.md
+- docs/PATCH_LOG.md
+
+Updated app files:
+
+- apps/api/src/config.ts
+- apps/api/src/contracts.ts
+- apps/api/src/server.ts
+- apps/api/src/store.ts
+- package.json
+- package-lock.json
+- src/lib/mvp-api.ts
+- src/lib/patch-log.ts
+- src/routes/admin.api-manager.tsx
+- src/routes/line-connect.tsx
+
+Verification:
+
+- Lint: passed with `npm run lint` and 9 existing fast-refresh warnings.
+- API TypeScript: passed with `npx tsc -p apps/api/tsconfig.json --noEmit`.
+- Build: passed with `npm run build`; Vite reported the existing large chunk warning.
+- API smoke: passed `GET /api/health`, `GET /api/admin/api-endpoints`, LINE webhook missing-signature `401`, valid signed LINE webhook event, `/api/line/push-test`, and `/api/admin/automation/run-now`.
+- Browser QA: passed `/admin/api-manager` showing copyable Headers, `/api/line/webhook`, `/api/line/push-test`, and the automation queue on `http://127.0.0.1:5173`.
+- Dependency install: `npm install @line/liff` completed; npm reported 9 moderate audit warnings.
+- Formatting: targeted Prettier applied to changed code/docs; `.env.example` was skipped because Prettier has no inferred env parser in this setup.
 
 ## v0.3.2 - 2026-05-18
 

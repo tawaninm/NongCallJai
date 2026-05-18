@@ -19,6 +19,57 @@ function LineConnectPage() {
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [now, setNow] = useState(() => Date.now());
   const [loading, setLoading] = useState(false);
+  const [liffStatus, setLiffStatus] = useState<"idle" | "linking" | "success" | "error">("idle");
+  const [liffError, setLiffError] = useState("");
+  const liffToken = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("token") ?? "";
+  }, []);
+
+  useEffect(() => {
+    if (!liffToken || liffStatus !== "idle") return;
+    let cancelled = false;
+
+    const completeFromLiff = async () => {
+      setLiffStatus("linking");
+      setLiffError("");
+      try {
+        const liffId = import.meta.env.VITE_LIFF_ID || "2010122231-05nw3NWg";
+        const { default: liff } = await import("@line/liff");
+        await liff.init({ liffId });
+
+        if (!liff.isLoggedIn()) {
+          liff.login({ redirectUri: window.location.href });
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        await mvpApi.completeLineLink({
+          token: liffToken,
+          lineUserId: profile.userId,
+          displayName: profile.displayName,
+          pictureUrl: profile.pictureUrl,
+        });
+
+        if (cancelled) return;
+        setLiffStatus("success");
+        toast.success("LINE connected");
+        if (liff.isInClient()) {
+          window.setTimeout(() => liff.closeWindow(), 1200);
+        }
+      } catch (error) {
+        if (cancelled) return;
+        setLiffStatus("error");
+        setLiffError(error instanceof Error ? error.message : "LINE connection failed");
+      }
+    };
+
+    completeFromLiff();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [liffStatus, liffToken]);
 
   const startNewLink = useCallback(async () => {
     if (!customer) return;
@@ -101,6 +152,42 @@ function LineConnectPage() {
     const seconds = String(remainingSeconds % 60).padStart(2, "0");
     return `${minutes}:${seconds}`;
   }, [remainingSeconds]);
+
+  if (liffToken) {
+    return (
+      <main className="vm-public-shell flex min-h-screen items-center justify-center px-5">
+        <section className="vm-glass w-full max-w-md rounded-[2rem] p-8 text-center">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#06c755]/10">
+            {liffStatus === "success" ? (
+              <CheckCircle2 className="h-10 w-10 text-[#06c755]" />
+            ) : (
+              <Smartphone className="h-10 w-10 text-primary" />
+            )}
+          </div>
+          <h1 className="mt-6 text-3xl font-extrabold">
+            {liffStatus === "success"
+              ? "LINE connected"
+              : liffStatus === "error"
+                ? "LINE connection needs retry"
+                : "Connecting LINE"}
+          </h1>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">
+            {liffStatus === "success"
+              ? "You can return to the website. The QR page will continue automatically."
+              : liffStatus === "error"
+                ? liffError || "Please reopen the QR link and try again."
+                : "Please wait while NongCallJai links this LINE account for family summaries."}
+          </p>
+          {liffStatus === "error" && (
+            <button onClick={() => setLiffStatus("idle")} className="vm-primary-btn mt-6 w-full">
+              <RefreshCw className="h-4 w-4" />
+              Retry
+            </button>
+          )}
+        </section>
+      </main>
+    );
+  }
 
   if (!customer) {
     return (

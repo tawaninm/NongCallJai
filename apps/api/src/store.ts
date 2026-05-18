@@ -10,6 +10,7 @@ import type {
   NotificationPayloadRecord,
   SetupStatus,
 } from "./contracts.js";
+import { readConfiguredEnv } from "./config.js";
 
 const now = () => new Date().toISOString();
 const uid = (prefix: string) => `${prefix}_${crypto.randomUUID().slice(0, 8)}`;
@@ -198,9 +199,13 @@ export function updateSetupStatus(customerId: string): SetupStatus {
   return customer.setupStatus;
 }
 
-export function createNotification(input: Omit<NotificationPayloadRecord, "id" | "createdAt">) {
+export function createNotification(
+  input: Omit<NotificationPayloadRecord, "id" | "createdAt" | "deliveryStatus"> &
+    Partial<Pick<NotificationPayloadRecord, "deliveryStatus">>,
+) {
   const notification: NotificationPayloadRecord = {
     ...input,
+    deliveryStatus: input.deliveryStatus ?? "pending",
     id: uid("noti"),
     createdAt: now(),
   };
@@ -270,17 +275,17 @@ export function cancelAutomationJob(jobId: string) {
   return { job };
 }
 
-export function runDueAutomationJobs() {
+export async function runDueAutomationJobs() {
   const runnable = db.automationJobs.filter(
     (job) =>
       (job.status === "queued" || job.status === "retrying") &&
       Date.parse(job.scheduledAt) <= Date.now(),
   );
-  const results = runnable.map((job) => runAutomationJob(job));
+  const results = await Promise.all(runnable.map((job) => runAutomationJob(job)));
   return { total: results.length, results };
 }
 
-function runAutomationJob(job: AutomationJobRecord) {
+async function runAutomationJob(job: AutomationJobRecord) {
   job.status = "running";
   job.startedAt = now();
   job.attemptCount += 1;
@@ -300,7 +305,6 @@ function runAutomationJob(job: AutomationJobRecord) {
   if (
     job.type === "botnoi_contact_sync" ||
     job.type === "call_schedule_create" ||
-    job.type === "line_push_send" ||
     job.type === "weekly_report_send" ||
     job.type === "retry_failed_notification"
   ) {
@@ -309,8 +313,107 @@ function runAutomationJob(job: AutomationJobRecord) {
     return { jobId: job.id, status: job.status, lastError: job.lastError };
   }
 
+  if (job.type === "line_push_send") {
+    const token = readConfiguredEnv("LINE_CHANNEL_ACCESS_TOKEN");
+    if (!token) {
+      job.lastError = "LINE_CHANNEL_ACCESS_TOKEN is not configured yet.";
+      finishJob(job, "blocked");
+      return { jobId: job.id, status: job.status, lastError: job.lastError };
+    }
+
+    const notificationId = String(job.payload.notificationId ?? "");
+    const notification = db.notifications.find((item) => item.id === notificationId);
+    if (!notification) {
+      job.lastError = "Notification payload not found.";
+      finishJob(job, "failed");
+      return { jobId: job.id, status: job.status, lastError: job.lastError };
+    }
+
+    const targets = db.lineConnections.filter(
+      (line) => line.customerId === notification.customerId && line.status === "linked",
+    );
+    if (targets.length === 0) {
+      notification.deliveryStatus = "failed";
+      job.lastError = "No linked LINE user found for this customer.";
+      finishJob(job, "blocked");
+      return { jobId: job.id, status: job.status, lastError: job.lastError };
+    }
+
+    try {
+      const pushResults: Array<{
+        sentMessages?: Array<{ id?: string }>;
+        messageId?: string;
+      }> = [];
+      for (const target of targets) {
+        if (!target.lineUserId) continue;
+        const response = await fetch("https://api.line.me/v2/bot/message/push", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            to: target.lineUserId,
+            messages: [
+              {
+                type: "text",
+                text: formatLineNotification(notification),
+              },
+            ],
+          }),
+        });
+        const payload = (await response.json().catch(() => ({}))) as {
+          sentMessages?: Array<{ id?: string }>;
+          messageId?: string;
+        };
+        if (!response.ok) {
+          throw new Error(
+            `LINE push failed with ${response.status}: ${JSON.stringify(payload).slice(0, 240)}`,
+          );
+        }
+        pushResults.push(payload);
+      }
+      notification.deliveryStatus = "sent";
+      notification.sentAt = now();
+      notification.lineMessageId = String(
+        pushResults[0]?.sentMessages?.[0]?.id ?? pushResults[0]?.messageId ?? "",
+      );
+      finishJob(job, "success");
+      return { jobId: job.id, status: job.status, targetCount: targets.length };
+    } catch (error) {
+      job.lastError = error instanceof Error ? error.message : "LINE push failed";
+      if (job.attemptCount < job.maxAttempts) {
+        notification.deliveryStatus = "retrying";
+        job.status = "retrying";
+        job.scheduledAt = new Date(Date.now() + job.attemptCount * 60 * 1000).toISOString();
+        job.updatedAt = now();
+        audit(`automation.${job.type}.retrying`, job.customerId);
+        return { jobId: job.id, status: job.status, lastError: job.lastError };
+      }
+      notification.deliveryStatus = "failed";
+      finishJob(job, "failed");
+      return { jobId: job.id, status: job.status, lastError: job.lastError };
+    }
+  }
+
   finishJob(job, "success");
   return { jobId: job.id, status: job.status };
+}
+
+function formatLineNotification(notification: NotificationPayloadRecord) {
+  const safeAudio = notification.audioUrl ? `\n\nAudio: ${notification.audioUrl}` : "";
+  return [
+    notification.title,
+    `ผู้สูงอายุ: ${notification.elderName}`,
+    `ระดับแจ้งเตือน: ${notification.alertLevel}`,
+    "",
+    notification.summary,
+    "",
+    notification.safeNote,
+    safeAudio,
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function finishJob(job: AutomationJobRecord, status: AutomationJobStatus) {

@@ -1,6 +1,6 @@
 # VoiceMed API Contracts
 
-Current v0.3.0 implementation adds an MVP Express API under `/api` with predictable typed responses. The API uses an in-memory development store until PostgreSQL is configured through Prisma.
+Current v0.3.3 implementation adds an MVP Express API under `/api` with predictable typed responses. The API uses an in-memory development store until PostgreSQL is configured through Prisma.
 
 ```ts
 export type ApiResponse<T> = {
@@ -40,6 +40,8 @@ export type ApiResponse<T> = {
 - `POST /api/line/link/start`
 - `GET /api/line/link/status?linkId=...`
 - `POST /api/line/link/complete`
+- `POST /api/line/webhook`
+- `POST /api/line/push-test`
 - `GET /api/customer/setup-status`
 - `GET /api/admin/customers`
 - `PATCH /api/admin/customers/:id/botnoi-mapping`
@@ -126,6 +128,75 @@ Response:
 }
 ```
 
+## Environment Requirements
+
+Put real values in `.env.local` locally and deployment secrets in production. Do not commit real tokens.
+
+```env
+LIFF_ID="2010122231-05nw3NWg"
+VITE_LIFF_ID="2010122231-05nw3NWg"
+LIFF_BASE_URL="https://liff.line.me/2010122231-05nw3NWg"
+LINE_LOGIN_CHANNEL_ID="YOUR_LINE_LOGIN_CHANNEL_ID"
+LINE_LOGIN_CHANNEL_SECRET="YOUR_LINE_LOGIN_CHANNEL_SECRET"
+LINE_MESSAGING_CHANNEL_ID="YOUR_LINE_MESSAGING_CHANNEL_ID"
+LINE_CHANNEL_ACCESS_TOKEN="YOUR_LINE_CHANNEL_ACCESS_TOKEN"
+LINE_CHANNEL_SECRET="YOUR_MESSAGING_API_CHANNEL_SECRET"
+LINE_OA_ADD_FRIEND_URL="https://lin.ee/..."
+PUBLIC_API_BASE_URL="https://your-domain.com"
+BOTNOI_WEBHOOK_SECRET="YOUR_BOTNOI_WEBHOOK_SECRET"
+```
+
+`LINE_CHANNEL_SECRET` must come from the Messaging API / Official Account channel used by webhook delivery, not the LIFF Login channel.
+
+`VITE_LIFF_ID` is intentionally public client configuration for the LIFF SDK. It lets the scanned QR page call LINE Login/profile and complete `/api/line/link/complete`.
+
+## LINE Webhook Payload
+
+`POST /api/line/webhook`
+
+Required header:
+
+```http
+x-line-signature: <LINE computed signature>
+```
+
+Example body:
+
+```ts
+{
+  destination: "Uxxxxxxxx";
+  events: [
+    {
+      type: "follow";
+      timestamp: 1779094800000;
+      source: {
+        type: "user";
+        userId: "Uxxxxxxxx";
+      };
+    }
+  ];
+}
+```
+
+The backend verifies the raw JSON body with HMAC-SHA256 and returns `401` for missing or invalid signatures.
+
+## LINE Push Test Payload
+
+`POST /api/line/push-test`
+
+```ts
+{
+  customerId: "cus_xxxxxxxx";
+  elderName: "Khun Mae";
+  title: "NongCallJai call summary";
+  summary: "Family-safe summary text";
+  alertLevel: "info" | "watch" | "urgent";
+  audioUrl?: string;
+}
+```
+
+This creates a notification payload and queues a `line_push_send` automation job. Run `POST /api/admin/automation/run-now` in development to execute due jobs.
+
 ## Botnoi Feedback Payload
 
 ```ts
@@ -152,6 +223,9 @@ Response:
   alertLevel: "info" | "watch" | "urgent";
   audioUrl?: string;
   safeNote: string;
+  deliveryStatus: "pending" | "retrying" | "sent" | "failed" | "acknowledged";
+  lineMessageId?: string;
+  sentAt?: string;
 }
 ```
 
