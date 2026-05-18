@@ -1,305 +1,508 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  BellRing,
-  Bot,
-  CheckCircle2,
-  HeartHandshake,
-  MessageCircleHeart,
-  Mic2,
-  PhoneCall,
-  Play,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
-import { toast } from "sonner";
-import { useAuth } from "@/lib/auth-context";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, CheckCircle2, ChevronRight, Menu } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
+import { MarketingPricingCards } from "@/components/marketing/MarketingPricingCards";
+import { NongCallJaiMascot } from "@/components/NongCallJaiMascot";
 import { APP_VERSION } from "@/lib/patch-log";
-import { subscriptionPlans } from "@/lib/voicemed-data";
+
+import type { MascotVariant } from "@/components/MascotIcon";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-const useCases = [
+const careSteps: { number: string; title: string; text: string; mascot: MascotVariant }[] = [
   {
-    title: "ลูกหลานทำงานยุ่ง",
-    text: "ให้ VoiceMed โทรถามไถ่แทนทุกวัน และส่งสรุปกลับมาให้ดูง่าย ๆ",
+    number: "01",
+    title: "เลือกแพ็กเกจ",
+    text: "เริ่มจากแผนรายเดือนที่เหมาะกับจำนวนผู้สูงอายุและรูปแบบการแจ้งเตือน",
+    mascot: "check",
   },
   {
-    title: "ผู้สูงอายุอยู่คนเดียว",
-    text: "มีเพื่อนคุยด้วยเสียงที่ช่วยลดความเหงาและสังเกตสัญญาณที่ครอบครัวควรรู้",
+    number: "02",
+    title: "เก็บข้อมูลและความยินยอม",
+    text: "กรอกข้อมูลที่จำเป็น เช่น เบอร์โทร คำเรียก เวลาที่สะดวก และขอบเขตการดูแล",
+    mascot: "clipboard",
   },
-  { title: "เตือนกินยาแบบไม่กดดัน", text: "ถามอย่างอ่อนโยนว่ากินยาหรือยัง โดยไม่แนะนำปรับยาเอง" },
+  {
+    number: "03",
+    title: "NongCallJai โทรถามไถ่",
+    text: "เสียงที่อ่อนโยนโทรเช็กอินตามเวลาที่ตั้งไว้ และถามเฉพาะคำถามที่ผ่านการอนุมัติ",
+    mascot: "phone",
+  },
+  {
+    number: "04",
+    title: "ครอบครัวรับสรุปผ่าน LINE",
+    text: "ส่งสรุปและสิ่งที่ควรตรวจสอบต่อ โดยไม่แทนการตัดสินใจของแพทย์หรือผู้ดูแล",
+    mascot: "chat",
+  },
 ];
 
-const steps = [
-  "เลือกแพ็กเกจ",
-  "เพิ่มข้อมูลคุณตาคุณยาย",
-  "ตั้งเวลา Voice bot / Chatbot",
-  "รับสรุปและแจ้งเตือน",
+const trustItems: { title: string; text: string; mascot: MascotVariant }[] = [
+  {
+    title: "มีคนจริงช่วยตั้งค่า",
+    text: "ทีมช่วยประสาน Botnoi, LINE OA และข้อมูลเริ่มต้นก่อนเริ่มใช้งาน",
+    mascot: "heart",
+  },
+  {
+    title: "ออกแบบเพื่อครอบครัว",
+    text: "ผู้สูงอายุไม่จำเป็นต้องใช้แอป ครอบครัวรับสรุปผ่านช่องทางที่คุ้นเคย",
+    mascot: "people",
+  },
+  {
+    title: "ปลอดภัยต่อคำแนะนำสุขภาพ",
+    text: "ระบบถามไถ่และแจ้งให้ตรวจสอบต่อ ไม่วินิจฉัย ไม่สั่งยา และไม่ปรับยา",
+    mascot: "shield",
+  },
 ];
+
+const featureMoments: { label: string; title: string; text: string; mascot: MascotVariant }[] = [
+  {
+    label: "Call schedule",
+    title: "ตั้งช่วงเวลาโทรที่ไม่รบกวน",
+    text: "ระบุเวลาที่คุณตาคุณยายสะดวก เช่น หลังอาหารเช้าหรือช่วงเย็น",
+    mascot: "calendar",
+  },
+  {
+    label: "LINE summary",
+    title: "สรุปสั้น อ่านจบไว",
+    text: "ครอบครัวเห็นประเด็นสำคัญและสิ่งที่ควรติดตามต่อโดยไม่ต้องเข้าเว็บบ่อย",
+    mascot: "chat",
+  },
+  {
+    label: "Family alert",
+    title: "แจ้งเตือนเมื่อควรตรวจสอบ",
+    text: "หากมีคำตอบที่ควรให้คนดูแลดูต่อ ระบบส่งสัญญาณอย่างระมัดระวัง",
+    mascot: "warning",
+  },
+];
+
+const faqs = [
+  {
+    question: "ผู้สูงอายุต้องใช้ LINE ไหม",
+    answer:
+      "ไม่จำเป็น NongCallJai โทรผ่านเบอร์โทรศัพท์ ส่วน LINE ใช้สำหรับครอบครัวรับสรุปและแจ้งเตือน",
+  },
+  {
+    question: "ระบบให้คำแนะนำทางการแพทย์หรือไม่",
+    answer: "ไม่ให้คำวินิจฉัย ไม่สั่งยา และไม่แนะนำให้เริ่ม หยุด เพิ่ม หรือลดขนาดยา",
+  },
+  {
+    question: "หลังสมัครแล้วเกิดอะไรขึ้น",
+    answer:
+      "ระบบเก็บคำขอบริการ เชื่อม LINE และส่งต่อให้ทีมตั้งค่า Botnoi schedule/script ตามขอบเขต MVP",
+  },
+] as const;
 
 function LandingPage() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
-  const openDemo = () => {
-    login("owner");
-    toast.success("เข้าสู่เดโม VoiceMed Family Platform");
-    navigate({ to: "/dashboard" });
-  };
-
   return (
-    <main className="vm-public-shell">
-      <PublicNav onDemo={openDemo} />
-
-      <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-[1440px] items-center gap-10 px-5 py-12 md:px-10 lg:grid-cols-[1fr_0.9fr]">
-        <div className="space-y-8">
-          <div className="vm-pill">
-            <Sparkles className="h-3.5 w-3.5" />
-            VoiceMed {APP_VERSION} · คอลด้วยความรัก
-          </div>
-          <div className="space-y-5">
-            <h1 className="max-w-4xl text-5xl font-extrabold leading-[1.05] tracking-tight md:text-7xl">
-              ทำงานอย่างหมดห่วง เพราะ{" "}
-              <span className="vm-gradient-text">VoiceMed อยู่เคียงข้างคุณตาคุณยาย</span>
-            </h1>
-            <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-              AI Voice Companion ที่โทรถามไถ่ เตือนเรื่องสำคัญ รับฟังความรู้สึก
-              และส่งรายงานให้ครอบครัวดูแลผู้สูงอายุได้ง่ายขึ้น โดยไม่ต้องมีความรู้เทคนิค
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Link to="/pricing" className="vm-primary-btn">
-              เลือกแพ็กเกจ
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <button onClick={openDemo} className="vm-secondary-btn">
-              <Play className="h-4 w-4" />
-              เข้าดูเดโมแพลตฟอร์ม
-            </button>
-          </div>
-          <div className="grid max-w-2xl grid-cols-3 gap-3">
-            {[
-              ["14 วัน", "ทดลองใช้ฟรี"],
-              ["1 สาย/วัน", "เริ่มต้น Basic"],
-              ["Botnoi", "Voice + Chat"],
-            ].map(([value, label]) => (
-              <div key={label} className="vm-glass-soft rounded-2xl p-4">
-                <p className="text-2xl font-extrabold text-foreground">{value}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <HeroPhone />
-      </section>
-
-      <section className="mx-auto max-w-[1440px] px-5 py-10 md:px-10">
-        <div className="rounded-[2rem] vm-glass p-6 md:p-8">
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <span className="vm-pill">How it works</span>
-              <h2 className="mt-4 text-3xl font-extrabold md:text-5xl">
-                Flow การดูแลที่ออกแบบให้ครอบครัวใช้ได้ทันที
-              </h2>
-            </div>
-            <p className="max-w-md text-sm leading-6 text-muted-foreground">
-              ใช้ Voice bot เป็นหลัก และมี Chatbot ช่วยจัดการคำถาม แผนดูแล ประวัติ
-              และแจ้งเตือนผ่านแพลตฟอร์ม
-            </p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-4">
-            {steps.map((step, index) => (
-              <div key={step} className="rounded-3xl border bg-white/70 p-5">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-extrabold text-primary">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <p className="mt-5 text-lg font-bold">{step}</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {index === 0 && "เริ่มจากแพ็กเกจรายเดือนที่เหมาะกับครอบครัว"}
-                  {index === 1 && "เพิ่มเบอร์โทร ช่วงเวลา และข้อมูลที่ควรรู้แบบสั้น ๆ"}
-                  {index === 2 && "เลือกโทนเสียง คำถาม และรอบการโทร/แชท"}
-                  {index === 3 && "ดูสรุป log และ alert โดยไม่ต้องเปิดระบบซับซ้อน"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-[1440px] px-5 py-10 md:px-10">
-        <div className="grid gap-5 lg:grid-cols-3">
-          {useCases.map((item, index) => (
-            <article key={item.title} className="vm-glass-soft rounded-[2rem] p-6">
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-primary shadow-lg">
-                {[HeartHandshake, MessageCircleHeart, BellRing][index] &&
-                  (() => {
-                    const Icon = [HeartHandshake, MessageCircleHeart, BellRing][index];
-                    return <Icon className="h-7 w-7" />;
-                  })()}
-              </div>
-              <h3 className="text-xl font-extrabold">{item.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-[1440px] px-5 py-10 md:px-10">
-        <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="rounded-[2rem] vm-glass p-6 md:p-8">
-            <span className="vm-pill">Botnoi-powered</span>
-            <h2 className="mt-4 text-3xl font-extrabold">
-              จัดการ Voice bot และ Chatbot ได้จากแพลตฟอร์มเดียว
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-muted-foreground">
-              ตั้งเวลาโทร เลือกชุดคำถาม ปรับโทนสนทนา ดู log และแจ้งเตือนครอบครัวผ่าน dashboard
-              ที่ออกแบบให้คนทั่วไปเข้าใจง่าย
-            </p>
-            <div className="mt-6 grid gap-3">
-              {[
-                "Voice bot โทรถามไถ่",
-                "Chatbot สำหรับครอบครัว",
-                "รายงานสรุปและแจ้งเตือน",
-                "ขอบเขตความปลอดภัย ไม่วินิจฉัยหรือสั่งยา",
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
-                  <CheckCircle2 className="h-5 w-5 text-teal" />
-                  <span className="text-sm font-bold">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="rounded-[2rem] vm-glass p-6 md:p-8">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-extrabold">แพ็กเกจเริ่มต้น</h2>
-              <Link to="/pricing" className="text-sm font-bold text-primary hover:underline">
-                ดูทั้งหมด
-              </Link>
-            </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              {subscriptionPlans.map((plan) => (
-                <PricingMiniCard key={plan.id} plan={plan} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-[1440px] px-5 py-10 md:px-10">
-        <div className="rounded-[2rem] bg-slate-950 p-8 text-white md:p-12">
-          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <p className="text-sm font-bold text-fuchsia-200">Ready to start</p>
-              <h2 className="mt-3 text-4xl font-extrabold md:text-6xl">
-                ให้ VoiceMed ช่วยโทรด้วยความห่วงใย ตั้งแต่วันนี้
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/70">
-                MVP นี้เป็น prototype subscription flow พร้อม mock payment และหลังบ้านสำหรับจัดการ
-                Voice bot / Chatbot
-              </p>
-            </div>
-            <Link to="/checkout" className="vm-primary-btn bg-white">
-              ทดลองใช้ฟรี 14 วัน
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
+    <main className="vm-public-shell text-[#17221c]">
+      <TopNav />
+      <div className="vm-marketing-container">
+        <HeroSection />
+        <TrustStrip />
+        <CareFlowSection />
+        <FeaturePreviewSection />
+        <SafetySection />
+        <PricingPreviewSection />
+        <FaqSection />
+        <FooterCta />
+      </div>
     </main>
   );
 }
 
-function PublicNav({ onDemo }: { onDemo: () => void }) {
+function TopNav() {
   return (
-    <header className="sticky top-0 z-30 border-b border-white/50 bg-white/55 backdrop-blur-2xl">
-      <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-5 md:px-10">
+    <header className="sticky top-0 z-50 border-b border-[#dce6de] bg-[#fafbf8]/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-[72px] max-w-[1180px] items-center justify-between px-5 md:h-20 md:px-8">
         <Link to="/" className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl vm-orb" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eaf7ef] shadow-[0_12px_30px_rgba(35,65,48,0.10)]">
+            <MascotIcon variant="call" size="2.2rem" />
+          </div>
           <div>
-            <p className="text-lg font-extrabold vm-gradient-text">VoiceMed</p>
-            <p className="text-[11px] font-bold text-muted-foreground">AI Voice Companion</p>
+            <p className="text-lg font-extrabold leading-5 text-[#223a2e]">NongCallJai</p>
+            <p className="mt-1 text-[11px] font-bold text-[#52625a]">by VoiceMed</p>
           </div>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm font-bold text-muted-foreground md:flex">
-          <a href="#how">Flow</a>
-          <Link to="/pricing">Pricing</Link>
-          <Link to="/patch-log">Updates</Link>
+
+        <nav className="hidden items-center gap-7 text-sm font-bold text-[#52625a] lg:flex">
+          <a className="transition hover:text-[#223a2e]" href="#flow">
+            How it works
+          </a>
+          <a className="transition hover:text-[#223a2e]" href="#safety">
+            Safety
+          </a>
+          <a className="transition hover:text-[#223a2e]" href="#packages">
+            Packages
+          </a>
+          <a className="transition hover:text-[#223a2e]" href="#faq">
+            FAQ
+          </a>
         </nav>
+
         <div className="flex items-center gap-2">
-          <button onClick={onDemo} className="vm-secondary-btn hidden py-2 sm:inline-flex">
-            เดโม
-          </button>
-          <Link to="/checkout" className="vm-primary-btn py-2">
-            เริ่มต้น
+          <Link to="/pricing" className="vm-primary-btn hidden sm:inline-flex">
+            เริ่มใช้ฟรี 14 วัน
           </Link>
+          <details className="relative lg:hidden">
+            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-2xl border border-[#dce6de] bg-white text-[#223a2e]">
+              <Menu className="h-5 w-5" />
+            </summary>
+            <div className="absolute right-0 top-[52px] w-52 rounded-3xl border border-[#dce6de] bg-white p-3 shadow-[0_18px_50px_rgba(35,65,48,0.14)]">
+              {[
+                ["How it works", "#flow"],
+                ["Safety", "#safety"],
+                ["Packages", "#packages"],
+                ["FAQ", "#faq"],
+              ].map(([label, href]) => (
+                <a
+                  key={href}
+                  className="block rounded-2xl px-4 py-3 text-sm font-bold text-[#52625a] hover:bg-[#eaf7ef] hover:text-[#223a2e]"
+                  href={href}
+                >
+                  {label}
+                </a>
+              ))}
+            </div>
+          </details>
         </div>
       </div>
     </header>
   );
 }
 
-function HeroPhone() {
+function HeroSection() {
   return (
-    <div className="relative mx-auto w-full max-w-lg">
-      <div className="absolute -left-8 top-16 h-28 w-28 rounded-full bg-fuchsia-300/40 blur-3xl" />
-      <div className="absolute -right-8 bottom-20 h-32 w-32 rounded-full bg-blue-300/50 blur-3xl" />
-      <div className="vm-glass rounded-[2.3rem] p-5">
-        <div className="vm-phone mx-auto max-w-[310px] p-4">
-          <div className="mx-auto mb-4 h-6 w-28 rounded-full bg-slate-950" />
-          <div className="rounded-[1.7rem] bg-gradient-to-b from-blue-50 to-white p-5">
-            <div className="mx-auto mb-6 h-32 w-32 rounded-full vm-orb" />
-            <p className="text-sm font-bold text-primary">VoiceMed กำลังโทรหา</p>
-            <h3 className="mt-2 text-2xl font-extrabold">คุณตาชาย</h3>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              “กินข้าวแล้วหรือยังคะ วันนี้กินยาตามเวลาไหมคะ”
-            </p>
-            <div className="mt-6 grid grid-cols-3 gap-2">
-              {[Mic2, PhoneCall, Bot].map((Icon, index) => (
-                <div
-                  key={index}
-                  className="flex h-12 items-center justify-center rounded-2xl bg-white shadow-sm"
-                >
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-              ))}
-            </div>
-          </div>
+    <section className="grid gap-10 py-12 md:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(390px,0.82fr)] lg:items-center lg:py-24">
+      <div>
+        <span className="vm-pill">
+          <MascotIcon variant="star" size="1.1rem" />
+          NongCallJai {APP_VERSION} for family care
+        </span>
+        <h1 className="mt-6 max-w-3xl text-[40px] font-extrabold leading-[1.18] text-[#223a2e] sm:text-[48px] lg:text-[56px]">
+          โทรถามไถ่แทนคุณ แล้วส่งสรุปให้ครอบครัวทาง LINE
+        </h1>
+        <p className="mt-5 max-w-2xl text-base font-medium leading-8 text-[#52625a] md:text-lg md:leading-9">
+          AI Voice Companion สำหรับครอบครัวที่ดูแลผู้สูงอายุจากระยะไกล โทรเช็กอินอย่างอ่อนโยน
+          เก็บข้อมูลที่เล่าเอง และแจ้งให้ครอบครัวตรวจสอบต่อเมื่อควรใส่ใจ
+        </p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link to="/pricing" className="vm-primary-btn h-12 px-6">
+            เริ่มทดลองใช้ฟรี 14 วัน
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <a href="#flow" className="vm-secondary-btn h-12 px-6">
+            ดูวิธีทำงาน
+          </a>
         </div>
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-white/70 p-4">
-            <p className="text-2xl font-extrabold">09:00</p>
-            <p className="text-xs text-muted-foreground">โทรรอบถัดไป</p>
-          </div>
-          <div className="rounded-2xl bg-white/70 p-4">
-            <p className="text-2xl font-extrabold">อบอุ่น</p>
-            <p className="text-xs text-muted-foreground">โทนสนทนา</p>
-          </div>
+        <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
+          <MetricCard value="14 วัน" label="ทดลองใช้งาน" />
+          <MetricCard value="LINE" label="รับสรุปครอบครัว" />
+          <MetricCard value="Human setup" label="ทีมช่วยตั้งค่า" />
         </div>
       </div>
+
+      <HeroProductPreview />
+    </section>
+  );
+}
+
+function MetricCard({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-3xl border border-[#dce6de] bg-white/80 p-5 shadow-[0_18px_50px_rgba(35,65,48,0.08)] backdrop-blur-xl">
+      <p className="text-2xl font-extrabold text-[#223a2e]">{value}</p>
+      <p className="mt-2 text-xs font-bold uppercase tracking-[0.14em] text-[#52625a]">{label}</p>
     </div>
   );
 }
 
-function PricingMiniCard({ plan }: { plan: (typeof subscriptionPlans)[number] }) {
+function HeroProductPreview() {
+  return (
+    <aside className="relative mx-auto w-full max-w-[520px] rounded-[32px] border border-[#c8d8cc] bg-white/75 p-4 shadow-[0_28px_80px_rgba(35,65,48,0.14)] backdrop-blur-2xl sm:p-6">
+      <div className="rounded-[28px] bg-[#223a2e] p-4 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold text-[#b9e6c6]">Voice call in progress</p>
+            <h2 className="mt-2 text-2xl font-extrabold">คุณตาชัย</h2>
+          </div>
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#d8f3df]">
+            08:30
+          </span>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-[160px_1fr] sm:items-center">
+          <div className="rounded-3xl bg-[#eaf7ef] p-2">
+            <NongCallJaiMascot compact variant="call" />
+          </div>
+          <div className="space-y-3">
+            <PreviewBubble text="สวัสดีค่ะ วันนี้ทานข้าวเช้าแล้วหรือยังคะ" />
+            <PreviewBubble text="มีเรื่องไหนอยากฝากบอกลูกหลานไหมคะ" muted />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_0.74fr]">
+        <div className="rounded-3xl border border-[#dce6de] bg-white p-5">
+          <div className="flex items-center gap-2 text-sm font-extrabold text-[#223a2e]">
+            <MascotIcon variant="chat" size="1.4rem" />
+            LINE summary
+          </div>
+          <p className="mt-3 text-sm leading-7 text-[#52625a]">
+            ทานข้าวแล้ว อารมณ์ดี และฝากบอกว่าคิดถึงหลาน
+          </p>
+          <span className="mt-4 inline-flex rounded-full bg-[#eaf7ef] px-3 py-1 text-xs font-bold text-[#4fa66a]">
+            ส่งให้ครอบครัวแล้ว
+          </span>
+        </div>
+        <div className="rounded-3xl border border-[#f0d4c8] bg-[#fff7f3] p-5">
+          <div className="flex items-center gap-2 text-sm font-extrabold text-[#7b4c3f]">
+            <MascotIcon variant="shield" size="1.4rem" />
+            Consent
+          </div>
+          <p className="mt-3 text-sm leading-7 text-[#7b4c3f]">
+            โทรเฉพาะข้อมูลที่ได้รับอนุญาตและสรุปอย่างปลอดภัย
+          </p>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function PreviewBubble({ text, muted = false }: { text: string; muted?: boolean }) {
   return (
     <div
-      className={`rounded-3xl border bg-white/70 p-5 ${plan.highlighted ? "ring-2 ring-primary" : ""}`}
+      className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
+        muted ? "bg-white/10 text-white/70" : "bg-white text-[#223a2e]"
+      }`}
     >
-      <p className="text-sm font-extrabold">{plan.name}</p>
-      <p className="mt-3 text-3xl font-extrabold">฿{plan.priceThb}</p>
-      <p className="text-xs text-muted-foreground">/ เดือน</p>
-      <p className="mt-3 min-h-10 text-xs leading-5 text-muted-foreground">{plan.callQuotaLabel}</p>
-      <Link
-        to="/checkout"
-        search={{ plan: plan.id }}
-        className="mt-4 flex rounded-xl bg-primary px-4 py-2 text-center text-xs font-bold text-white"
-      >
-        เลือกแพ็กเกจ
-      </Link>
+      {text}
+    </div>
+  );
+}
+
+function TrustStrip() {
+  return (
+    <section className="grid gap-4 md:grid-cols-3">
+      {trustItems.map(({ mascot, title, text }) => (
+        <article key={title} className="vm-story-card">
+          <MascotIcon variant={mascot} size="2.5rem" />
+          <h2 className="mt-4 text-xl font-extrabold text-[#223a2e]">{title}</h2>
+          <p className="mt-2 text-sm leading-7 text-[#52625a]">{text}</p>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function CareFlowSection() {
+  return (
+    <section id="flow" className="vm-section">
+      <SectionHeader
+        eyebrow="How it works"
+        title="เส้นทางการดูแลที่เรียบง่าย ตั้งแต่สมัครจนถึงครอบครัวได้รับสรุป"
+        text="ใช้ care thread เดียวกันทั้งประสบการณ์: โทรถามไถ่ รับฟัง สรุป และส่งต่อให้ครอบครัวตรวจสอบ"
+      />
+      <div className="vm-care-thread mt-10 grid gap-4 lg:grid-cols-4">
+        {careSteps.map(({ mascot, number, title, text }) => (
+          <article key={number} className="vm-step-card">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-extrabold text-[#4fa66a]">{number}</span>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eaf7ef]">
+                <MascotIcon variant={mascot} size="2.5rem" />
+              </div>
+            </div>
+            <h3 className="mt-5 text-xl font-extrabold text-[#223a2e]">{title}</h3>
+            <p className="mt-3 text-sm leading-7 text-[#52625a]">{text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FeaturePreviewSection() {
+  return (
+    <section className="vm-section grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+      <div className="lg:sticky lg:top-28">
+        <SectionHeader
+          eyebrow="Product moments"
+          title="แสดงภาพจริงของงานที่ครอบครัวต้องทำ ไม่ใช่แค่การ์ดฟีเจอร์ทั่วไป"
+          text="หน้าเว็บควรเล่าให้เห็นว่า NongCallJai ช่วยลดช่องว่างระหว่างการโทรถามไถ่และการตัดสินใจของครอบครัวอย่างไร"
+        />
+        <Link to="/checkout" className="vm-secondary-btn mt-6">
+          สมัครและส่งข้อมูลตั้งค่า
+          <ChevronRight className="h-4 w-4" />
+        </Link>
+        {/* Mascot decoration under the section header */}
+        <div className="mt-6 flex justify-center lg:justify-start">
+          <NongCallJaiMascot compact variant="heart" />
+        </div>
+      </div>
+
+      <div className="grid gap-4">
+        {featureMoments.map(({ mascot, label, title, text }) => (
+          <article key={title} className="vm-feature-card">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-[0_12px_30px_rgba(35,65,48,0.08)]">
+              <MascotIcon variant={mascot} size="2.8rem" />
+            </div>
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#75b6c8]">
+                {label}
+              </p>
+              <h3 className="mt-2 text-2xl font-extrabold text-[#223a2e]">{title}</h3>
+              <p className="mt-2 text-sm leading-7 text-[#52625a]">{text}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SafetySection() {
+  return (
+    <section id="safety" className="vm-section">
+      <div className="grid gap-5 rounded-[32px] border border-[#c8d8cc] bg-white/80 p-5 shadow-[0_18px_50px_rgba(35,65,48,0.08)] backdrop-blur-xl md:grid-cols-2 md:p-8">
+        <div>
+          <span className="vm-pill">Trust and safety</span>
+          <h2 className="mt-5 text-3xl font-extrabold leading-tight text-[#223a2e] md:text-4xl">
+            ชัดเจนตั้งแต่หน้าแรกว่า NongCallJai ทำอะไร และไม่ทำอะไร
+          </h2>
+          <p className="mt-4 text-base leading-8 text-[#52625a]">
+            ความน่าเชื่อถือของบริการดูแลสุขภาพไม่ได้มาจากคำว่า AI
+            แต่จากขอบเขตที่ปลอดภัยและเข้าใจง่าย
+          </p>
+        </div>
+        <div className="grid gap-4">
+          <SafetyList
+            title="ทำได้"
+            items={[
+              "โทรถามคำถามเช็กอินที่ได้รับอนุมัติ",
+              "รับฟังและสรุปข้อมูลที่ผู้สูงอายุเล่าเอง",
+              "แจ้งครอบครัวเมื่อมีสิ่งที่ควรตรวจสอบต่อ",
+            ]}
+          />
+          <SafetyList
+            title="ไม่ทำ"
+            items={["ไม่วินิจฉัยโรค", "ไม่สั่งยา หรือปรับขนาดยา", "ไม่แทนแพทย์ พยาบาล หรือผู้ดูแล"]}
+            warning
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SafetyList({
+  title,
+  items,
+  warning = false,
+}: {
+  title: string;
+  items: string[];
+  warning?: boolean;
+}) {
+  return (
+    <div className={warning ? "vm-safety-card-warning" : "vm-safety-card"}>
+      <h3 className="text-lg font-extrabold text-[#223a2e]">{title}</h3>
+      <ul className="mt-3 space-y-2">
+        {items.map((item) => (
+          <li key={item} className="flex items-start gap-3 text-sm leading-7 text-[#52625a]">
+            <MascotIcon variant={warning ? "warning" : "check"} size="1.4rem" className="mt-0.5" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function PricingPreviewSection() {
+  return (
+    <section id="packages" className="vm-section">
+      <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <SectionHeader
+          eyebrow="Packages"
+          title="เลือกแพ็กเกจที่เหมาะกับครอบครัว"
+          text="ใช้ HTML pricing card ที่ responsive จริง แทนภาพ package banner เพื่อให้โหลดไว อ่านง่าย และปรับต่อได้"
+        />
+        <Link to="/pricing" className="vm-secondary-btn self-start md:self-auto">
+          ดูรายละเอียดทั้งหมด
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+      <MarketingPricingCards />
+    </section>
+  );
+}
+
+function FaqSection() {
+  return (
+    <section id="faq" className="vm-section">
+      <SectionHeader
+        eyebrow="FAQ"
+        title="คำถามที่ช่วยให้ครอบครัวตัดสินใจได้เร็วขึ้น"
+        text="ตอบข้อกังวลหลักก่อนพาผู้ใช้ไป checkout หรือ onboarding"
+      />
+      <div className="mt-8 grid gap-4 md:grid-cols-3">
+        {faqs.map((item) => (
+          <article key={item.question} className="vm-story-card">
+            <h3 className="text-lg font-extrabold text-[#223a2e]">{item.question}</h3>
+            <p className="mt-3 text-sm leading-7 text-[#52625a]">{item.answer}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FooterCta() {
+  return (
+    <footer className="mb-10 overflow-hidden rounded-[32px] bg-[#223a2e] p-6 text-white shadow-[0_28px_80px_rgba(35,65,48,0.18)] md:p-10">
+      <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-center">
+        <div>
+          <p className="text-sm font-bold text-[#b9e6c6]">เพราะความห่วงใยไม่ควรรอให้ว่างก่อน</p>
+          <h2 className="mt-4 max-w-2xl text-3xl font-extrabold leading-tight md:text-5xl">
+            ให้ NongCallJai ช่วยโทรแทนคุณในวันที่งานยุ่ง
+          </h2>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-white/70">
+            เริ่มจากแพ็กเกจทดลอง เก็บข้อมูลอย่างปลอดภัย แล้วให้ทีมช่วยเตรียม Botnoi และ LINE OA
+            สำหรับครอบครัวของคุณ
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Link to="/pricing" className="vm-primary-btn">
+              เริ่มทดลองใช้ฟรี 14 วัน
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/patch-log"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/20"
+            >
+              ดูอัปเดต
+            </Link>
+          </div>
+        </div>
+        {/* Mascot decorative illustration */}
+        <div className="hidden lg:flex lg:justify-center">
+          <img
+            src="/Mascot Icon Logo/2.png"
+            alt="NongCallJai waving"
+            className="h-72 w-auto object-contain drop-shadow-[0_20px_60px_rgba(0,0,0,0.35)] animate-[float_4s_ease-in-out_infinite]"
+          />
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function SectionHeader({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
+  return (
+    <div className="max-w-3xl">
+      <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#4fa66a]">{eyebrow}</p>
+      <h2 className="mt-3 text-3xl font-extrabold leading-tight text-[#223a2e] md:text-4xl">
+        {title}
+      </h2>
+      <p className="mt-4 text-base leading-8 text-[#52625a]">{text}</p>
     </div>
   );
 }

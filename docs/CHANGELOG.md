@@ -1,5 +1,49 @@
 # Changelog
 
+## v0.3.1 - 2026-05-18
+
+### Changed
+
+- Reworked the public landing page into a warm care companion startup website with a calmer split hero, product preview, care-thread flow, trust strip, safety panel, FAQ, and structured footer CTA.
+- Replaced the Figma-export package image carousel with responsive HTML pricing cards.
+- Reworked `/pricing` to use the same canonical pricing card component as the landing page.
+- Updated the visual system toward a premium healthcare/care palette with forest, mint, sky, peach, amber, and LINE green accents.
+- Recolored the Botnoi chat widget from purple to the VoiceMed green system.
+
+### Notes
+
+- Large Figma-export package and footer images are no longer required by the landing page.
+- The public copy keeps the healthcare AI safety boundary: NongCallJai asks, summarizes, and alerts family, but does not diagnose, prescribe, or adjust medication.
+
+## v0.3.0 — 2026-05-17
+
+### Added
+
+- Added NongCallJai/BOTNOI Figma-first green design direction.
+- Added MVP Express API skeleton under `apps/api`.
+- Added Prisma PostgreSQL schema for customer, subscription, elder profile, LINE connection, Botnoi mapping, call feedback, notifications, and audit logs.
+- Added LINE connect, waiting setup, and internal admin customer setup routes.
+- Added frontend API client with local fallback for mock checkout, service onboarding, LINE link, and admin customer queue.
+
+### Changed
+
+- Refocused family-facing web flow to landing, pricing, mock checkout, service onboarding, LINE connect, and waiting setup.
+- Updated public pages to use NongCallJai mascot-led green theme.
+- Reworked the landing page to match the provided Desktop.png structure with hero phone preview, step cards, reason cards, centered package banner, mascot quote area, and dark footer call-to-action.
+- Added Figma-exported Landing/Desktop package banners, footer banner, Mascot, and icon/sticker assets to the landing page after explicit approval to pull final imagery from Figma.
+- Reworked the landing page from a fixed 1440px design canvas into a real responsive website layout with a max-width landing container, section-based flow, Figma-inspired desktop positioning, and mobile fallbacks.
+- Clarified that Figma bitmap images are only pulled into the website when explicitly requested or when final web-ready exports are provided.
+- Removed demo language from the main purchase flow.
+- Hid call feedback/transcript/report concepts from the family-facing MVP web flow.
+- Updated agent rules and API docs for the new web/Botnoi/LINE responsibility split.
+
+### Notes
+
+- Mock checkout remains the default.
+- Botnoi schedule/calling and LINE OA push delivery are owned by separate teams.
+- The MVP API uses an in-memory development store until PostgreSQL is configured.
+- VoiceMed/NongCallJai does not diagnose, prescribe, or adjust medication.
+
 ## v0.2.0 — 2026-05-12
 
 ### Added

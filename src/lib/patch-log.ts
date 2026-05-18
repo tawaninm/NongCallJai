@@ -11,9 +11,89 @@ export type PatchLogEntry = {
   notes?: string[];
 };
 
-export const APP_VERSION = "v0.2.0";
+export const APP_VERSION = "v0.3.1";
 
 export const patchLogs: PatchLogEntry[] = [
+  {
+    version: "v0.3.1",
+    date: "2026-05-18",
+    category: "UI",
+    title: "Warm care companion marketing redesign",
+    summary:
+      "Reworked the public landing and pricing experience into a warmer, more premium care companion website. The update replaces the Figma-export package carousel and footer banner with responsive HTML sections, adds clearer trust and safety storytelling, introduces reusable marketing pricing cards, and aligns the Botnoi chat widget color with the VoiceMed green system.",
+    markdownFiles: ["DESIGN.md", "docs/CHANGELOG.md", "docs/PATCH_LOG.md"],
+    appFiles: [
+      "src/components/marketing/MarketingPricingCards.tsx",
+      "src/components/BotnoiChat.tsx",
+      "src/routes/index.tsx",
+      "src/routes/pricing.tsx",
+      "src/styles.css",
+      "src/lib/patch-log.ts",
+    ],
+    status: "Completed",
+    buildResult:
+      "Passed: npm run lint (9 existing fast-refresh warnings), npm run build, and browser QA for landing/pricing at http://127.0.0.1:8080. Desktop screenshots rendered; mobile DOM/overflow checks passed at 390px width.",
+    notes: [
+      "Landing now uses a split hero, product preview, care-thread flow, safety panel, FAQ, and structured footer CTA.",
+      "Pricing cards are canonical reusable UI and no longer depend on large package banner images.",
+      "The public visual system now adds forest, sky, peach, amber, and LINE green accents around the primary mint palette.",
+      "NongCallJai still does not diagnose, prescribe, or adjust medication.",
+    ],
+  },
+  {
+    version: "v0.3.0",
+    date: "2026-05-17",
+    category: "Feature",
+    title: "NongCallJai Figma-first MVP web and API foundation",
+    summary:
+      "Updated the VoiceMed MVP into a Figma-first NongCallJai flow focused on package sales, service onboarding, LINE connection, waiting setup, and internal Botnoi/LINE handoff. Added Express API skeleton, Prisma PostgreSQL schema, frontend API fallback client, and updated docs/design rules for the new scope.",
+    markdownFiles: [
+      "DESIGN.md",
+      ".agents/rules/00-project-brief.md",
+      ".agents/rules/02-frontend-ui-rules.md",
+      ".agents/rules/03-backend-api-rules.md",
+      "docs/API_CONTRACTS.md",
+      "docs/PROJECT_STRUCTURE.md",
+      "docs/CHANGELOG.md",
+      "docs/PATCH_LOG.md",
+    ],
+    appFiles: [
+      "apps/api/src/contracts.ts",
+      "apps/api/src/server.ts",
+      "apps/api/src/store.ts",
+      "apps/api/tsconfig.json",
+      "prisma/schema.prisma",
+      "src/lib/mvp-api.ts",
+      "src/components/AppSidebar.tsx",
+      "src/components/NongCallJaiMascot.tsx",
+      "src/routes/index.tsx",
+      "src/routes/pricing.tsx",
+      "src/routes/checkout.tsx",
+      "src/routes/onboarding.tsx",
+      "src/routes/line-connect.tsx",
+      "src/routes/waiting-setup.tsx",
+      "src/routes/admin.customers.tsx",
+      "src/routes/dashboard.tsx",
+      "src/routes/__root.tsx",
+      "src/styles.css",
+      "package.json",
+      "package-lock.json",
+    ],
+    status: "Completed",
+    buildResult:
+      "Passed: npm run lint (9 existing fast-refresh warnings), npm run build, npx tsc -p apps/api/tsconfig.json --noEmit, and GET http://localhost:8787/api/health. Targeted Prettier run formatted changed files; prisma/schema.prisma has no configured Prettier parser.",
+    notes: [
+      "Mock checkout remains the default.",
+      "The API uses an in-memory development store until PostgreSQL is configured.",
+      "Botnoi schedule/calling and LINE OA push delivery are owned by separate teams.",
+      "Family-facing web does not show call feedback, transcript, audio, call history, or reports in this MVP.",
+      "Landing page layout now follows the Figma Landing / Desktop direction with component/icon placement for hero phone preview, flow cards, package banner, mascot quote area, and footer CTA.",
+      "Figma-exported NongCallJai package banners, footer banner, Mascot, and icon/sticker assets are stored in public/assets/nongcalljai/figma and used on the landing page as real visual components.",
+      "Figma bitmap images are pulled into the website only when explicitly requested or when final exported assets are provided.",
+      "Landing page was refined from a fixed 1440px design canvas into a real responsive website layout with max-width sections and mobile fallbacks.",
+      "NongCallJai does not diagnose, prescribe, or adjust medication.",
+    ],
+  },
   {
     version: "v0.2.0",
     date: "2026-05-12",

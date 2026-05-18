@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -58,57 +59,69 @@
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.875rem;
   --font-family-sans:
     "Manrope", "Noto Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  /* VoiceMed v0.2.0: Liquid Glass + AI startup healthcare */
-  --vm-bg: #f7fbff;
-  --vm-surface: rgba(255, 255, 255, 0.72);
-  --vm-glass-border: rgba(120, 145, 255, 0.22);
-  --vm-primary: #2563eb;
-  --vm-violet: #7c3aed;
-  --vm-pink: #ec5cff;
-  --vm-teal: #00897b;
-  --vm-navy: #102033;
-  --vm-muted: #64748b;
+  /* VoiceMed v0.3.1: warm care companion system */
+  --vm-bg: #eaf7ef;
+  --vm-mint-50: #f4fbf6;
+  --vm-mint-100: #eaf7ef;
+  --vm-mint-200: #cfe9d7;
+  --vm-mint-300: #a8d8b6;
+  --vm-mint-400: #7cc58e;
+  --vm-mint-500: #4fa66a;
+  --vm-mint-600: #3f8e58;
+  --vm-mint-700: #337248;
+  --vm-mint-800: #2a5b3b;
+  --vm-mint-900: #223a2e;
+  --vm-mint-950: #17221c;
+  --vm-surface: rgba(250, 251, 248, 0.82);
+  --vm-glass-border: rgba(34, 58, 46, 0.12);
+  --vm-primary: #4fa66a;
+  --vm-violet: #75b6c8;
+  --vm-pink: #f2b8a2;
+  --vm-teal: #06c755;
+  --vm-navy: #223a2e;
+  --vm-muted: #52625a;
+  --vm-amber: #f5b85a;
 
-  --background: #f7fbff;
-  --foreground: #102033;
+  --background: #eaf7ef;
+  --foreground: #17221c;
   --card: rgba(255, 255, 255, 0.78);
-  --card-foreground: #102033;
+  --card-foreground: #17221c;
   --popover: #ffffff;
-  --popover-foreground: #071e27;
+  --popover-foreground: #17221c;
 
-  --primary: #2563eb;
+  --primary: #4fa66a;
   --primary-foreground: #ffffff;
-  --secondary: #eef6ff;
-  --secondary-foreground: #34506b;
-  --muted: #eef6ff;
-  --muted-foreground: #64748b;
-  --accent: #efe9ff;
-  --accent-foreground: #5b21b6;
+  --secondary: #eaf7ef;
+  --secondary-foreground: #223a2e;
+  --muted: #eef3ef;
+  --muted-foreground: #52625a;
+  --accent: #dce6de;
+  --accent-foreground: #223a2e;
   --destructive: #ba1a1a;
   --destructive-foreground: #ffffff;
-  --border: rgba(120, 145, 255, 0.22);
-  --input: #bfd4e7;
-  --ring: #7c3aed;
+  --border: rgba(34, 58, 46, 0.12);
+  --input: #dce6de;
+  --ring: #4fa66a;
 
-  --chart-1: #2563eb;
-  --chart-2: #7c3aed;
-  --chart-3: #ec5cff;
-  --chart-4: #00897b;
-  --chart-5: #f59e0b;
+  --chart-1: #4fa66a;
+  --chart-2: #75b6c8;
+  --chart-3: #f2b8a2;
+  --chart-4: #223a2e;
+  --chart-5: #f5b85a;
 
   /* Light sidebar matching reference screenshots */
   --sidebar: #ffffff;
   --sidebar-foreground: #3d4946;
-  --sidebar-primary: #2563eb;
+  --sidebar-primary: #4fa66a;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef6ff;
-  --sidebar-accent-foreground: #2563eb;
-  --sidebar-border: rgba(120, 145, 255, 0.2);
-  --sidebar-ring: #7c3aed;
+  --sidebar-accent: #eaf7ef;
+  --sidebar-accent-foreground: #4fa66a;
+  --sidebar-border: rgba(34, 58, 46, 0.12);
+  --sidebar-ring: #4fa66a;
 
   /* Risk colors from DESIGN.md */
   --risk-green: #4caf50;
@@ -130,12 +143,15 @@
   }
   body {
     background:
-      radial-gradient(circle at 12% 8%, rgba(236, 92, 255, 0.16), transparent 28rem),
-      radial-gradient(circle at 88% 10%, rgba(37, 99, 235, 0.14), transparent 30rem),
-      linear-gradient(180deg, #f7fbff 0%, #edf7ff 50%, #ffffff 100%);
+      radial-gradient(circle at 12% 8%, rgba(79, 166, 106, 0.16), transparent 28rem),
+      radial-gradient(circle at 88% 10%, rgba(117, 182, 200, 0.14), transparent 30rem),
+      linear-gradient(180deg, #fafbf8 0%, #eaf7ef 56%, #ffffff 100%);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    line-height: 1.55;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }
 
@@ -182,52 +198,114 @@
   .vm-page {
     @apply mx-auto w-full max-w-[1440px] space-y-6;
   }
+  .vm-marketing-container {
+    @apply mx-auto w-full max-w-[1180px] px-5 pb-12 sm:px-8;
+  }
+  .vm-section {
+    @apply py-14 md:py-20;
+  }
   .vm-public-shell {
     @apply min-h-screen overflow-hidden text-foreground;
     background:
-      radial-gradient(circle at 14% 8%, rgba(236, 92, 255, 0.2), transparent 24rem),
-      radial-gradient(circle at 80% 14%, rgba(37, 99, 235, 0.18), transparent 30rem),
-      linear-gradient(180deg, #f7fbff 0%, #edf7ff 54%, #ffffff 100%);
+      radial-gradient(circle at 14% 8%, rgba(207, 233, 215, 0.82), transparent 24rem),
+      radial-gradient(circle at 78% 16%, rgba(117, 182, 200, 0.18), transparent 30rem),
+      radial-gradient(circle at 50% 62%, rgba(242, 184, 162, 0.12), transparent 28rem),
+      linear-gradient(180deg, #fafbf8 0%, #eaf7ef 52%, #ffffff 100%);
   }
   .vm-glass {
-    @apply border bg-white/70 shadow-[0_24px_80px_rgba(37,99,235,0.12)] backdrop-blur-2xl;
+    @apply border bg-white/75 shadow-[0_18px_50px_rgba(35,65,48,0.10)] backdrop-blur-2xl;
     border-color: var(--vm-glass-border);
   }
   .vm-glass-soft {
-    @apply border bg-white/55 backdrop-blur-xl;
+    @apply border bg-white/60 shadow-[0_18px_50px_rgba(35,65,48,0.06)] backdrop-blur-xl;
     border-color: var(--vm-glass-border);
   }
   .vm-gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(100deg, var(--vm-primary), var(--vm-violet), var(--vm-pink));
+    background-image: linear-gradient(
+      100deg,
+      var(--vm-mint-950),
+      var(--vm-mint-700),
+      var(--vm-mint-500)
+    );
   }
   .vm-pill {
-    @apply inline-flex items-center gap-2 rounded-full border bg-white/70 px-3 py-1 text-xs font-bold text-primary backdrop-blur-xl;
+    @apply inline-flex items-center gap-2 rounded-full border bg-white/80 px-3 py-1 text-xs font-bold text-primary backdrop-blur-xl;
     border-color: var(--vm-glass-border);
   }
   .vm-primary-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:shadow-xl;
-    background-image: linear-gradient(100deg, var(--vm-primary), var(--vm-violet), var(--vm-pink));
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold text-white shadow-[0_16px_34px_rgba(79,166,106,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(79,166,106,0.28)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20;
+    background-image: linear-gradient(100deg, var(--vm-mint-600), var(--vm-mint-500), #7cc58e);
   }
   .vm-secondary-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border bg-white/70 px-5 py-3 text-sm font-bold text-primary backdrop-blur-xl transition hover:bg-white;
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border bg-white/80 px-5 py-3 text-sm font-bold text-primary backdrop-blur-xl transition hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20;
     border-color: var(--vm-glass-border);
   }
   .vm-orb {
     background:
       radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.92), transparent 12%),
-      radial-gradient(circle at 55% 45%, rgba(236, 92, 255, 0.92), transparent 28%),
-      radial-gradient(circle at 35% 65%, rgba(37, 99, 235, 0.88), transparent 35%),
-      radial-gradient(circle at 70% 70%, rgba(124, 58, 237, 0.76), transparent 34%);
+      radial-gradient(circle at 55% 45%, rgba(188, 225, 196, 0.92), transparent 28%),
+      radial-gradient(circle at 35% 65%, rgba(96, 165, 110, 0.88), transparent 35%),
+      radial-gradient(circle at 70% 70%, rgba(58, 89, 64, 0.76), transparent 34%);
     box-shadow:
       inset 0 0 40px rgba(255, 255, 255, 0.55),
-      0 22px 70px rgba(124, 58, 237, 0.25);
+      0 22px 70px rgba(58, 89, 64, 0.22);
+  }
+  .nj-soft-bg {
+    background:
+      radial-gradient(circle at 20% 15%, rgba(240, 249, 242, 0.98), transparent 22rem),
+      radial-gradient(circle at 86% 24%, rgba(140, 197, 152, 0.34), transparent 24rem),
+      linear-gradient(135deg, #f0f9f2 0%, #d6eddb 42%, #ffffff 100%);
+  }
+  .nj-dark-panel {
+    background:
+      radial-gradient(circle at 85% 20%, rgba(117, 182, 200, 0.16), transparent 18rem),
+      linear-gradient(135deg, #223a2e 0%, #17221c 100%);
   }
   .vm-phone {
     @apply rounded-[2.3rem] border-[10px] border-slate-950 bg-white shadow-[0_30px_90px_rgba(16,32,51,0.25)];
   }
   .vm-card-grid {
     @apply grid gap-4 md:grid-cols-2 xl:grid-cols-3;
+  }
+  .vm-story-card {
+    @apply rounded-[24px] border border-[#dce6de] bg-white/80 p-6 shadow-[0_18px_50px_rgba(35,65,48,0.08)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-[0_22px_58px_rgba(35,65,48,0.12)];
+  }
+  .vm-step-card {
+    @apply relative z-10 rounded-[24px] border border-[#dce6de] bg-white/90 p-6 shadow-[0_18px_50px_rgba(35,65,48,0.08)] backdrop-blur-xl;
+  }
+  .vm-care-thread {
+    @apply relative;
+  }
+  .vm-feature-card {
+    @apply grid gap-5 rounded-[28px] border border-[#dce6de] bg-[#fafbf8]/90 p-6 shadow-[0_18px_50px_rgba(35,65,48,0.08)] backdrop-blur-xl md:grid-cols-[auto_1fr] md:p-7;
+  }
+  .vm-safety-card {
+    @apply rounded-[24px] border border-[#dce6de] bg-[#fafbf8] p-5;
+  }
+  .vm-safety-card-warning {
+    @apply rounded-[24px] border border-[#f0d4c8] bg-[#fff7f3] p-5;
+  }
+  .vm-pricing-card {
+    @apply relative flex min-h-[560px] flex-col rounded-[28px] border border-[#dce6de] bg-white/90 p-6 shadow-[0_18px_50px_rgba(35,65,48,0.08)] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(35,65,48,0.13)];
+  }
+  .vm-pricing-card-featured {
+    @apply border-[#4fa66a] bg-[#fbfffc] ring-2 ring-[#4fa66a]/35;
+  }
+  .vm-recommend-badge {
+    @apply absolute right-5 top-5 rounded-full bg-[#223a2e] px-3 py-1 text-xs font-bold text-white;
+  }
+  @media (min-width: 1024px) {
+    .vm-care-thread::before {
+      position: absolute;
+      left: 4rem;
+      right: 4rem;
+      top: 3.1rem;
+      height: 2px;
+      content: "";
+      background: linear-gradient(90deg, transparent, #4fa66a, #75b6c8, transparent);
+      opacity: 0.45;
+    }
   }
   /* Dark vitals monitor card */
   .vitals-dark-card {
@@ -272,5 +350,16 @@
   }
   .timeline-dot-muted {
     @apply bg-muted-foreground/40;
+  }
+}
+
+/* Floating mascot animation */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
   }
 }

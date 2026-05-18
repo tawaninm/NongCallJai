@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, Download } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { toast } from "sonner";
 import {
   Bar,
@@ -59,7 +59,7 @@ function ReportsPage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <span className="vm-pill">
-              <BarChart3 className="h-3.5 w-3.5" />
+              <MascotIcon variant="report" size="1.1rem" />
               Family Reports
             </span>
             <h1 className="mt-5 text-4xl font-extrabold">รายงานภาพรวมการดูแล</h1>
@@ -68,7 +68,7 @@ function ReportsPage() {
             </p>
           </div>
           <button onClick={() => toast.info("สร้างรายงาน PDF แบบ mock")} className="vm-primary-btn">
-            <Download className="h-4 w-4" />
+            <MascotIcon variant="download" size="1.2rem" />
             Export report
           </button>
         </div>

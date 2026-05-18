@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Copy, Eye, HeartHandshake, Mic2, ShieldCheck } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { toast } from "sonner";
 import { voiceMedStore } from "@/lib/voicemed-store";
 
@@ -14,7 +14,7 @@ function CarePlansPage() {
     <div className="vm-page">
       <section className="rounded-[2rem] vm-glass p-6 md:p-8">
         <span className="vm-pill">
-          <HeartHandshake className="h-3.5 w-3.5" />
+          <MascotIcon variant="heart" size="1.1rem" />
           Care Conversation Templates
         </span>
         <h1 className="mt-5 text-4xl font-extrabold">แผนการดูแลและชุดคำถาม</h1>
@@ -34,8 +34,8 @@ function CarePlansPage() {
                   {template.description}
                 </p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Mic2 className="h-6 w-6" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                <MascotIcon variant="mic" size="2.5rem" />
               </div>
             </div>
 
@@ -55,7 +55,7 @@ function CarePlansPage() {
 
             <div className="mt-5 rounded-3xl bg-amber-50 p-4">
               <p className="flex items-center gap-2 text-sm font-bold text-amber-800">
-                <ShieldCheck className="h-4 w-4" />
+                <MascotIcon variant="shield" size="1.2rem" />
                 Safety boundary
               </p>
               <p className="mt-2 text-sm leading-6 text-amber-800/80">{template.safeBoundary}</p>
@@ -66,14 +66,14 @@ function CarePlansPage() {
                 onClick={() => toast.info("เปิด preview script")}
                 className="vm-secondary-btn flex-1 py-2"
               >
-                <Eye className="h-4 w-4" />
+                <MascotIcon variant="eye" size="1.2rem" />
                 Preview
               </button>
               <button
                 onClick={() => toast.success("คัดลอก template ใน mock แล้ว")}
                 className="vm-primary-btn flex-1 py-2"
               >
-                <Copy className="h-4 w-4" />
+                <MascotIcon variant="copy" size="1.2rem" />
                 Duplicate
               </button>
             </div>

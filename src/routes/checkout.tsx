@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, CreditCard, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
+import { mvpApi } from "@/lib/mvp-api";
 import { subscriptionPlans } from "@/lib/voicemed-data";
-import { voiceMedStore } from "@/lib/voicemed-store";
 
 export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
@@ -16,17 +17,26 @@ function CheckoutPage() {
   const [selectedPlan, setSelectedPlan] = useState("standard");
   const [payerName, setPayerName] = useState("คุณภัทร");
   const [phone, setPhone] = useState("089-111-2244");
+  const [email, setEmail] = useState("family@example.com");
+  const [loading, setLoading] = useState(false);
   const plan = subscriptionPlans.find((item) => item.id === selectedPlan) ?? subscriptionPlans[1];
 
-  const startTrial = () => {
-    if (!payerName.trim() || !phone.trim()) {
-      toast.error("กรุณากรอกชื่อและเบอร์โทรสำหรับเดโม");
+  const startTrial = async () => {
+    if (!payerName.trim() || !phone.trim() || !email.trim()) {
+      toast.error("กรุณากรอกชื่อ เบอร์โทร และอีเมลสำหรับสมัครบริการ");
       return;
     }
-    voiceMedStore.startTrial(selectedPlan);
-    login("owner");
-    toast.success("เริ่มทดลองใช้ฟรีแล้ว ไปตั้งค่า VoiceMed ต่อได้เลย");
-    navigate({ to: "/onboarding" });
+    setLoading(true);
+    try {
+      await mvpApi.completeMockCheckout({ payerName, phone, email, planId: selectedPlan });
+      login("owner");
+      toast.success("สมัครแพ็กเกจเรียบร้อยแล้ว ไปกรอกข้อมูลสำหรับตั้งค่าบริการต่อได้เลย");
+      navigate({ to: "/onboarding" });
+    } catch {
+      toast.error("ไม่สามารถสมัครบริการได้ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,32 +50,19 @@ function CheckoutPage() {
         <section className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
           <div className="rounded-[2rem] vm-glass p-6 md:p-8">
             <span className="vm-pill">
-              <Sparkles className="h-3.5 w-3.5" />
+              <MascotIcon variant="star" size="1.1rem" />
               Mock checkout
             </span>
-            <h1 className="mt-5 text-4xl font-extrabold">เริ่มทดลองใช้ VoiceMed</h1>
+            <h1 className="mt-5 text-4xl font-extrabold">สมัครบริการ NongCallJai</h1>
             <p className="mt-3 text-sm leading-7 text-muted-foreground">
-              หน้านี้เป็น prototype checkout ยังไม่มีการตัดเงินจริง ใช้เพื่อจำลอง flow ซื้อ
-              subscription และ onboarding
+              รอบ MVP นี้ยังไม่ตัดเงินจริง ระบบจะสร้าง customer record
+              และส่งต่อไปยังขั้นตอนเก็บข้อมูลผู้สูงอายุ เพื่อให้ทีมตั้งค่า Botnoi และ LINE OA ต่อ
             </p>
 
             <div className="mt-8 space-y-5">
-              <label className="block">
-                <span className="text-sm font-bold">ชื่อผู้จ่าย / เจ้าของบัญชี</span>
-                <input
-                  value={payerName}
-                  onChange={(event) => setPayerName(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
-                />
-              </label>
-              <label className="block">
-                <span className="text-sm font-bold">เบอร์โทร</span>
-                <input
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
-                />
-              </label>
+              <Field label="ชื่อผู้จ่าย / เจ้าของบัญชี" value={payerName} onChange={setPayerName} />
+              <Field label="เบอร์โทร" value={phone} onChange={setPhone} />
+              <Field label="อีเมล" value={email} onChange={setEmail} />
               <div>
                 <p className="text-sm font-bold">เลือกแพ็กเกจ</p>
                 <div className="mt-2 grid gap-3 md:grid-cols-3">
@@ -89,9 +86,9 @@ function CheckoutPage() {
             </div>
           </div>
 
-          <aside className="rounded-[2rem] bg-slate-950 p-6 text-white md:p-8">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
-              <CreditCard className="h-7 w-7" />
+          <aside className="rounded-[2rem] nj-dark-panel p-6 text-white md:p-8">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
+              <MascotIcon variant="money" size="3rem" />
             </div>
             <h2 className="mt-5 text-2xl font-extrabold">สรุปรายการ</h2>
             <div className="mt-6 space-y-4 rounded-3xl bg-white/10 p-5">
@@ -100,25 +97,47 @@ function CheckoutPage() {
                 <strong>฿{plan.priceThb}</strong>
               </div>
               <div className="flex items-center justify-between text-white/70">
-                <span>ทดลองใช้ฟรี 14 วัน</span>
-                <span>฿0</span>
+                <span>Mock checkout</span>
+                <span>฿0 วันนี้</span>
               </div>
               <div className="border-t border-white/20 pt-4">
                 <p className="text-sm text-white/70">
-                  หลังหมด trial ระบบ mock จะแสดงสถานะ subscription ตามแพ็กเกจ
+                  หลังสมัคร ระบบจะให้เชื่อม LINE OA และรอทีมตั้งค่า Botnoi Voicebot
                 </p>
               </div>
             </div>
-            <button onClick={startTrial} className="vm-primary-btn mt-6 w-full">
-              เริ่มทดลองใช้ฟรี
+            <button onClick={startTrial} disabled={loading} className="vm-primary-btn mt-6 w-full">
+              {loading ? "กำลังสมัคร..." : "สมัครและไปตั้งค่าบริการ"}
             </button>
             <div className="mt-5 flex items-start gap-3 text-xs leading-6 text-white/60">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
-              ไม่มีการเก็บเงินจริง ไม่มี API key และไม่มี payment gateway จริงใน MVP นี้
+              <MascotIcon variant="shield" size="1.2rem" className="mt-0.5" />
+              ไม่มีการเก็บ payment credential จริงใน MVP และไม่แสดง secret ของ LINE หรือ Botnoi
+              บนหน้าเว็บ
             </div>
           </aside>
         </section>
       </div>
     </main>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-sm font-bold">{label}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+      />
+    </label>
   );
 }

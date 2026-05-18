@@ -7,7 +7,8 @@ import {
   useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
-import { Bell, Menu, Search, Sparkles, UserRound } from "lucide-react";
+import { Menu } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Toaster } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -18,7 +19,15 @@ import { roleLabels } from "@/lib/voicemed-data";
 import { getAlertTone, getElderName, voiceMedStore } from "@/lib/voicemed-store";
 import appCss from "../styles.css?url";
 
-const PUBLIC_ROUTES = new Set(["/", "/pricing", "/checkout", "/patch-log"]);
+const PUBLIC_ROUTES = new Set([
+  "/",
+  "/pricing",
+  "/checkout",
+  "/onboarding",
+  "/line-connect",
+  "/waiting-setup",
+  "/patch-log",
+]);
 
 function NotFoundComponent() {
   return (
@@ -42,11 +51,11 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: `VoiceMed ${APP_VERSION} · AI Voice Companion` },
+      { title: `NongCallJai by VoiceMed ${APP_VERSION} · AI Voice Companion` },
       {
         name: "description",
         content:
-          "VoiceMed แพลตฟอร์ม AI Voice Companion สำหรับครอบครัวที่ต้องการดูแลผู้สูงอายุผ่าน Voice bot, Chatbot, reminder และรายงานสรุป",
+          "NongCallJai by VoiceMed บริการ AI Voice Companion สำหรับครอบครัวที่ต้องการให้ระบบโทรถามไถ่ผู้สูงอายุ และส่งสรุปผ่าน LINE OA อย่างปลอดภัย",
       },
     ],
     links: [
@@ -119,9 +128,11 @@ function AppLayout() {
               onClick={() => setMobileMenuOpen(true)}
               aria-label="เปิดเมนู"
             >
-              <Menu className="h-5 w-5" />
+              <MascotIcon variant="menu" size="1.5rem" />
             </button>
-            <div className="hidden h-10 w-10 items-center justify-center rounded-2xl vm-orb md:flex" />
+            <div className="hidden h-10 w-10 items-center justify-center rounded-2xl bg-[#eaf7ef] md:flex">
+              <MascotIcon variant="call" size="1.8rem" />
+            </div>
             <div className="min-w-0">
               <p className="truncate text-lg font-extrabold vm-gradient-text">
                 VoiceMed Family Platform
@@ -134,7 +145,7 @@ function AppLayout() {
 
           <div className="flex items-center gap-2 md:gap-3">
             <div className="hidden items-center gap-2 rounded-full border bg-white/70 px-3 py-2 backdrop-blur-xl lg:flex">
-              <Search className="h-4 w-4 text-muted-foreground" />
+              <MascotIcon variant="search" size="1.2rem" />
               <input
                 className="w-56 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                 placeholder="ค้นหาผู้สูงอายุ, log, alert..."
@@ -146,7 +157,7 @@ function AppLayout() {
                 className="relative rounded-xl border bg-white/70 p-2 backdrop-blur-xl hover:bg-white"
                 aria-label="เปิดการแจ้งเตือน"
               >
-                <Bell className="h-5 w-5 text-muted-foreground" />
+                <MascotIcon variant="bell" size="1.5rem" />
                 {unreadCount > 0 && (
                   <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
                     {unreadCount}
@@ -156,7 +167,7 @@ function AppLayout() {
               <VoiceMedNotifications open={notifOpen} onClose={() => setNotifOpen(false)} />
             </div>
             <div className="hidden items-center gap-2 rounded-full border bg-white/70 px-3 py-2 text-xs font-bold text-primary backdrop-blur-xl sm:flex">
-              <UserRound className="h-4 w-4" />
+              <MascotIcon variant="user" size="1.3rem" />
               <span>{userName || roleLabels[role]}</span>
             </div>
           </div>
@@ -188,7 +199,7 @@ function VoiceMedNotifications({ open, onClose }: { open: boolean; onClose: () =
             <p className="text-sm font-bold">การแจ้งเตือนครอบครัว</p>
             <p className="text-xs text-muted-foreground">สิ่งที่ VoiceMed แนะนำให้ครอบครัวดูต่อ</p>
           </div>
-          <Sparkles className="h-4 w-4 text-primary" />
+          <MascotIcon variant="star" size="1.2rem" />
         </div>
         <div className="max-h-80 divide-y overflow-auto">
           {alerts.length === 0 && (

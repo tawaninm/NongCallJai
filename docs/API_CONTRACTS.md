@@ -1,6 +1,6 @@
 # VoiceMed API Contracts
 
-Current v0.2.0 implementation is frontend mock data only. Future APIs should use `/api` and keep predictable typed responses.
+Current v0.3.0 implementation adds an MVP Express API under `/api` with predictable typed responses. The API uses an in-memory development store until PostgreSQL is configured through Prisma.
 
 ```ts
 export type ApiResponse<T> = {
@@ -21,35 +21,58 @@ export type ApiResponse<T> = {
 
 ## Core Resources
 
-- `FamilyAccount`
+- `Customer`
+- `Subscription`
 - `ElderProfile`
-- `SubscriptionPlan`
-- `BotConfig`
-- `CareTemplate`
-- `CallLog`
-- `FamilyAlert`
-- `DailySummary`
-- `BillingRecord`
+- `LineConnection`
+- `BotnoiMapping`
+- `CallFeedbackLog`
+- `NotificationLog`
 - `ConsentRecord`
+- `AuditLog`
 
 ## Future Endpoints
 
-- `POST /api/auth/demo-login`
-- `GET /api/family-account`
-- `GET /api/subscription-plans`
-- `POST /api/checkout/mock-start-trial`
-- `GET /api/elder-profiles`
-- `POST /api/elder-profiles`
-- `GET /api/elder-profiles/:id`
-- `GET /api/bot-configs`
-- `PATCH /api/bot-configs/:id`
-- `GET /api/care-templates`
-- `GET /api/call-logs`
-- `GET /api/alerts`
-- `PATCH /api/alerts/:id/review`
-- `PATCH /api/alerts/:id/resolve`
-- `GET /api/reports/summary`
-- `GET /api/billing`
+- `GET /api/health`
+- `GET /api/plans`
+- `POST /api/checkout/mock-complete`
+- `POST /api/onboarding/service-request`
+- `POST /api/line/link/start`
+- `POST /api/line/link/complete`
+- `GET /api/customer/setup-status`
+- `GET /api/admin/customers`
+- `PATCH /api/admin/customers/:id/botnoi-mapping`
+- `POST /api/botnoi/call-feedback`
+- `GET /api/line/notification-payloads/:id`
+
+## Botnoi Feedback Payload
+
+```ts
+{
+  botnoiBotId: string;
+  botnoiContactId: string;
+  callStatus: "answered" | "missed" | "failed";
+  startedAt: string;
+  summary?: string;
+  transcript?: string;
+  audioUrl?: string;
+  tags?: string[];
+}
+```
+
+## LINE Notification Payload
+
+```ts
+{
+  customerId: string;
+  elderName: string;
+  title: string;
+  summary: string;
+  alertLevel: "info" | "watch" | "urgent";
+  audioUrl?: string;
+  safeNote: string;
+}
+```
 
 ## Safety Rules
 
@@ -58,3 +81,4 @@ export type ApiResponse<T> = {
 - Do not return secrets or Botnoi API keys.
 - Do not return AI output as medical advice.
 - Log AI summaries and alert generation for traceability.
+- Family-facing web should not expose call feedback, transcript, or audio; those are packaged for LINE OA delivery.

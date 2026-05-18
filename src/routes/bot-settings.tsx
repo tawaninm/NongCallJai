@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Bot, CheckCircle2, MessageSquare, PhoneCall, SlidersHorizontal } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
+import type { MascotVariant } from "@/components/MascotIcon";
 import { useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import type { BotTone } from "@/lib/voicemed-data";
@@ -28,7 +29,7 @@ function BotSettingsPage() {
     <div className="vm-page">
       <section className="rounded-[2rem] vm-glass p-6 md:p-8">
         <span className="vm-pill">
-          <Bot className="h-3.5 w-3.5" />
+          <MascotIcon variant="bot" size="1.1rem" />
           Botnoi Voicebot + Chatbot
         </span>
         <h1 className="mt-5 text-4xl font-extrabold">จัดการ Voice bot และ Chatbot</h1>
@@ -40,19 +41,19 @@ function BotSettingsPage() {
 
       <section className="grid gap-5 lg:grid-cols-3">
         <IntegrationCard
-          icon={PhoneCall}
+          mascot="phone"
           title="Voice bot"
           status="Connected"
           detail="โทรถามไถ่และเตือนเรื่องสำคัญผ่าน Botnoi Voice"
         />
         <IntegrationCard
-          icon={MessageSquare}
+          mascot="chat"
           title="Chatbot / LINE"
           status="Connected"
           detail="รองรับข้อความจากครอบครัวและรายงานสรุป"
         />
         <IntegrationCard
-          icon={SlidersHorizontal}
+          mascot="slider"
           title="Safety layer"
           status="Active"
           detail="ไม่วินิจฉัย ไม่สั่งยา และแจ้งให้ครอบครัวตรวจสอบเมื่อจำเป็น"
@@ -133,12 +134,12 @@ function BotSettingsPage() {
 }
 
 function IntegrationCard({
-  icon: Icon,
+  mascot,
   title,
   status,
   detail,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  mascot: MascotVariant;
   title: string;
   status: string;
   detail: string;
@@ -146,9 +147,9 @@ function IntegrationCard({
   return (
     <div className="rounded-[2rem] vm-glass-soft p-5">
       <div className="flex items-center justify-between">
-        <Icon className="h-7 w-7 text-primary" />
+        <MascotIcon variant={mascot} size="2.5rem" />
         <span className="flex items-center gap-1 rounded-full bg-teal/10 px-2 py-1 text-xs font-bold text-teal">
-          <CheckCircle2 className="h-3.5 w-3.5" />
+          <MascotIcon variant="check" size="1rem" />
           {status}
         </span>
       </div>

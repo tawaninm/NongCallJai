@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WaitingSetupRouteImport } from './routes/waiting-setup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -17,6 +18,7 @@ import { Route as PatientsRouteImport } from './routes/patients'
 import { Route as PatchLogRouteImport } from './routes/patch-log'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MedicationRouteImport } from './routes/medication'
+import { Route as LineConnectRouteImport } from './routes/line-connect'
 import { Route as FamilyRouteImport } from './routes/family'
 import { Route as ElderProfilesRouteImport } from './routes/elder-profiles'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -34,7 +36,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatientsIndexRouteImport } from './routes/patients.index'
 import { Route as PatientsPatientIdRouteImport } from './routes/patients.$patientId'
 import { Route as ElderProfilesElderIdRouteImport } from './routes/elder-profiles.$elderId'
+import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 
+const WaitingSetupRoute = WaitingSetupRouteImport.update({
+  id: '/waiting-setup',
+  path: '/waiting-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -73,6 +81,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const MedicationRoute = MedicationRouteImport.update({
   id: '/medication',
   path: '/medication',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LineConnectRoute = LineConnectRouteImport.update({
+  id: '/line-connect',
+  path: '/line-connect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FamilyRoute = FamilyRouteImport.update({
@@ -160,6 +173,11 @@ const ElderProfilesElderIdRoute = ElderProfilesElderIdRouteImport.update({
   path: '/$elderId',
   getParentRoute: () => ElderProfilesRoute,
 } as any)
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/admin/customers',
+  path: '/admin/customers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -176,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/elder-profiles': typeof ElderProfilesRouteWithChildren
   '/family': typeof FamilyRoute
+  '/line-connect': typeof LineConnectRoute
   '/medication': typeof MedicationRoute
   '/onboarding': typeof OnboardingRoute
   '/patch-log': typeof PatchLogRoute
@@ -184,6 +203,8 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/waiting-setup': typeof WaitingSetupRoute
+  '/admin/customers': typeof AdminCustomersRoute
   '/elder-profiles/$elderId': typeof ElderProfilesElderIdRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
   '/patients/': typeof PatientsIndexRoute
@@ -203,6 +224,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/elder-profiles': typeof ElderProfilesRouteWithChildren
   '/family': typeof FamilyRoute
+  '/line-connect': typeof LineConnectRoute
   '/medication': typeof MedicationRoute
   '/onboarding': typeof OnboardingRoute
   '/patch-log': typeof PatchLogRoute
@@ -210,6 +232,8 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/waiting-setup': typeof WaitingSetupRoute
+  '/admin/customers': typeof AdminCustomersRoute
   '/elder-profiles/$elderId': typeof ElderProfilesElderIdRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
   '/patients': typeof PatientsIndexRoute
@@ -230,6 +254,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/elder-profiles': typeof ElderProfilesRouteWithChildren
   '/family': typeof FamilyRoute
+  '/line-connect': typeof LineConnectRoute
   '/medication': typeof MedicationRoute
   '/onboarding': typeof OnboardingRoute
   '/patch-log': typeof PatchLogRoute
@@ -238,6 +263,8 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/waiting-setup': typeof WaitingSetupRoute
+  '/admin/customers': typeof AdminCustomersRoute
   '/elder-profiles/$elderId': typeof ElderProfilesElderIdRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
   '/patients/': typeof PatientsIndexRoute
@@ -259,6 +286,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/elder-profiles'
     | '/family'
+    | '/line-connect'
     | '/medication'
     | '/onboarding'
     | '/patch-log'
@@ -267,6 +295,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/reports'
     | '/settings'
+    | '/waiting-setup'
+    | '/admin/customers'
     | '/elder-profiles/$elderId'
     | '/patients/$patientId'
     | '/patients/'
@@ -286,6 +316,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/elder-profiles'
     | '/family'
+    | '/line-connect'
     | '/medication'
     | '/onboarding'
     | '/patch-log'
@@ -293,6 +324,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/reports'
     | '/settings'
+    | '/waiting-setup'
+    | '/admin/customers'
     | '/elder-profiles/$elderId'
     | '/patients/$patientId'
     | '/patients'
@@ -312,6 +345,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/elder-profiles'
     | '/family'
+    | '/line-connect'
     | '/medication'
     | '/onboarding'
     | '/patch-log'
@@ -320,6 +354,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/reports'
     | '/settings'
+    | '/waiting-setup'
+    | '/admin/customers'
     | '/elder-profiles/$elderId'
     | '/patients/$patientId'
     | '/patients/'
@@ -340,6 +376,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ElderProfilesRoute: typeof ElderProfilesRouteWithChildren
   FamilyRoute: typeof FamilyRoute
+  LineConnectRoute: typeof LineConnectRoute
   MedicationRoute: typeof MedicationRoute
   OnboardingRoute: typeof OnboardingRoute
   PatchLogRoute: typeof PatchLogRoute
@@ -348,10 +385,19 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
+  WaitingSetupRoute: typeof WaitingSetupRoute
+  AdminCustomersRoute: typeof AdminCustomersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/waiting-setup': {
+      id: '/waiting-setup'
+      path: '/waiting-setup'
+      fullPath: '/waiting-setup'
+      preLoaderRoute: typeof WaitingSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -406,6 +452,13 @@ declare module '@tanstack/react-router' {
       path: '/medication'
       fullPath: '/medication'
       preLoaderRoute: typeof MedicationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/line-connect': {
+      id: '/line-connect'
+      path: '/line-connect'
+      fullPath: '/line-connect'
+      preLoaderRoute: typeof LineConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/family': {
@@ -527,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ElderProfilesElderIdRouteImport
       parentRoute: typeof ElderProfilesRoute
     }
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/admin/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -571,6 +631,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ElderProfilesRoute: ElderProfilesRouteWithChildren,
   FamilyRoute: FamilyRoute,
+  LineConnectRoute: LineConnectRoute,
   MedicationRoute: MedicationRoute,
   OnboardingRoute: OnboardingRoute,
   PatchLogRoute: PatchLogRoute,
@@ -579,6 +640,8 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
+  WaitingSetupRoute: WaitingSetupRoute,
+  AdminCustomersRoute: AdminCustomersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

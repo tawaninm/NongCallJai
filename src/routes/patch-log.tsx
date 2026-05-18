@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, CheckCircle2, FileText, GitBranch, Info } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { APP_VERSION, latestPatchLog, patchLogs } from "@/lib/patch-log";
 
 export const Route = createFileRoute("/patch-log")({
@@ -27,7 +28,7 @@ function PatchLogPage() {
 
         <section className="rounded-[2rem] vm-glass p-6 md:p-8">
           <span className="vm-pill">
-            <GitBranch className="h-3.5 w-3.5" />
+            <MascotIcon variant="log" size="1.1rem" />
             VoiceMed Release Notes
           </span>
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
@@ -72,7 +73,7 @@ function PatchLogPage() {
                   </div>
                   <div className="rounded-2xl bg-white/70 p-4">
                     <div className="flex items-start gap-3">
-                      <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <MascotIcon variant="star" size="1.2rem" className="mt-0.5" />
                       <div className="text-sm leading-6 text-muted-foreground">
                         <p>
                           <span className="font-bold text-foreground">Build/Lint:</span>{" "}
@@ -99,7 +100,7 @@ function InfoCard({ label, value }: { label: string; value: string }) {
     <div className="rounded-[2rem] vm-glass-soft p-5">
       <p className="text-xs font-bold text-muted-foreground">{label}</p>
       <p className="mt-2 font-extrabold">{value}</p>
-      <CheckCircle2 className="mt-4 h-5 w-5 text-teal" />
+      <MascotIcon variant="check" size="1.5rem" className="mt-4" />
     </div>
   );
 }
@@ -108,7 +109,7 @@ function FileList({ title, files }: { title: string; files: string[] }) {
   return (
     <div className="rounded-2xl border bg-white/70 p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-bold">
-        <FileText className="h-4 w-4 text-primary" />
+        <MascotIcon variant="file" size="1.2rem" />
         {title}
       </div>
       <ul className="max-h-72 space-y-1 overflow-auto pr-1 text-xs leading-5 text-muted-foreground">

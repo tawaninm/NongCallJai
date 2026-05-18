@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MessageCircleHeart, PhoneCall } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { useState, useSyncExternalStore } from "react";
 import { getElderName, voiceMedStore } from "@/lib/voicemed-store";
 
@@ -20,7 +20,7 @@ function CallHistoryPage() {
     <div className="vm-page">
       <section className="rounded-[2rem] vm-glass p-6 md:p-8">
         <span className="vm-pill">
-          <MessageCircleHeart className="h-3.5 w-3.5" />
+          <MascotIcon variant="chat" size="1.1rem" />
           Call / Chat History
         </span>
         <h1 className="mt-5 text-4xl font-extrabold">ประวัติการโทรและแชท</h1>
@@ -69,7 +69,7 @@ function CallHistoryPage() {
                   {selected.mood ?? "-"}
                 </p>
               </div>
-              <PhoneCall className="h-7 w-7 text-primary" />
+              <MascotIcon variant="phone" size="2rem" />
             </div>
 
             <div className="mt-5 rounded-3xl bg-white/70 p-5">

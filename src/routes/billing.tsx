@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CreditCard, Sparkles } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { subscriptionPlans } from "@/lib/voicemed-data";
@@ -25,7 +25,7 @@ function BillingPage() {
       <section className="grid gap-6 lg:grid-cols-[1fr_0.75fr]">
         <div className="rounded-[2rem] vm-glass p-6 md:p-8">
           <span className="vm-pill">
-            <CreditCard className="h-3.5 w-3.5" />
+            <MascotIcon variant="money" size="1.1rem" />
             Billing
           </span>
           <h1 className="mt-5 text-4xl font-extrabold">Subscription และการชำระเงิน</h1>
@@ -55,7 +55,7 @@ function BillingPage() {
                 <p className="text-2xl font-extrabold">{plan.name}</p>
                 <p className="mt-2 text-4xl font-extrabold">฿{plan.priceThb}</p>
               </div>
-              {plan.id === account.planId && <Sparkles className="h-6 w-6 text-primary" />}
+              {plan.id === account.planId && <MascotIcon variant="star" size="1.8rem" />}
             </div>
             <p className="mt-3 min-h-12 text-sm leading-6 text-muted-foreground">
               {plan.callQuotaLabel}

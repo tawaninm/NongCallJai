@@ -1,6 +1,6 @@
 # Project Structure
 
-Current repository structure remains a single Vite/TanStack/React app.
+Current repository structure is a Vite/TanStack/React app with an MVP Express API added under `apps/api`.
 
 ```txt
 src/
@@ -29,8 +29,20 @@ src/
     billing.tsx
     settings.tsx
     patch-log.tsx
+    line-connect.tsx
+    waiting-setup.tsx
+    admin.customers.tsx
+apps/
+  api/
+    src/
+      contracts.ts
+      server.ts
+      store.ts
+    tsconfig.json
+prisma/
+  schema.prisma
 ```
 
 Compatibility routes exist for old CareGo paths and should guide users to VoiceMed pages.
 
-Future backend/monorepo work may introduce `apps/api`, `packages/shared`, and Prisma, but do not migrate architecture in the current prototype unless requested.
+The MVP API uses Express routes under `/api`, Zod validation, and an in-memory development store. `prisma/schema.prisma` defines the intended PostgreSQL data model for production database work.

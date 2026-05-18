@@ -1,13 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  Bell,
-  Bot,
-  FileText,
-  HeartHandshake,
-  PhoneCall,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
+import type { MascotVariant } from "@/components/MascotIcon";
 import { voiceMedStore, getAlertTone } from "@/lib/voicemed-store";
 
 export const Route = createFileRoute("/elder-profiles/$elderId")({
@@ -68,14 +62,14 @@ function ElderProfileDetailPage() {
 
       <section className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
         <div className="space-y-6">
-          <Panel title="ข้อมูลดูแล" icon={HeartHandshake}>
+          <Panel title="ข้อมูลดูแล" mascot="heart">
             <p className="text-sm leading-7 text-muted-foreground">{elder.healthNotes}</p>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <InfoBox label="ที่อยู่/สถานะ" value={elder.livingSituation} />
               <InfoBox label="เวลาที่โทร" value={elder.preferredCallTime ?? "-"} />
             </div>
           </Panel>
-          <Panel title="Bot configuration" icon={Bot}>
+          <Panel title="Bot configuration" mascot="bot">
             <div className="grid gap-3">
               <InfoBox label="สถานะ" value={bot?.status ?? "draft"} />
               <InfoBox label="ช่องทาง" value={bot?.channel ?? "voice"} />
@@ -88,7 +82,7 @@ function ElderProfileDetailPage() {
         </div>
 
         <div className="space-y-6">
-          <Panel title="แผนดูแลที่เปิดใช้" icon={ShieldCheck}>
+          <Panel title="แผนดูแลที่เปิดใช้" mascot="shield">
             <div className="grid gap-3 md:grid-cols-2">
               {(bot?.enabledCarePlans ?? []).map((planId) => {
                 const plan = templates.find((template) => template.id === planId);
@@ -104,7 +98,7 @@ function ElderProfileDetailPage() {
             </div>
           </Panel>
 
-          <Panel title="Call / Chat logs ล่าสุด" icon={PhoneCall}>
+          <Panel title="Call / Chat logs ล่าสุด" mascot="phone">
             <div className="space-y-3">
               {calls.map((call) => (
                 <div key={call.id} className="rounded-2xl border bg-white/70 p-4">
@@ -122,7 +116,7 @@ function ElderProfileDetailPage() {
             </div>
           </Panel>
 
-          <Panel title="Alerts" icon={Bell}>
+          <Panel title="Alerts" mascot="bell">
             <div className="space-y-3">
               {alerts.map((alert) => (
                 <div key={alert.id} className="rounded-2xl border bg-white/70 p-4">
@@ -145,17 +139,17 @@ function ElderProfileDetailPage() {
 
 function Panel({
   title,
-  icon: Icon,
+  mascot,
   children,
 }: {
   title: string;
-  icon: React.ComponentType<{ className?: string }>;
+  mascot: MascotVariant;
   children: React.ReactNode;
 }) {
   return (
     <section className="rounded-[2rem] vm-glass p-5">
       <h2 className="mb-4 flex items-center gap-2 text-xl font-extrabold">
-        <Icon className="h-5 w-5 text-primary" />
+        <MascotIcon variant={mascot} size="1.8rem" />
         {title}
       </h2>
       {children}

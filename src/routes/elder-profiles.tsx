@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Bot, MapPin, Phone, Plus, UserRoundPlus } from "lucide-react";
+import { Plus } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { useSyncExternalStore } from "react";
 import { voiceMedStore } from "@/lib/voicemed-store";
 
@@ -20,7 +21,7 @@ function ElderProfilesPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <span className="vm-pill">
-            <UserRoundPlus className="h-3.5 w-3.5" />
+            <MascotIcon variant="user" size="1.1rem" />
             Elder Profiles
           </span>
           <h1 className="mt-4 text-4xl font-extrabold">โปรไฟล์ผู้สูงอายุ</h1>
@@ -62,15 +63,15 @@ function ElderProfilesPage() {
               </div>
               <div className="mt-5 space-y-2 text-sm text-muted-foreground">
                 <p className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
+                  <MascotIcon variant="phone" size="1.2rem" />
                   {elder.phone}
                 </p>
                 <p className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
+                  <MascotIcon variant="home" size="1.2rem" />
                   {elder.livingSituation}
                 </p>
                 <p className="flex items-center gap-2">
-                  <Bot className="h-4 w-4" />
+                  <MascotIcon variant="bot" size="1.2rem" />
                   Bot {config?.status ?? "draft"} · โทร {elder.preferredCallTime}
                 </p>
               </div>

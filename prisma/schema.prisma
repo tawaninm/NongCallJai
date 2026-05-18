@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id              String           @id @default(cuid())
+  payerName       String
+  phone           String
+  email           String?
+  planId          String
+  setupStatus     String           @default("waiting_line")
+  createdAt       DateTime         @default(now())
+  subscriptions   Subscription[]
+  elders          ElderProfile[]
+  lineConnections LineConnection[]
+  botnoiMappings  BotnoiMapping[]
+  notifications   NotificationLog[]
+  auditLogs       AuditLog[]
+}
+
+model Subscription {
+  id         String   @id @default(cuid())
+  customerId String
+  planId     String
+  status     String   @default("trial")
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id])
+}
+
+model ElderProfile {
+  id             String          @id @default(cuid())
+  customerId     String
+  name           String
+  nickname       String?
+  phone          String
+  relationship   String
+  note           String?
+  consentGranted Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  customer       Customer        @relation(fields: [customerId], references: [id])
+  consentRecords ConsentRecord[]
+  botnoiMappings BotnoiMapping[]
+}
+
+model ConsentRecord {
+  id             String       @id @default(cuid())
+  elderProfileId String
+  consentType    String
+  status         String
+  updatedAt      DateTime     @updatedAt
+  elderProfile   ElderProfile @relation(fields: [elderProfileId], references: [id])
+}
+
+model LineConnection {
+  id          String    @id @default(cuid())
+  customerId  String
+  lineUserId  String?
+  displayName String?
+  token       String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+  customer    Customer  @relation(fields: [customerId], references: [id])
+}
+
+model BotnoiMapping {
+  id              String        @id @default(cuid())
+  customerId      String
+  elderProfileId  String?
+  botnoiBotId     String
+  botnoiContactId String
+  status          String        @default("draft")
+  updatedAt       DateTime      @updatedAt
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  elderProfile    ElderProfile? @relation(fields: [elderProfileId], references: [id])
+}
+
+model CallFeedbackLog {
+  id              String   @id @default(cuid())
+  botnoiBotId     String
+  botnoiContactId String
+  callStatus      String
+  startedAt       DateTime
+  summary         String?
+  transcript      String?
+  audioUrl        String?
+  tags            Json?
+  createdAt       DateTime @default(now())
+}
+
+model NotificationLog {
+  id         String   @id @default(cuid())
+  customerId String
+  elderName  String
+  title      String
+  summary    String
+  alertLevel String
+  audioUrl   String?
+  safeNote   String
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  customerId String?
+  action     String
+  createdAt  DateTime @default(now())
+  customer   Customer? @relation(fields: [customerId], references: [id])
+}

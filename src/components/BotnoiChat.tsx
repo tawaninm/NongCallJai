@@ -25,7 +25,7 @@ export function BotnoiChat() {
       chatDiv.className = "bn-customerchat";
       chatDiv.setAttribute("bot_id", "69fd5d09fb3079f007911739");
       chatDiv.setAttribute("bot_name", "VoiceMed AI Companion");
-      chatDiv.setAttribute("theme_color", "#7C3AED");
+      chatDiv.setAttribute("theme_color", "#4FA66A");
       chatDiv.setAttribute("locale", "th");
       chatDiv.setAttribute(
         "logged_in_greeting",

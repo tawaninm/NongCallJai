@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bell, CheckCircle2 } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { getAlertTone, getElderName, voiceMedStore } from "@/lib/voicemed-store";
@@ -19,7 +19,7 @@ function AlertsPage() {
     <div className="vm-page">
       <section className="rounded-[2rem] vm-glass p-6 md:p-8">
         <span className="vm-pill">
-          <Bell className="h-3.5 w-3.5" />
+          <MascotIcon variant="bell" size="1.1rem" />
           Family Alerts
         </span>
         <h1 className="mt-5 text-4xl font-extrabold">แจ้งเตือนและสิ่งที่ควรตรวจสอบ</h1>
@@ -64,7 +64,7 @@ function AlertsPage() {
                   }}
                   className="vm-primary-btn py-2"
                 >
-                  <CheckCircle2 className="h-4 w-4" />
+                  <MascotIcon variant="check" size="1.2rem" />
                   Resolve
                 </button>
               </div>

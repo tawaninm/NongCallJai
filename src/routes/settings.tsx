@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Settings, ShieldCheck } from "lucide-react";
+import { MascotIcon } from "@/components/MascotIcon";
 import { voiceMedStore } from "@/lib/voicemed-store";
 
 export const Route = createFileRoute("/settings")({
@@ -14,7 +14,7 @@ function SettingsPage() {
     <div className="vm-page">
       <section className="rounded-[2rem] vm-glass p-6 md:p-8">
         <span className="vm-pill">
-          <Settings className="h-3.5 w-3.5" />
+          <MascotIcon variant="settings" size="1.1rem" />
           Account Settings
         </span>
         <h1 className="mt-5 text-4xl font-extrabold">ตั้งค่าบัญชีและความเป็นส่วนตัว</h1>
@@ -36,7 +36,7 @@ function SettingsPage() {
 
         <div className="rounded-[2rem] vm-glass p-5">
           <h2 className="flex items-center gap-2 text-2xl font-extrabold">
-            <ShieldCheck className="h-6 w-6 text-teal" />
+            <MascotIcon variant="shield" size="1.8rem" />
             Consent / PDPA
           </h2>
           <p className="mt-2 text-sm leading-7 text-muted-foreground">
