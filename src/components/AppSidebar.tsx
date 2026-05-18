@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { MascotIcon } from "@/components/MascotIcon";
 import { useAuth } from "@/lib/auth-context";
 import { APP_VERSION } from "@/lib/patch-log";
+import { motion, AnimatePresence } from "framer-motion";
 
 import type { MascotVariant } from "@/components/MascotIcon";
 
@@ -33,12 +34,18 @@ export function AppSidebar({ mobileOpen = false, setMobileOpen }: Props) {
 
   return (
     <>
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm md:hidden"
-          onClick={() => setMobileOpen?.(false)}
-        />
-      )}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm md:hidden"
+            onClick={() => setMobileOpen?.(false)}
+          />
+        )}
+      </AnimatePresence>
       <aside
         className={`fixed inset-y-0 left-0 z-50 flex h-screen w-72 shrink-0 flex-col border-r border-white/60 bg-white/72 text-sidebar-foreground shadow-[24px_0_80px_rgba(58,89,64,0.10)] backdrop-blur-2xl transition-transform duration-300 md:static md:translate-x-0 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
@@ -66,18 +73,24 @@ export function AppSidebar({ mobileOpen = false, setMobileOpen }: Props) {
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {navItems.map((item) => {
+          {navItems.map((item, idx) => {
             const active = currentPath === item.url || currentPath.startsWith(`${item.url}/`);
             return (
-              <Link
+              <motion.div
                 key={item.url}
-                to={item.url}
-                onClick={() => setMobileOpen?.(false)}
-                className={`sidebar-nav-item ${active ? "sidebar-nav-item-active" : ""}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2, delay: idx * 0.05 }}
               >
-                <MascotIcon variant={item.mascot} size="1.5rem" />
-                <span className="flex-1">{item.title}</span>
-              </Link>
+                <Link
+                  to={item.url}
+                  onClick={() => setMobileOpen?.(false)}
+                  className={`sidebar-nav-item ${active ? "sidebar-nav-item-active" : ""}`}
+                >
+                  <MascotIcon variant={item.mascot} size="1.5rem" />
+                  <span className="flex-1">{item.title}</span>
+                </Link>
+              </motion.div>
             );
           })}
         </nav>

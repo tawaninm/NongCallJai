@@ -17,6 +17,7 @@ import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { APP_VERSION } from "@/lib/patch-log";
 import { roleLabels } from "@/lib/voicemed-data";
 import { getAlertTone, getElderName, voiceMedStore } from "@/lib/voicemed-store";
+import { motion, AnimatePresence } from "framer-motion";
 import appCss from "../styles.css?url";
 
 const PUBLIC_ROUTES = new Set([
@@ -115,7 +116,22 @@ function AppLayout() {
     }
   }, [isLoggedIn, isPublic, navigate]);
 
-  if (isPublic || !isLoggedIn) return <Outlet />;
+  if (isPublic || !isLoggedIn) {
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentPath}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="h-full w-full"
+        >
+          <Outlet />
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
@@ -172,8 +188,19 @@ function AppLayout() {
             </div>
           </div>
         </header>
-        <main className="min-w-0 flex-1 overflow-y-auto p-4 md:p-6">
-          <Outlet />
+        <main className="min-w-0 flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50/50">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentPath}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="h-full"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>
@@ -191,10 +218,22 @@ function VoiceMedNotifications({ open, onClose }: { open: boolean; onClose: () =
   if (!open) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="absolute right-0 top-12 z-50 w-88 max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl vm-glass">
-        <div className="flex items-center justify-between border-b border-white/60 px-4 py-3">
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-40 bg-black/5 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="absolute right-0 top-12 z-50 w-88 max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl vm-glass shadow-2xl"
+      >
+        <div className="flex items-center justify-between border-b border-white/60 px-4 py-3 bg-white/40">
           <div>
             <p className="text-sm font-bold">การแจ้งเตือนครอบครัว</p>
             <p className="text-xs text-muted-foreground">สิ่งที่ VoiceMed แนะนำให้ครอบครัวดูต่อ</p>
@@ -236,7 +275,7 @@ function VoiceMedNotifications({ open, onClose }: { open: boolean; onClose: () =
             </button>
           ))}
         </div>
-      </div>
-    </>
+      </motion.div>
+    </AnimatePresence>
   );
 }

@@ -4,6 +4,8 @@ import { MascotIcon } from "@/components/MascotIcon";
 import { MarketingPricingCards } from "@/components/marketing/MarketingPricingCards";
 import { NongCallJaiMascot } from "@/components/NongCallJaiMascot";
 import { APP_VERSION } from "@/lib/patch-log";
+import { motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 import type { MascotVariant } from "@/components/MascotIcon";
 
@@ -175,7 +177,11 @@ function TopNav() {
 function HeroSection() {
   return (
     <section className="grid gap-10 py-12 md:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(390px,0.82fr)] lg:items-center lg:py-24">
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <span className="vm-pill">
           <MascotIcon variant="star" size="1.1rem" />
           NongCallJai {APP_VERSION} for family care
@@ -201,9 +207,15 @@ function HeroSection() {
           <MetricCard value="LINE" label="รับสรุปครอบครัว" />
           <MetricCard value="Human setup" label="ทีมช่วยตั้งค่า" />
         </div>
-      </div>
+      </motion.div>
 
-      <HeroProductPreview />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+      >
+        <HeroProductPreview />
+      </motion.div>
     </section>
   );
 }
@@ -283,12 +295,19 @@ function PreviewBubble({ text, muted = false }: { text: string; muted?: boolean 
 function TrustStrip() {
   return (
     <section className="grid gap-4 md:grid-cols-3">
-      {trustItems.map(({ mascot, title, text }) => (
-        <article key={title} className="vm-story-card">
+      {trustItems.map(({ mascot, title, text }, i) => (
+        <motion.article
+          key={title}
+          className="vm-story-card"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5, delay: i * 0.1 }}
+        >
           <MascotIcon variant={mascot} size="2.5rem" />
           <h2 className="mt-4 text-xl font-extrabold text-[#223a2e]">{title}</h2>
           <p className="mt-2 text-sm leading-7 text-[#52625a]">{text}</p>
-        </article>
+        </motion.article>
       ))}
     </section>
   );
@@ -303,8 +322,15 @@ function CareFlowSection() {
         text="ใช้ care thread เดียวกันทั้งประสบการณ์: โทรถามไถ่ รับฟัง สรุป และส่งต่อให้ครอบครัวตรวจสอบ"
       />
       <div className="vm-care-thread mt-10 grid gap-4 lg:grid-cols-4">
-        {careSteps.map(({ mascot, number, title, text }) => (
-          <article key={number} className="vm-step-card">
+        {careSteps.map(({ mascot, number, title, text }, i) => (
+          <motion.article
+            key={number}
+            className="vm-step-card"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+          >
             <div className="flex items-center justify-between">
               <span className="text-sm font-extrabold text-[#4fa66a]">{number}</span>
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eaf7ef]">
@@ -313,7 +339,7 @@ function CareFlowSection() {
             </div>
             <h3 className="mt-5 text-xl font-extrabold text-[#223a2e]">{title}</h3>
             <p className="mt-3 text-sm leading-7 text-[#52625a]">{text}</p>
-          </article>
+          </motion.article>
         ))}
       </div>
     </section>
