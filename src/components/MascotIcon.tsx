@@ -130,6 +130,8 @@ interface MascotIconProps {
   alt?: string;
 }
 
+import { motion } from "framer-motion";
+
 export function MascotIcon({
   variant = "call",
   size = "1.5rem",
@@ -137,12 +139,15 @@ export function MascotIcon({
   alt = "NongCallJai",
 }: MascotIconProps) {
   return (
-    <img
+    <motion.img
       src={MASCOT_SRC[variant]}
       alt={alt}
       className={`inline-block shrink-0 object-contain ${className}`}
       style={{ width: size, height: size }}
       loading="lazy"
+      whileHover={{ scale: 1.1, rotate: [-2, 2, 0], transition: { duration: 0.3 } }}
+      whileTap={{ scale: 0.9 }}
+      layoutId={`mascot-icon-${variant}`}
     />
   );
 }

@@ -21,6 +21,8 @@ const MASCOT_SRC: Record<MascotVariant, string> = {
   dance: "/Mascot Icon Logo/5.png",
 };
 
+import { motion } from "framer-motion";
+
 export function NongCallJaiMascot({
   compact = false,
   variant = "call",
@@ -31,19 +33,29 @@ export function NongCallJaiMascot({
   const src = MASCOT_SRC[variant];
 
   return (
-    <div
+    <motion.div
       className={`relative mx-auto flex items-center justify-center ${
         compact ? "h-36 w-36" : "h-72 w-72 md:h-96 md:w-96"
       }`}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, type: "spring", bounce: 0.4 }}
     >
       {/* soft glow behind mascot */}
-      <div className="absolute inset-4 rounded-full bg-[#d6eddb]/60 blur-2xl" />
-      <img
+      <motion.div
+        className="absolute inset-4 rounded-full bg-[#d6eddb]/60 blur-2xl"
+        animate={{ scale: [1, 1.1, 1], opacity: [0.6, 0.8, 0.6] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.img
         src={src}
         alt="NongCallJai mascot"
         className="relative z-10 h-full w-full object-contain drop-shadow-[0_20px_40px_rgba(58,89,64,0.20)]"
         loading="lazy"
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        layoutId={compact ? undefined : "hero-main-mascot"}
       />
-    </div>
+    </motion.div>
   );
 }
