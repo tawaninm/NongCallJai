@@ -1,29 +1,41 @@
-import handler from '../dist/server/server.js';
+import handlerImport from '../dist/server/server.js';
+
+const handler = handlerImport.default || handlerImport;
 
 export default async function (req, res) {
   try {
-    // 1. Convert Node.js IncomingMessage (req) to Web Request
     const protocol = req.headers['x-forwarded-proto'] || 'http';
-    const host = req.headers['x-forwarded-host'] || req.headers.host;
-    const url = new URL(req.url, `${protocol}://${host}`);
+    const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
+    const url = new URL(req.url || '/', `${protocol}://${host}`);
+
+    // Flatten headers to string values
+    const flattenedHeaders = {};
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (Array.isArray(value)) {
+        flattenedHeaders[key] = value.join(', ');
+      } else if (value !== undefined) {
+        flattenedHeaders[key] = value;
+      }
+    }
 
     const options = {
-      method: req.method,
-      headers: req.headers,
+      method: req.method || 'GET',
+      headers: flattenedHeaders,
     };
 
     if (req.method !== 'GET' && req.method !== 'HEAD') {
-      options.body = req;
-      options.duplex = 'half';
+      const buffers = [];
+      for await (const chunk of req) {
+        buffers.push(chunk);
+      }
+      options.body = Buffer.concat(buffers);
     }
 
-    const webRequest = new Request(url, options);
+    const webRequest = new Request(url.toString(), options);
 
-    // 2. Call the TanStack Start handler
     const webResponse = await handler(webRequest);
 
-    // 3. Convert Web Response back to Node.js ServerResponse (res)
-    res.statusCode = webResponse.status;
+    res.statusCode = webResponse.status || 200;
     
     webResponse.headers.forEach((value, key) => {
       res.setHeader(key, value);
@@ -43,6 +55,6 @@ export default async function (req, res) {
   } catch (error) {
     console.error('Serverless Function Error:', error);
     res.statusCode = 500;
-    res.end('Internal Server Error');
+    res.end('Internal Server Error: ' + (error.message || error.toString()));
   }
 }
