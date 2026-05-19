@@ -167,7 +167,6 @@ function AppLayout() {
                 placeholder="ค้นหาผู้สูงอายุ, log, alert..."
               />
             </div>
-            <div className="relative">
               <button
                 onClick={() => setNotifOpen((open) => !open)}
                 className="relative rounded-xl border bg-white/70 p-2 backdrop-blur-xl hover:bg-white"
@@ -180,8 +179,6 @@ function AppLayout() {
                   </span>
                 )}
               </button>
-              <VoiceMedNotifications open={notifOpen} onClose={() => setNotifOpen(false)} />
-            </div>
             <div className="hidden items-center gap-2 rounded-full border bg-white/70 px-3 py-2 text-xs font-bold text-primary backdrop-blur-xl sm:flex">
               <MascotIcon variant="user" size="1.3rem" />
               <span>{userName || roleLabels[role]}</span>
@@ -203,6 +200,7 @@ function AppLayout() {
           </AnimatePresence>
         </main>
       </div>
+      <VoiceMedNotifications open={notifOpen} onClose={() => setNotifOpen(false)} />
     </div>
   );
 }
@@ -231,7 +229,7 @@ function VoiceMedNotifications({ open, onClose }: { open: boolean; onClose: () =
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: -10 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="absolute right-0 top-12 z-50 w-88 max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl vm-glass shadow-2xl"
+        className="fixed right-4 top-20 z-50 w-88 max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl vm-glass shadow-2xl md:right-6"
       >
         <div className="flex items-center justify-between border-b border-white/60 px-4 py-3 bg-white/40">
           <div>
