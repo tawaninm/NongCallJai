@@ -1,27 +1,27 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Customer {
-  id              String           @id @default(cuid())
+  id              String            @id @default(cuid())
   payerName       String
   phone           String
   email           String?
   planId          String
-  setupStatus     String           @default("waiting_line")
-  createdAt       DateTime         @default(now())
-  subscriptions   Subscription[]
+  setupStatus     String            @default("waiting_line")
+  createdAt       DateTime          @default(now())
+  auditLogs       AuditLog[]
+  automationJobs  AutomationJob[]
+  botnoiMappings  BotnoiMapping[]
   elders          ElderProfile[]
   lineConnections LineConnection[]
-  botnoiMappings  BotnoiMapping[]
   notifications   NotificationLog[]
-  automationJobs  AutomationJob[]
-  auditLogs       AuditLog[]
+  subscriptions   Subscription[]
 }
 
 model Subscription {
@@ -43,9 +43,9 @@ model ElderProfile {
   note           String?
   consentGranted Boolean         @default(false)
   createdAt      DateTime        @default(now())
-  customer       Customer        @relation(fields: [customerId], references: [id])
-  consentRecords ConsentRecord[]
   botnoiMappings BotnoiMapping[]
+  consentRecords ConsentRecord[]
+  customer       Customer        @relation(fields: [customerId], references: [id])
 }
 
 model ConsentRecord {
@@ -85,49 +85,55 @@ model BotnoiMapping {
 }
 
 model CallFeedbackLog {
-  id              String   @id @default(cuid())
-  botnoiBotId     String
-  botnoiContactId String
-  callStatus      String
-  startedAt       DateTime
-  summary         String?
-  transcript      String?
-  audioUrl        String?
-  tags            Json?
-  createdAt       DateTime @default(now())
+  id                String   @id @default(cuid())
+  botnoiBotId       String
+  botnoiContactId   String
+  callStatus        String
+  startedAt         DateTime
+  summary           String?
+  transcript        String?
+  audioUrl          String?
+  tags              Json?
+  createdAt         DateTime @default(now())
+  caring_message    String?
+  meal              Boolean?
+  meal_detail       String?
+  medication_detail String?
+  medication_status Boolean?
+  today_activity    String?
 }
 
 model NotificationLog {
-  id         String   @id @default(cuid())
-  customerId String
-  elderName  String
-  title      String
-  summary    String
-  alertLevel String
-  audioUrl   String?
-  safeNote   String
-  deliveryStatus String   @default("pending")
+  id             String    @id @default(cuid())
+  customerId     String
+  elderName      String
+  title          String
+  summary        String
+  alertLevel     String
+  audioUrl       String?
+  safeNote       String
+  deliveryStatus String    @default("pending")
   lineMessageId  String?
-  sentAt     DateTime?
-  createdAt  DateTime @default(now())
-  customer   Customer @relation(fields: [customerId], references: [id])
+  sentAt         DateTime?
+  createdAt      DateTime  @default(now())
+  customer       Customer  @relation(fields: [customerId], references: [id])
 }
 
 model AutomationJob {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   type           String
-  status         String   @default("queued")
+  status         String    @default("queued")
   customerId     String?
   elderProfileId String?
-  scheduledAt    DateTime @default(now())
+  scheduledAt    DateTime  @default(now())
   startedAt      DateTime?
   finishedAt     DateTime?
-  attemptCount   Int      @default(0)
-  maxAttempts    Int      @default(3)
+  attemptCount   Int       @default(0)
+  maxAttempts    Int       @default(3)
   lastError      String?
   payload        Json
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   customer       Customer? @relation(fields: [customerId], references: [id])
 
   @@index([status, scheduledAt])
@@ -135,23 +141,23 @@ model AutomationJob {
 }
 
 model ApiClient {
-  id            String          @id @default(cuid())
-  name          String
-  clientType    String
-  secretHash    String
-  status        String          @default("active")
-  createdAt     DateTime        @default(now())
-  requestLogs   ApiRequestLog[]
+  id          String          @id @default(cuid())
+  name        String
+  clientType  String
+  secretHash  String
+  status      String          @default("active")
+  createdAt   DateTime        @default(now())
+  requestLogs ApiRequestLog[]
 }
 
 model ApiRequestLog {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   apiClientId String?
   method      String
   endpoint    String
   statusCode  Int
   requestId   String
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime   @default(now())
   apiClient   ApiClient? @relation(fields: [apiClientId], references: [id])
 
   @@index([apiClientId, createdAt])
@@ -159,9 +165,9 @@ model ApiRequestLog {
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   customerId String?
   action     String
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
   customer   Customer? @relation(fields: [customerId], references: [id])
 }

@@ -3,28 +3,22 @@ import express from "express";
 import { z } from "zod";
 import { getLiffBaseUrl, isConfiguredEnv, port, readConfiguredEnv } from "./config.js";
 import {
-  audit,
   db,
   cancelAutomationJob,
-  completeLineLink,
   createAutomationJob,
-  createCustomer,
-  createElder,
-  createLineLink,
-  createNotification,
-  getLineLinkStatus,
   listAutomationJobs,
   retryAutomationJob,
   runDueAutomationJobs,
-  updateSetupStatus,
-  upsertBotnoiMapping,
 } from "./store.js";
 import type { AlertLevel, ApiResponse, AutomationJobStatus } from "./contracts.js";
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 const app = express();
-
 type RawBodyRequest = express.Request & { rawBody?: Buffer };
-
 app.use(
   express.json({
     limit: "1mb",
@@ -37,11 +31,9 @@ app.use(
 function ok<T>(data: T, meta?: ApiResponse<T>["meta"]): ApiResponse<T> {
   return { ok: true, data, meta };
 }
-
 function fail(code: string, message: string, details?: unknown): ApiResponse<never> {
   return { ok: false, error: { code, message, details } };
 }
-
 function route<T>(handler: (req: express.Request) => T | Promise<T>) {
   return async (req: express.Request, res: express.Response) => {
     try {
@@ -105,7 +97,7 @@ const apiEndpointCatalog = [
       callStatus: "answered",
       startedAt: "2026-05-18T09:00:00+07:00",
       summary: "Family-safe summary text",
-      tags: ["needs_review"],
+      tags: { meal: true, meal_detail: "ข้าวต้ม", medication_status: true },
     },
   },
   {
@@ -163,6 +155,8 @@ const apiEndpointCatalog = [
   },
 ];
 
+// --- Zod Schemas ---
+
 const checkoutSchema = z.object({
   payerName: z.string().min(1),
   phone: z.string().min(6),
@@ -219,6 +213,29 @@ const linePushTestSchema = z.object({
     ),
 });
 
+const callFeedbackSchema = z.object({
+  botnoiBotId: z.string().min(1),
+  botnoiContactId: z.string().min(1),
+  callStatus: z.enum(["answered", "missed", "failed"]),
+  startedAt: z.string().min(1),
+  summary: z.string().optional(),
+  transcript: z.string().optional(),
+  audioUrl: z.string().url().optional(),
+  tags: z
+    .object({
+      symptom: z.string().optional(),
+      meal: z.boolean().optional(),
+      meal_detail: z.string().optional(),
+      medication_status: z.boolean().optional(),
+      medication_detail: z.string().optional(),
+      today_activity: z.string().optional(),
+      caring_message: z.string().optional(),
+    })
+    .optional(),
+});
+
+// --- LINE signature helper ---
+
 function verifyLineSignature(req: RawBodyRequest) {
   const channelSecret = readConfiguredEnv("LINE_CHANNEL_SECRET");
   if (!channelSecret) {
@@ -229,7 +246,6 @@ function verifyLineSignature(req: RawBodyRequest) {
       message: "LINE_CHANNEL_SECRET is not configured.",
     };
   }
-
   const rawBody = req.rawBody;
   const signature = String(req.headers["x-line-signature"] ?? "");
   if (!rawBody || !signature) {
@@ -240,15 +256,14 @@ function verifyLineSignature(req: RawBodyRequest) {
       message: "Missing LINE webhook signature.",
     };
   }
-
   const expectedSignature = crypto
     .createHmac("sha256", channelSecret)
     .update(rawBody)
     .digest("base64");
   const expected = Buffer.from(expectedSignature);
   const received = Buffer.from(signature);
-  const matches = expected.length === received.length && crypto.timingSafeEqual(expected, received);
-
+  const matches =
+    expected.length === received.length && crypto.timingSafeEqual(expected, received);
   return matches
     ? { ok: true as const }
     : {
@@ -259,62 +274,115 @@ function verifyLineSignature(req: RawBodyRequest) {
       };
 }
 
+// ============================================================
+// ROUTES
+// ============================================================
+
+// ✅ Health check
 app.get("/api/health", (_req, res) => {
   res.json(
     ok({
       status: "ok",
       service: "voicemed-api",
-      storage: "memory",
+      storage: "prisma",
       automationJobs: db.automationJobs.length,
       time: new Date().toISOString(),
     }),
   );
 });
 
+// ✅ Plans
 app.get("/api/plans", (_req, res) => {
   res.json(ok(plans));
 });
 
+// ✅ Prisma — Mock checkout
 app.post(
   "/api/checkout/mock-complete",
-  route((req) => {
+  route(async (req) => {
     const input = checkoutSchema.parse(req.body);
-    const customer = createCustomer({ ...input, email: input.email || undefined });
-    return {
-      customer,
-      subscription: { customerId: customer.id, planId: input.planId, status: "trial" },
-    };
+    const customer = await prisma.customer.create({
+      data: {
+        payerName: input.payerName,
+        phone: input.phone,
+        email: input.email || null,
+        planId: input.planId,
+        setupStatus: "waiting_line",
+      },
+    });
+    const subscription = await prisma.subscription.create({
+      data: {
+        customerId: customer.id,
+        planId: input.planId,
+        status: "trial",
+      },
+    });
+    return { customer, subscription };
   }),
 );
 
+// ✅ Prisma — Service onboarding
 app.post(
   "/api/onboarding/service-request",
-  route((req) => {
+  route(async (req) => {
     const input = onboardingSchema.parse(req.body);
-    const customer = db.customers.find((item) => item.id === input.customerId);
+    const customer = await prisma.customer.findUnique({ where: { id: input.customerId } });
     if (!customer) throw new Error("Customer not found");
-    const elder = createElder(input);
-    return { customer, elder, setupStatus: updateSetupStatus(customer.id) };
+    const elder = await prisma.elderProfile.create({
+      data: {
+        customerId: input.customerId,
+        name: input.name,
+        nickname: input.nickname || null,
+        phone: input.phone,
+        relationship: input.relationship,
+        note: input.note || null,
+        consentGranted: input.consentGranted,
+      },
+    });
+    await prisma.customer.update({
+      where: { id: input.customerId },
+      data: { setupStatus: "waiting_botnoi" },
+    });
+    return { customer, elder, setupStatus: "waiting_botnoi" };
   }),
 );
 
+// ✅ Prisma — Setup status
 app.get(
   "/api/customer/setup-status",
-  route((req) => {
+  route(async (req) => {
     const customerId = String(req.query.customerId ?? "");
-    const customer = db.customers.find((item) => item.id === customerId);
+    const customer = await prisma.customer.findUnique({ where: { id: customerId } });
     if (!customer) throw new Error("Customer not found");
-    return { customerId, setupStatus: updateSetupStatus(customerId) };
+    const hasLine = await prisma.lineConnection.findFirst({
+      where: { customerId, status: "linked" },
+    });
+    const hasBotnoi = await prisma.botnoiMapping.findFirst({
+      where: { customerId, status: "active" },
+    });
+    const setupStatus =
+      hasLine && hasBotnoi ? "ready" : hasLine ? "waiting_botnoi" : "waiting_line";
+    await prisma.customer.update({ where: { id: customerId }, data: { setupStatus } });
+    return { customerId, setupStatus };
   }),
 );
 
+// ✅ Prisma — LINE link start
 app.post(
   "/api/line/link/start",
-  route((req) => {
+  route(async (req) => {
     const input = z.object({ customerId: z.string().min(1) }).parse(req.body);
-    const customer = db.customers.find((item) => item.id === input.customerId);
+    const customer = await prisma.customer.findUnique({ where: { id: input.customerId } });
     if (!customer) throw new Error("Customer not found");
-    const link = createLineLink(customer.id);
+    await prisma.lineConnection.updateMany({
+      where: { customerId: input.customerId, status: "pending" },
+      data: { status: "expired" },
+    });
+    const token = crypto.randomBytes(18).toString("base64url");
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    const link = await prisma.lineConnection.create({
+      data: { customerId: input.customerId, token, expiresAt, status: "pending" },
+    });
     const liffBaseUrl = getLiffBaseUrl();
     return {
       ...link,
@@ -325,64 +393,33 @@ app.post(
   }),
 );
 
-app.post("/api/line/webhook", (req: RawBodyRequest, res) => {
-  const signature = verifyLineSignature(req);
-  if (!signature.ok) {
-    res.status(signature.status).json(fail(signature.code, signature.message));
-    return;
-  }
-
-  try {
-    const input = lineWebhookSchema.parse(req.body);
-    const processed = input.events.map((event) => {
-      audit(`line.webhook.${event.type}`);
-      return {
-        type: event.type,
-        sourceType: event.source?.type,
-        hasUserId: Boolean(event.source?.userId),
-      };
-    });
-    res.json(ok({ received: input.events.length, processed }));
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res
-        .status(400)
-        .json(fail("VALIDATION_ERROR", "Invalid LINE webhook payload", error.flatten()));
-      return;
+// ✅ Prisma — LINE link status
+app.get(
+  "/api/line/link/status",
+  route(async (req) => {
+    const input = z.object({ linkId: z.string().min(1) }).parse(req.query);
+    const link = await prisma.lineConnection.findUnique({ where: { id: input.linkId } });
+    if (!link) throw new Error("Line link not_found");
+    if (link.status === "pending" && link.expiresAt < new Date()) {
+      await prisma.lineConnection.update({ where: { id: link.id }, data: { status: "expired" } });
+      throw new Error("Line link expired");
     }
-    const message = error instanceof Error ? error.message : "Unexpected LINE webhook error";
-    res.status(500).json(fail("INTERNAL_ERROR", message));
-  }
-});
-
-app.post(
-  "/api/line/push-test",
-  route((req) => {
-    const input = linePushTestSchema.parse(req.body);
-    const customer = db.customers.find((item) => item.id === input.customerId);
-    if (!customer) throw new Error("Customer not found");
-    const notification = createNotification(input);
     return {
-      notification,
-      queued: true,
-      nextStep: "Call POST /api/admin/automation/run-now or wait for the worker scheduler.",
+      linkId: link.id,
+      customerId: link.customerId,
+      status: link.status,
+      expiresAt: link.expiresAt,
+      linkedAt: link.linkedAt,
+      displayName: link.displayName,
+      pictureUrl: link.pictureUrl,
     };
   }),
 );
 
-app.get(
-  "/api/line/link/status",
-  route((req) => {
-    const input = z.object({ linkId: z.string().min(1) }).parse(req.query);
-    const result = getLineLinkStatus(input.linkId);
-    if ("error" in result) throw new Error(`Line link ${result.error}`);
-    return result;
-  }),
-);
-
+// ✅ Prisma — LINE link complete
 app.post(
   "/api/line/link/complete",
-  route((req) => {
+  route(async (req) => {
     const input = z
       .object({
         token: z.string().min(1),
@@ -391,26 +428,52 @@ app.post(
         pictureUrl: z.string().url().optional(),
       })
       .parse(req.body);
-    const result = completeLineLink(input);
-    if ("error" in result) throw new Error(`Line link ${result.error}`);
-    return { lineConnection: result.link, setupStatus: updateSetupStatus(result.link.customerId) };
+    const link = await prisma.lineConnection.findUnique({ where: { token: input.token } });
+    if (!link) throw new Error("Line link not_found");
+    if (link.usedAt) throw new Error("Line link used");
+    if (link.expiresAt < new Date()) {
+      await prisma.lineConnection.update({ where: { id: link.id }, data: { status: "expired" } });
+      throw new Error("Line link expired");
+    }
+    const now = new Date();
+    const updated = await prisma.lineConnection.update({
+      where: { id: link.id },
+      data: {
+        lineUserId: input.lineUserId,
+        displayName: input.displayName || null,
+        pictureUrl: input.pictureUrl || null,
+        usedAt: now,
+        linkedAt: now,
+        status: "linked",
+      },
+    });
+    const hasBotnoi = await prisma.botnoiMapping.findFirst({
+      where: { customerId: link.customerId, status: "active" },
+    });
+    const setupStatus = hasBotnoi ? "ready" : "waiting_botnoi";
+    await prisma.customer.update({ where: { id: link.customerId }, data: { setupStatus } });
+    return { lineConnection: updated, setupStatus };
   }),
 );
 
-app.get("/api/admin/customers", (_req, res) => {
-  const rows = db.customers.map((customer) => ({
-    ...customer,
-    elders: db.elders.filter((elder) => elder.customerId === customer.id),
-    lineConnections: db.lineConnections.filter((line) => line.customerId === customer.id),
-    botnoiMappings: db.botnoiMappings.filter((mapping) => mapping.customerId === customer.id),
-  }));
-  res.json(ok(rows, { total: rows.length }));
-});
+// ✅ Prisma — Admin customers list
+app.get(
+  "/api/admin/customers",
+  route(async () => {
+    const customers = await prisma.customer.findMany({
+      include: { elders: true, lineConnections: true, botnoiMappings: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return { customers, total: customers.length };
+  }),
+);
 
+// ✅ API endpoint catalog
 app.get("/api/admin/api-endpoints", (_req, res) => {
   res.json(ok(apiEndpointCatalog, { total: apiEndpointCatalog.length }));
 });
 
+// ✅ Automation jobs (in-memory queue)
 app.get(
   "/api/admin/automation/jobs",
   route((req) => {
@@ -450,7 +513,7 @@ app.post(
 app.get(
   "/api/admin/automation/health",
   route(() => ({
-    storage: "memory",
+    storage: "prisma",
     queue: {
       total: db.automationJobs.length,
       queued: db.automationJobs.filter((job) => job.status === "queued").length,
@@ -467,9 +530,10 @@ app.get(
   })),
 );
 
+// ✅ Prisma — Admin botnoi mapping
 app.patch(
   "/api/admin/customers/:id/botnoi-mapping",
-  route((req) => {
+  route(async (req) => {
     const input = z
       .object({
         elderProfileId: z.string().optional(),
@@ -477,91 +541,300 @@ app.patch(
         botnoiContactId: z.string().min(1),
       })
       .parse(req.body);
-    const customer = db.customers.find((item) => item.id === req.params.id);
+    const customer = await prisma.customer.findUnique({ where: { id: req.params.id } });
     if (!customer) throw new Error("Customer not found");
-    return {
-      mapping: upsertBotnoiMapping({ customerId: customer.id, ...input }),
-      setupStatus: updateSetupStatus(customer.id),
-    };
+    const existing = await prisma.botnoiMapping.findFirst({
+      where: { customerId: customer.id, botnoiContactId: input.botnoiContactId },
+    });
+    const mapping = existing
+      ? await prisma.botnoiMapping.update({
+          where: { id: existing.id },
+          data: {
+            botnoiBotId: input.botnoiBotId,
+            elderProfileId: input.elderProfileId || null,
+            status: "active",
+          },
+        })
+      : await prisma.botnoiMapping.create({
+          data: {
+            customerId: customer.id,
+            botnoiBotId: input.botnoiBotId,
+            botnoiContactId: input.botnoiContactId,
+            elderProfileId: input.elderProfileId || null,
+            status: "active",
+          },
+        });
+    const hasLine = await prisma.lineConnection.findFirst({
+      where: { customerId: customer.id, status: "linked" },
+    });
+    const setupStatus = hasLine ? "ready" : "waiting_line";
+    await prisma.customer.update({ where: { id: customer.id }, data: { setupStatus } });
+    return { mapping, setupStatus };
   }),
 );
 
+// ✅ Prisma — Botnoi call-feedback (รับจาก Botnoi → บันทึก DB + สร้าง NotificationLog)
 app.post(
   "/api/botnoi/call-feedback",
-  route((req) => {
-    const input = z
-      .object({
-        botnoiBotId: z.string().min(1),
-        botnoiContactId: z.string().min(1),
-        callStatus: z.enum(["answered", "missed", "failed"]),
-        startedAt: z.string().min(1),
-        summary: z.string().optional(),
-        transcript: z.string().optional(),
-        audioUrl: z.string().url().optional(),
-        tags: z.array(z.string()).optional(),
-      })
-      .parse(req.body);
-    const mapping = db.botnoiMappings.find(
-      (item) =>
-        item.botnoiBotId === input.botnoiBotId && item.botnoiContactId === input.botnoiContactId,
-    );
+  route(async (req) => {
+    const input = callFeedbackSchema.parse(req.body);
+
+    // หา mapping จาก Prisma
+    const mapping = await prisma.botnoiMapping.findFirst({
+      where: {
+        botnoiBotId: input.botnoiBotId,
+        botnoiContactId: input.botnoiContactId,
+      },
+      include: { elderProfile: true },
+    });
     if (!mapping) throw new Error("Botnoi mapping not found");
-    const elder = mapping.elderProfileId
-      ? db.elders.find((item) => item.id === mapping.elderProfileId)
-      : undefined;
+
+    const elderName =
+      mapping.elderProfile?.nickname || mapping.elderProfile?.name || "ผู้สูงอายุ";
+
     const alertLevel: AlertLevel =
       input.callStatus !== "answered"
         ? "watch"
-        : input.tags?.includes("urgent")
+        : input.tags?.symptom
           ? "urgent"
-          : input.tags?.includes("needs_review")
-            ? "watch"
-            : "info";
-    const notification = createNotification({
-      customerId: mapping.customerId,
-      elderName: elder?.nickname || elder?.name || "ผู้สูงอายุ",
-      title:
-        input.callStatus === "answered" ? "น้องคอลใจโทรสำเร็จแล้ว" : "น้องคอลใจมีสายที่ควรตรวจสอบ",
-      summary:
-        input.summary ||
-        (input.callStatus === "answered"
-          ? "มีผลการโทรใหม่จาก Botnoi Voicebot"
-          : "การโทรไม่สำเร็จหรือยังไม่ได้รับสาย"),
-      alertLevel,
-      audioUrl: input.audioUrl,
-      safeNote:
-        "NongCallJai เป็นบริการถามไถ่และส่งสรุปให้ครอบครัว ไม่วินิจฉัยโรค ไม่สั่งยา และไม่ปรับยา หากอาการรุนแรงควรติดต่อบุคลากรทางการแพทย์หรือช่องทางฉุกเฉินที่เหมาะสม",
+          : "info";
+
+    // บันทึก CallFeedbackLog
+    const log = await prisma.callFeedbackLog.create({
+      data: {
+        botnoiBotId:       input.botnoiBotId,
+        botnoiContactId:   input.botnoiContactId,
+        callStatus:        input.callStatus,
+        startedAt:         new Date(input.startedAt),
+        summary:           input.summary ?? null,
+        transcript:        input.transcript ?? null,
+        audioUrl:          input.audioUrl ?? null,
+        tags:              input.tags ?? null,
+        meal:              input.tags?.meal ?? null,
+        meal_detail:       input.tags?.meal_detail ?? null,
+        medication_status: input.tags?.medication_status ?? null,
+        medication_detail: input.tags?.medication_detail ?? null,
+        today_activity:    input.tags?.today_activity ?? null,
+        caring_message:    input.tags?.caring_message ?? null,
+      },
     });
+
+    // บันทึก NotificationLog
+    const notification = await prisma.notificationLog.create({
+      data: {
+        customerId: mapping.customerId,
+        elderName,
+        title:
+          input.callStatus === "answered"
+            ? "น้องคอลใจโทรสำเร็จแล้ว"
+            : "น้องคอลใจมีสายที่ควรตรวจสอบ",
+        summary:
+          input.summary ||
+          (input.callStatus === "answered"
+            ? "มีผลการโทรใหม่จาก Botnoi Voicebot"
+            : "การโทรไม่สำเร็จหรือยังไม่ได้รับสาย"),
+        alertLevel,
+        audioUrl:       input.audioUrl ?? null,
+        safeNote:
+          "NongCallJai เป็นบริการถามไถ่และส่งสรุปให้ครอบครัว ไม่วินิจฉัยโรค ไม่สั่งยา และไม่ปรับยา",
+        deliveryStatus: "pending",
+      },
+    });
+
+    // Queue automation jobs
     createAutomationJob({
       type: "call_feedback_process",
       customerId: mapping.customerId,
-      elderProfileId: mapping.elderProfileId,
+      elderProfileId: mapping.elderProfileId ?? undefined,
       scheduledAt: new Date().toISOString(),
       payload: {
-        botnoiBotId: input.botnoiBotId,
+        botnoiBotId:     input.botnoiBotId,
         botnoiContactId: input.botnoiContactId,
-        callStatus: input.callStatus,
+        callStatus:      input.callStatus,
       },
     });
     createAutomationJob({
       type: "summary_generate",
       customerId: mapping.customerId,
-      elderProfileId: mapping.elderProfileId,
+      elderProfileId: mapping.elderProfileId ?? undefined,
       scheduledAt: new Date().toISOString(),
       payload: { notificationId: notification.id, alertLevel },
     });
-    return { notification };
+
+    return { log, notification, alertLevel };
   }),
 );
 
+// ✅ Prisma — Notification payload (ให้ทีม LINE OA ดึงไปส่ง)
 app.get(
   "/api/line/notification-payloads/:id",
-  route((req) => {
-    const notification = db.notifications.find((item) => item.id === req.params.id);
+  route(async (req) => {
+    const notification = await prisma.notificationLog.findUnique({
+      where: { id: req.params.id },
+    });
     if (!notification) throw new Error("Notification not found");
     return notification;
   }),
 );
+
+// ✅ LINE Webhook (signature verify)
+app.post("/api/line/webhook", (req: RawBodyRequest, res) => {
+  const signature = verifyLineSignature(req);
+  if (!signature.ok) {
+    res.status(signature.status).json(fail(signature.code, signature.message));
+    return;
+  }
+  try {
+    const input = lineWebhookSchema.parse(req.body);
+    const processed = input.events.map((event) => ({
+      type: event.type,
+      sourceType: event.source?.type,
+      hasUserId: Boolean(event.source?.userId),
+    }));
+    res.json(ok({ received: input.events.length, processed }));
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res
+        .status(400)
+        .json(fail("VALIDATION_ERROR", "Invalid LINE webhook payload", error.flatten()));
+      return;
+    }
+    const message = error instanceof Error ? error.message : "Unexpected LINE webhook error";
+    res.status(500).json(fail("INTERNAL_ERROR", message));
+  }
+});
+
+// ✅ Prisma — LINE push test (สร้าง notification + ส่ง LINE จริง)
+app.post(
+  "/api/line/push-test",
+  route(async (req) => {
+    const input = linePushTestSchema.parse(req.body);
+
+    // บันทึก NotificationLog ลง DB
+    const notification = await prisma.notificationLog.create({
+      data: {
+        customerId:     input.customerId,
+        elderName:      input.elderName,
+        title:          input.title,
+        summary:        input.summary,
+        alertLevel:     input.alertLevel,
+        audioUrl:       input.audioUrl ?? null,
+        safeNote:       input.safeNote,
+        deliveryStatus: "pending",
+      },
+    });
+
+    // ส่ง LINE push จริง (ถ้ามี token และมี lineUserId)
+    let lineSent = false;
+    const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+    if (accessToken && !accessToken.includes("...")) {
+      const lineConnection = await prisma.lineConnection.findFirst({
+        where: { customerId: input.customerId, status: "linked" },
+      });
+      if (lineConnection?.lineUserId) {
+        const text = `🔔 ${input.title}\n\n${input.summary}\n\n⚠️ ${input.safeNote}`;
+        await fetch("https://api.line.me/v2/bot/message/push", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            to: lineConnection.lineUserId,
+            messages: [{ type: "text", text }],
+          }),
+        });
+        await prisma.notificationLog.update({
+          where: { id: notification.id },
+          data: { deliveryStatus: "sent", sentAt: new Date() },
+        });
+        lineSent = true;
+      }
+    }
+
+    return {
+      notification,
+      lineSent,
+      nextStep: lineSent
+        ? "LINE message sent successfully"
+        : "No linked LINE account found. Call POST /api/admin/automation/run-now or wait for the worker scheduler.",
+    };
+  }),
+);
+
+// ✅ Prisma — Botnoi Webhook (รับจาก Botnoi โดยตรง format ต่างจาก call-feedback)
+app.post("/api/botnoi/webhook", async (req, res) => {
+  try {
+    const body = req.body;
+
+    // บันทึก CallFeedbackLog
+    const log = await prisma.callFeedbackLog.create({
+      data: {
+        botnoiBotId:       body.bot_id ?? "",
+        botnoiContactId:   body.contact_id ?? "",
+        callStatus:        body.status ?? "completed",
+        startedAt:         body.started_at ? new Date(body.started_at) : new Date(),
+        summary:           body.summary ?? null,
+        transcript:        body.transcript ?? null,
+        audioUrl:          body.audio_url ?? null,
+        tags:              body.tags ?? null,
+        meal:              body.tags?.meal ?? null,
+        meal_detail:       body.tags?.meal_detail ?? null,
+        medication_status: body.tags?.medication_status ?? null,
+        medication_detail: body.tags?.medication_detail ?? null,
+        today_activity:    body.tags?.today_activity ?? null,
+        caring_message:    body.tags?.caring_message ?? null,
+      },
+    });
+
+    // หา mapping + ส่ง LINE
+    const mapping = await prisma.botnoiMapping.findFirst({
+      where: {
+        botnoiBotId:     body.bot_id ?? "",
+        botnoiContactId: body.contact_id ?? "",
+      },
+      include: { customer: true, elderProfile: true },
+    });
+
+    let lineSent = false;
+    if (mapping) {
+      const lineConnection = await prisma.lineConnection.findFirst({
+        where: { customerId: mapping.customerId, status: "linked" },
+      });
+      if (lineConnection?.lineUserId) {
+        const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+        if (accessToken && !accessToken.includes("...")) {
+          const elderName =
+            mapping.elderProfile?.nickname || mapping.elderProfile?.name || "ผู้สูงอายุ";
+          const meal = body.tags?.meal
+            ? `✅ กินข้าวแล้ว: ${body.tags?.meal_detail || "-"}`
+            : "❌ ยังไม่ได้กินข้าว";
+          const med = body.tags?.medication_status ? "✅ กินยาแล้ว" : "❌ ยังไม่ได้กินยา";
+          const act = body.tags?.today_activity ? `📝 ${body.tags.today_activity}` : "-";
+          const msg = body.tags?.caring_message ? `\n💌 ${body.tags.caring_message}` : "";
+          const text = `🔔 น้องคอลใจรายงานสุขภาพ ${elderName}\n\n${meal}\n${med}\n🏃 กิจวัตร: ${act}${msg}\n\n⚠️ NongCallJai เป็นบริการถามไถ่ ไม่วินิจฉัยโรค`;
+
+          await fetch("https://api.line.me/v2/bot/message/push", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+              to: lineConnection.lineUserId,
+              messages: [{ type: "text", text }],
+            }),
+          });
+          lineSent = true;
+        }
+      }
+    }
+
+    res.json({ ok: true, data: log, lineSent });
+  } catch (err: any) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
 
 app.listen(port, () => {
   console.log(`VoiceMed API listening on http://localhost:${port}`);
