@@ -320,7 +320,6 @@ async function runAutomationJob(job: AutomationJobRecord) {
       finishJob(job, "blocked");
       return { jobId: job.id, status: job.status, lastError: job.lastError };
     }
-
     const notificationId = String(job.payload.notificationId ?? "");
     const notification = db.notifications.find((item) => item.id === notificationId);
     if (!notification) {
@@ -328,7 +327,6 @@ async function runAutomationJob(job: AutomationJobRecord) {
       finishJob(job, "failed");
       return { jobId: job.id, status: job.status, lastError: job.lastError };
     }
-
     const targets = db.lineConnections.filter(
       (line) => line.customerId === notification.customerId && line.status === "linked",
     );
@@ -338,12 +336,8 @@ async function runAutomationJob(job: AutomationJobRecord) {
       finishJob(job, "blocked");
       return { jobId: job.id, status: job.status, lastError: job.lastError };
     }
-
     try {
-      const pushResults: Array<{
-        sentMessages?: Array<{ id?: string }>;
-        messageId?: string;
-      }> = [];
+      const pushResults: Array<{ sentMessages?: Array<{ id?: string }>; messageId?: string }> = [];
       for (const target of targets) {
         if (!target.lineUserId) continue;
         const response = await fetch("https://api.line.me/v2/bot/message/push", {
@@ -354,12 +348,7 @@ async function runAutomationJob(job: AutomationJobRecord) {
           },
           body: JSON.stringify({
             to: target.lineUserId,
-            messages: [
-              {
-                type: "text",
-                text: formatLineNotification(notification),
-              },
-            ],
+            messages: [{ type: "text", text: formatLineNotification(notification) }],
           }),
         });
         const payload = (await response.json().catch(() => ({}))) as {
@@ -367,9 +356,7 @@ async function runAutomationJob(job: AutomationJobRecord) {
           messageId?: string;
         };
         if (!response.ok) {
-          throw new Error(
-            `LINE push failed with ${response.status}: ${JSON.stringify(payload).slice(0, 240)}`,
-          );
+          throw new Error(`LINE push failed with ${response.status}: ${JSON.stringify(payload).slice(0, 240)}`);
         }
         pushResults.push(payload);
       }
