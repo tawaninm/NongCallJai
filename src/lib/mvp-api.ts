@@ -101,8 +101,11 @@ const CUSTOMER_KEY = "voicemed_mvp_customer";
 const ELDER_KEY = "voicemed_mvp_elder";
 const LINE_KEY = "voicemed_mvp_line";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "https://nongcalljai.vercel.app";
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, {
+  const url = path.startsWith("http") ? path : `${BASE_URL}${path}`;
+  const response = await fetch(url, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -222,6 +225,7 @@ export const mvpApi = {
     } catch {
       const token = uid("line");
       const linkId = uid("line");
+      const liffId = import.meta.env?.VITE_LIFF_ID || "2010205058-LUkFdcjW";
       const link: LineLink = {
         id: linkId,
         linkId,
@@ -229,7 +233,7 @@ export const mvpApi = {
         token,
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
         status: "pending",
-        liffUrl: `https://liff.line.me/VOICE_MED_LIFF_ID?token=${token}`,
+        liffUrl: `https://liff.line.me/${liffId}?token=${token}`,
         pollIntervalMs: 2500,
       };
       writeJson(LINE_KEY, link);
@@ -260,15 +264,32 @@ export const mvpApi = {
     displayName?: string;
     pictureUrl?: string;
   }) {
-    const data = await request<{ lineConnection: LineLink; setupStatus: SetupStatus }>(
-      "/api/line/link/complete",
-      {
-        method: "POST",
-        body: JSON.stringify(input),
-      },
-    );
-    writeJson(LINE_KEY, data.lineConnection);
-    return data;
+    try {
+      const data = await request<{ lineConnection: LineLink; setupStatus: SetupStatus }>(
+        "/api/line/link/complete",
+        {
+          method: "POST",
+          body: JSON.stringify(input),
+        },
+      );
+      writeJson(LINE_KEY, data.lineConnection);
+      return data;
+    } catch {
+      // Mock successful linking
+      const stored = readJson<LineLink>(LINE_KEY);
+      if (!stored) throw new Error("No pending link found");
+
+      const updatedLink: LineLink = {
+        ...stored,
+        status: "linked",
+      };
+      writeJson(LINE_KEY, updatedLink);
+
+      return {
+        lineConnection: updatedLink,
+        setupStatus: "waiting_botnoi" as SetupStatus,
+      };
+    }
   },
 
   async getApiEndpoints() {

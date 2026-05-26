@@ -7,6 +7,7 @@ import { APP_VERSION } from "@/lib/patch-log";
 import { motion } from "framer-motion";
 
 import type { MascotVariant } from "@/components/MascotIcon";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -114,6 +115,55 @@ function LandingPage() {
 }
 
 function TopNav() {
+  const [profile, setProfile] = useState<{ displayName: string; pictureUrl?: string } | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const initLiff = async () => {
+      try {
+        const liffId = import.meta.env.VITE_LIFF_ID || "2010205058-LUkFdcjW";
+        const { default: liff } = await import("@line/liff");
+        await liff.init({ liffId });
+        if (liff.isLoggedIn() && mounted) {
+          const p = await liff.getProfile();
+          setProfile(p);
+        }
+      } catch (e) {
+        console.error("LIFF init failed", e);
+      }
+    };
+    initLiff();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleLogin = async () => {
+    try {
+      const liffId = import.meta.env.VITE_LIFF_ID || "2010205058-LUkFdcjW";
+      const { default: liff } = await import("@line/liff");
+      await liff.init({ liffId });
+      if (!liff.isLoggedIn()) {
+        liff.login({ redirectUri: window.location.href });
+      }
+    } catch (error) {
+      console.error("LINE Login error", error);
+      alert("ไม่สามารถเชื่อมต่อกับ LINE ได้ โปรดตรวจสอบ LIFF ID");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { default: liff } = await import("@line/liff");
+      if (liff.isLoggedIn()) {
+        liff.logout();
+        setProfile(null);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-[#dce6de] bg-[#fafbf8]/90 backdrop-blur-xl">
       <div className="mx-auto flex h-[72px] max-w-[1180px] items-center justify-between px-5 md:h-20 md:px-8">
@@ -143,6 +193,59 @@ function TopNav() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {profile ? (
+            <details className="relative hidden sm:block">
+              <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-[#dce6de] bg-white py-1 pl-1 pr-4 transition hover:bg-[#eaf7ef]">
+                {profile.pictureUrl ? (
+                  <img
+                    src={profile.pictureUrl}
+                    alt="profile"
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-[#eaf7ef]" />
+                )}
+                <span className="text-sm font-bold text-[#223a2e]">{profile.displayName}</span>
+              </summary>
+              <div className="absolute right-0 top-12 w-56 rounded-2xl border border-[#dce6de] bg-white p-2 shadow-[0_18px_50px_rgba(35,65,48,0.14)]">
+                <div className="mb-2 border-b border-[#dce6de] px-4 pb-2 pt-1">
+                  <p className="text-xs font-bold text-[#52625a]">ลงชื่อเข้าใช้ในชื่อ</p>
+                  <p className="truncate text-sm font-extrabold text-[#223a2e]">
+                    {profile.displayName}
+                  </p>
+                </div>
+
+                <a
+                  href="/profile"
+                  className="flex w-full items-center rounded-xl px-4 py-2 text-left text-sm font-bold text-[#52625a] hover:bg-[#eaf7ef] hover:text-[#223a2e]"
+                >
+                  ข้อมูลส่วนตัวและแพ็กเกจ
+                </a>
+                <button
+                  onClick={() => alert("ระบบ Dark Mode กำลังอยู่ในช่วงพัฒนาครับ")}
+                  className="flex w-full items-center rounded-xl px-4 py-2 text-left text-sm font-bold text-[#52625a] hover:bg-[#eaf7ef] hover:text-[#223a2e]"
+                >
+                  โหมดกลางคืน (Dark Mode)
+                </button>
+
+                <div className="my-1 h-px bg-[#dce6de]" />
+
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center rounded-xl px-4 py-2 text-left text-sm font-bold text-red-500 hover:bg-red-50"
+                >
+                  ออกจากระบบ
+                </button>
+              </div>
+            </details>
+          ) : (
+            <button
+              onClick={handleLogin}
+              className="hidden items-center justify-center rounded-full border border-[#06c755] bg-white px-5 py-2 text-sm font-bold text-[#06c755] transition hover:bg-[#06c755] hover:text-white sm:inline-flex"
+            >
+              เข้าสู่ระบบด้วย LINE
+            </button>
+          )}
           <Link to="/pricing" className="vm-primary-btn hidden sm:inline-flex">
             เริ่มใช้ฟรี 14 วัน
           </Link>
