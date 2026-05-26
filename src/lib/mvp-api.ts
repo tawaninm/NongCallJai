@@ -101,11 +101,8 @@ const CUSTOMER_KEY = "voicemed_mvp_customer";
 const ELDER_KEY = "voicemed_mvp_elder";
 const LINE_KEY = "voicemed_mvp_line";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "https://nongcalljai.vercel.app";
-
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const url = path.startsWith("http") ? path : `${BASE_URL}${path}`;
-  const response = await fetch(url, {
+  const response = await fetch(path, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -225,7 +222,7 @@ export const mvpApi = {
     } catch {
       const token = uid("line");
       const linkId = uid("line");
-      const liffId = import.meta.env?.VITE_LIFF_ID || "2010205058-LUkFdcjW";
+      const liffId = import.meta.env?.VITE_LIFF_ID || "2010206295-oRygsH1x";
       const link: LineLink = {
         id: linkId,
         linkId,
