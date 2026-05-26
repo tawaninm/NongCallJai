@@ -825,8 +825,9 @@ app.post("/api/botnoi/webhook", async (req, res) => {
     }
 
     res.json({ ok: true, data: log, lineSent });
-  } catch (err: any) {
-    res.status(500).json({ ok: false, error: err.message });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ ok: false, error: errorMessage });
   }
 });
 

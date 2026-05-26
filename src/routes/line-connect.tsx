@@ -34,7 +34,7 @@ function LineConnectPage() {
       setLiffStatus("linking");
       setLiffError("");
       try {
-        const liffId = import.meta.env.VITE_LIFF_ID || "2010122231-05nw3NWg";
+        const liffId = import.meta.env.VITE_LIFF_ID || "2010205058-LUkFdcjW";
         const { default: liff } = await import("@line/liff");
         await liff.init({ liffId });
 
@@ -54,9 +54,15 @@ function LineConnectPage() {
         if (cancelled) return;
         setLiffStatus("success");
         toast.success("LINE connected");
-        if (liff.isInClient()) {
-          window.setTimeout(() => liff.closeWindow(), 1200);
-        }
+
+        // Redirect to Chatbot natively
+        window.setTimeout(() => {
+          if (liff.isInClient()) {
+            liff.openWindow({ url: "https://lin.ee/ZbCYdSN", external: true });
+          } else {
+            window.location.href = "https://lin.ee/ZbCYdSN";
+          }
+        }, 1200);
       } catch (error) {
         if (cancelled) return;
         setLiffStatus("error");
@@ -166,22 +172,39 @@ function LineConnectPage() {
           </div>
           <h1 className="mt-6 text-3xl font-extrabold">
             {liffStatus === "success"
-              ? "LINE connected"
+              ? "เชื่อมต่อสำเร็จแล้ว!"
               : liffStatus === "error"
-                ? "LINE connection needs retry"
-                : "Connecting LINE"}
+                ? "การเชื่อมต่อขัดข้อง"
+                : "กำลังเชื่อมต่อ LINE..."}
           </h1>
           <p className="mt-3 text-sm leading-7 text-muted-foreground">
             {liffStatus === "success"
-              ? "You can return to the website. The QR page will continue automatically."
+              ? "กำลังพาคุณไปยังหน้าแชทบอท NongCallJai เพื่อเพิ่มเพื่อน..."
               : liffStatus === "error"
-                ? liffError || "Please reopen the QR link and try again."
-                : "Please wait while NongCallJai links this LINE account for family summaries."}
+                ? liffError || "กรุณาสแกน QR Code ใหม่อีกครั้ง"
+                : "กรุณารอสักครู่ ระบบกำลังผูกข้อมูลให้คุณ"}
           </p>
+
+          {liffStatus === "success" && (
+            <button
+              onClick={async () => {
+                const { default: liff } = await import("@line/liff");
+                if (liff.isInClient()) {
+                  liff.openWindow({ url: "https://lin.ee/ZbCYdSN", external: true });
+                } else {
+                  window.location.href = "https://lin.ee/ZbCYdSN";
+                }
+              }}
+              className="vm-primary-btn mt-6 w-full"
+            >
+              คลิกที่นี่เพื่อไปหน้าแชทบอท
+            </button>
+          )}
+
           {liffStatus === "error" && (
             <button onClick={() => setLiffStatus("idle")} className="vm-primary-btn mt-6 w-full">
               <RefreshCw className="h-4 w-4" />
-              Retry
+              ลองใหม่อีกครั้ง
             </button>
           )}
         </section>

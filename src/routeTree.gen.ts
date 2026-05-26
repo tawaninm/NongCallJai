@@ -13,6 +13,7 @@ import { Route as WaitingSetupRouteImport } from './routes/waiting-setup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PatientsRouteImport } from './routes/patients'
 import { Route as PatchLogRouteImport } from './routes/patch-log'
@@ -57,6 +58,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -206,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/patch-log': typeof PatchLogRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pricing': typeof PricingRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/patch-log': typeof PatchLogRoute
   '/pricing': typeof PricingRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -268,6 +276,7 @@ export interface FileRoutesById {
   '/patch-log': typeof PatchLogRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pricing': typeof PricingRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -301,6 +310,7 @@ export interface FileRouteTypes {
     | '/patch-log'
     | '/patients'
     | '/pricing'
+    | '/profile'
     | '/register'
     | '/reports'
     | '/settings'
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/patch-log'
     | '/pricing'
+    | '/profile'
     | '/register'
     | '/reports'
     | '/settings'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/patch-log'
     | '/patients'
     | '/pricing'
+    | '/profile'
     | '/register'
     | '/reports'
     | '/settings'
@@ -394,6 +406,7 @@ export interface RootRouteChildren {
   PatchLogRoute: typeof PatchLogRoute
   PatientsRoute: typeof PatientsRouteWithChildren
   PricingRoute: typeof PricingRoute
+  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
@@ -430,6 +443,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -657,6 +677,7 @@ const rootRouteChildren: RootRouteChildren = {
   PatchLogRoute: PatchLogRoute,
   PatientsRoute: PatientsRouteWithChildren,
   PricingRoute: PricingRoute,
+  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
