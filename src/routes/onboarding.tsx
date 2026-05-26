@@ -13,8 +13,9 @@ function OnboardingPage() {
   const customer = mvpApi.getStoredCustomer();
   const [name, setName] = useState("สมชาย วงศ์สุวรรณ");
   const [nickname, setNickname] = useState("คุณตาชาย");
+  const [age, setAge] = useState("");
   const [phone, setPhone] = useState("081-234-5678");
-  const [relationship, setRelationship] = useState("คุณตา");
+  const [relationship, setRelationship] = useState("ตา");
   const [note, setNote] = useState(
     "ชอบให้โทรช่วงเช้า ใช้น้ำเสียงอ่อนโยน และส่งสรุปให้ครอบครัวผ่าน LINE",
   );
@@ -27,8 +28,8 @@ function OnboardingPage() {
       navigate({ to: "/checkout" });
       return;
     }
-    if (!name.trim() || !phone.trim() || !relationship.trim()) {
-      toast.error("กรุณากรอกชื่อ เบอร์โทร และความสัมพันธ์");
+    if (!name.trim() || !phone.trim() || !relationship.trim() || !age.trim()) {
+      toast.error("กรุณากรอกชื่อ อายุ เบอร์โทร และความสัมพันธ์");
       return;
     }
     setLoading(true);
@@ -39,6 +40,7 @@ function OnboardingPage() {
         nickname,
         phone,
         relationship,
+        age: parseInt(age, 10),
         note,
         consentGranted,
       });
@@ -82,8 +84,14 @@ function OnboardingPage() {
             <div className="grid gap-5 md:grid-cols-2">
               <Field label="ชื่อ-นามสกุลผู้สูงอายุ" value={name} onChange={setName} />
               <Field label="ชื่อเล่น/คำเรียก" value={nickname} onChange={setNickname} />
+              <Field label="อายุ (ปี)" value={age} onChange={setAge} type="number" />
               <Field label="เบอร์โทรผู้สูงอายุ" value={phone} onChange={setPhone} />
-              <Field label="ความสัมพันธ์" value={relationship} onChange={setRelationship} />
+              <Field
+                label="ความสัมพันธ์"
+                value={relationship}
+                onChange={setRelationship}
+                options={["ตา", "ยาย", "ปู่", "ย่า"]}
+              />
             </div>
 
             <label className="mt-6 block">
@@ -126,10 +134,14 @@ function Field({
   label,
   value,
   onChange,
+  options,
+  type = "text",
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  options?: string[];
+  type?: string;
 }) {
   return (
     <label className="block">
@@ -137,11 +149,26 @@ function Field({
         <MascotIcon variant="user" size="1.2rem" />
         {label}
       </span>
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
-      />
+      {options ? (
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="mt-2 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+        >
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="mt-2 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+        />
+      )}
     </label>
   );
 }

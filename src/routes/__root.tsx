@@ -167,18 +167,18 @@ function AppLayout() {
                 placeholder="ค้นหาผู้สูงอายุ, log, alert..."
               />
             </div>
-              <button
-                onClick={() => setNotifOpen((open) => !open)}
-                className="relative rounded-xl border bg-white/70 p-2 backdrop-blur-xl hover:bg-white"
-                aria-label="เปิดการแจ้งเตือน"
-              >
-                <MascotIcon variant="bell" size="1.5rem" />
-                {unreadCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
+            <button
+              onClick={() => setNotifOpen((open) => !open)}
+              className="relative rounded-xl border bg-white/70 p-2 backdrop-blur-xl hover:bg-white"
+              aria-label="เปิดการแจ้งเตือน"
+            >
+              <MascotIcon variant="bell" size="1.5rem" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
             <div className="hidden items-center gap-2 rounded-full border bg-white/70 px-3 py-2 text-xs font-bold text-primary backdrop-blur-xl sm:flex">
               <MascotIcon variant="user" size="1.3rem" />
               <span>{userName || roleLabels[role]}</span>

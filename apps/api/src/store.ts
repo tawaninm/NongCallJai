@@ -356,7 +356,9 @@ async function runAutomationJob(job: AutomationJobRecord) {
           messageId?: string;
         };
         if (!response.ok) {
-          throw new Error(`LINE push failed with ${response.status}: ${JSON.stringify(payload).slice(0, 240)}`);
+          throw new Error(
+            `LINE push failed with ${response.status}: ${JSON.stringify(payload).slice(0, 240)}`,
+          );
         }
         pushResults.push(payload);
       }

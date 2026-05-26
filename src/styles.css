@@ -1,6 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap");
-@import "tailwindcss" source(none);
-@source "../src";
+@import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -238,7 +237,7 @@
     background-image: linear-gradient(100deg, var(--vm-mint-600), var(--vm-mint-500), #7cc58e);
   }
   .vm-secondary-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-2xl border bg-white/80 px-5 py-3 text-sm font-bold text-primary backdrop-blur-xl transition hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20;
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border bg-white/80 px-5 py-3 text-sm font-bold text-primary backdrop-blur-xl transition hover:bg-primary hover:text-white hover:border-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20;
     border-color: var(--vm-glass-border);
   }
   .vm-orb {
@@ -287,13 +286,10 @@
     @apply rounded-[24px] border border-[#f0d4c8] bg-[#fff7f3] p-5;
   }
   .vm-pricing-card {
-    @apply relative flex min-h-[560px] flex-col rounded-[28px] border border-[#dce6de] bg-white/90 p-6 shadow-[0_18px_50px_rgba(35,65,48,0.08)] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(35,65,48,0.13)];
-  }
-  .vm-pricing-card-featured {
-    @apply border-[#4fa66a] bg-[#fbfffc] ring-2 ring-[#4fa66a]/35;
+    @apply relative flex min-h-[560px] flex-col rounded-[28px] border border-[#dce6de] bg-white/90 p-6 shadow-[0_18px_50px_rgba(35,65,48,0.08)] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(35,65,48,0.13)] hover:border-[#4fa66a] hover:bg-[#fbfffc] hover:ring-2 hover:ring-[#4fa66a]/35;
   }
   .vm-recommend-badge {
-    @apply absolute right-5 top-5 rounded-full bg-[#223a2e] px-3 py-1 text-xs font-bold text-white;
+    @apply rounded-full bg-[#223a2e] px-3 py-1 text-xs font-bold tracking-wide text-white;
   }
   @media (min-width: 1024px) {
     .vm-care-thread::before {

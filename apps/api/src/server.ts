@@ -262,8 +262,7 @@ function verifyLineSignature(req: RawBodyRequest) {
     .digest("base64");
   const expected = Buffer.from(expectedSignature);
   const received = Buffer.from(signature);
-  const matches =
-    expected.length === received.length && crypto.timingSafeEqual(expected, received);
+  const matches = expected.length === received.length && crypto.timingSafeEqual(expected, received);
   return matches
     ? { ok: true as const }
     : {
@@ -589,33 +588,28 @@ app.post(
     });
     if (!mapping) throw new Error("Botnoi mapping not found");
 
-    const elderName =
-      mapping.elderProfile?.nickname || mapping.elderProfile?.name || "ผู้สูงอายุ";
+    const elderName = mapping.elderProfile?.nickname || mapping.elderProfile?.name || "ผู้สูงอายุ";
 
     const alertLevel: AlertLevel =
-      input.callStatus !== "answered"
-        ? "watch"
-        : input.tags?.symptom
-          ? "urgent"
-          : "info";
+      input.callStatus !== "answered" ? "watch" : input.tags?.symptom ? "urgent" : "info";
 
     // บันทึก CallFeedbackLog
     const log = await prisma.callFeedbackLog.create({
       data: {
-        botnoiBotId:       input.botnoiBotId,
-        botnoiContactId:   input.botnoiContactId,
-        callStatus:        input.callStatus,
-        startedAt:         new Date(input.startedAt),
-        summary:           input.summary ?? null,
-        transcript:        input.transcript ?? null,
-        audioUrl:          input.audioUrl ?? null,
-        tags:              input.tags ?? null,
-        meal:              input.tags?.meal ?? null,
-        meal_detail:       input.tags?.meal_detail ?? null,
+        botnoiBotId: input.botnoiBotId,
+        botnoiContactId: input.botnoiContactId,
+        callStatus: input.callStatus,
+        startedAt: new Date(input.startedAt),
+        summary: input.summary ?? null,
+        transcript: input.transcript ?? null,
+        audioUrl: input.audioUrl ?? null,
+        tags: input.tags ?? null,
+        meal: input.tags?.meal ?? null,
+        meal_detail: input.tags?.meal_detail ?? null,
         medication_status: input.tags?.medication_status ?? null,
         medication_detail: input.tags?.medication_detail ?? null,
-        today_activity:    input.tags?.today_activity ?? null,
-        caring_message:    input.tags?.caring_message ?? null,
+        today_activity: input.tags?.today_activity ?? null,
+        caring_message: input.tags?.caring_message ?? null,
       },
     });
 
@@ -634,7 +628,7 @@ app.post(
             ? "มีผลการโทรใหม่จาก Botnoi Voicebot"
             : "การโทรไม่สำเร็จหรือยังไม่ได้รับสาย"),
         alertLevel,
-        audioUrl:       input.audioUrl ?? null,
+        audioUrl: input.audioUrl ?? null,
         safeNote:
           "NongCallJai เป็นบริการถามไถ่และส่งสรุปให้ครอบครัว ไม่วินิจฉัยโรค ไม่สั่งยา และไม่ปรับยา",
         deliveryStatus: "pending",
@@ -648,9 +642,9 @@ app.post(
       elderProfileId: mapping.elderProfileId ?? undefined,
       scheduledAt: new Date().toISOString(),
       payload: {
-        botnoiBotId:     input.botnoiBotId,
+        botnoiBotId: input.botnoiBotId,
         botnoiContactId: input.botnoiContactId,
-        callStatus:      input.callStatus,
+        callStatus: input.callStatus,
       },
     });
     createAutomationJob({
@@ -713,13 +707,13 @@ app.post(
     // บันทึก NotificationLog ลง DB
     const notification = await prisma.notificationLog.create({
       data: {
-        customerId:     input.customerId,
-        elderName:      input.elderName,
-        title:          input.title,
-        summary:        input.summary,
-        alertLevel:     input.alertLevel,
-        audioUrl:       input.audioUrl ?? null,
-        safeNote:       input.safeNote,
+        customerId: input.customerId,
+        elderName: input.elderName,
+        title: input.title,
+        summary: input.summary,
+        alertLevel: input.alertLevel,
+        audioUrl: input.audioUrl ?? null,
+        safeNote: input.safeNote,
         deliveryStatus: "pending",
       },
     });
@@ -770,27 +764,27 @@ app.post("/api/botnoi/webhook", async (req, res) => {
     // บันทึก CallFeedbackLog
     const log = await prisma.callFeedbackLog.create({
       data: {
-        botnoiBotId:       body.bot_id ?? "",
-        botnoiContactId:   body.contact_id ?? "",
-        callStatus:        body.status ?? "completed",
-        startedAt:         body.started_at ? new Date(body.started_at) : new Date(),
-        summary:           body.summary ?? null,
-        transcript:        body.transcript ?? null,
-        audioUrl:          body.audio_url ?? null,
-        tags:              body.tags ?? null,
-        meal:              body.tags?.meal ?? null,
-        meal_detail:       body.tags?.meal_detail ?? null,
+        botnoiBotId: body.bot_id ?? "",
+        botnoiContactId: body.contact_id ?? "",
+        callStatus: body.status ?? "completed",
+        startedAt: body.started_at ? new Date(body.started_at) : new Date(),
+        summary: body.summary ?? null,
+        transcript: body.transcript ?? null,
+        audioUrl: body.audio_url ?? null,
+        tags: body.tags ?? null,
+        meal: body.tags?.meal ?? null,
+        meal_detail: body.tags?.meal_detail ?? null,
         medication_status: body.tags?.medication_status ?? null,
         medication_detail: body.tags?.medication_detail ?? null,
-        today_activity:    body.tags?.today_activity ?? null,
-        caring_message:    body.tags?.caring_message ?? null,
+        today_activity: body.tags?.today_activity ?? null,
+        caring_message: body.tags?.caring_message ?? null,
       },
     });
 
     // หา mapping + ส่ง LINE
     const mapping = await prisma.botnoiMapping.findFirst({
       where: {
-        botnoiBotId:     body.bot_id ?? "",
+        botnoiBotId: body.bot_id ?? "",
         botnoiContactId: body.contact_id ?? "",
       },
       include: { customer: true, elderProfile: true },

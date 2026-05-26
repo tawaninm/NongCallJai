@@ -34,6 +34,7 @@ export type ElderProfileRequest = {
   nickname?: string;
   phone: string;
   relationship: string;
+  age?: number;
   note?: string;
   consentGranted: boolean;
   createdAt: string;
@@ -185,6 +186,7 @@ export const mvpApi = {
     nickname?: string;
     phone: string;
     relationship: string;
+    age?: number;
     note?: string;
     consentGranted: boolean;
   }) {
