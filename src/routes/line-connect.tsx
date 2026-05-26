@@ -34,7 +34,7 @@ function LineConnectPage() {
       setLiffStatus("linking");
       setLiffError("");
       try {
-        const liffId = import.meta.env.VITE_LIFF_ID || "2010205058-LUkFdcjW";
+        const liffId = import.meta.env.VITE_LIFF_ID || "2010206295-oRygsH1x";
         const { default: liff } = await import("@line/liff");
         await liff.init({ liffId });
 
