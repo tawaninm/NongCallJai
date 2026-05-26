@@ -55,10 +55,15 @@ function LineConnectPage() {
         setLiffStatus("success");
         toast.success("LINE connected");
 
-        // Redirect to Chatbot natively
-        window.setTimeout(() => {
+        // Send message and return to Chatbot natively
+        window.setTimeout(async () => {
           if (liff.isInClient()) {
-            liff.openWindow({ url: "https://lin.ee/ZbCYdSN", external: true });
+            try {
+              await liff.sendMessages([{ type: "text", text: "เริ่มใช้งาน" }]);
+            } catch (err) {
+              console.error("Failed to send message", err);
+            }
+            liff.closeWindow();
           } else {
             window.location.href = "https://lin.ee/ZbCYdSN";
           }
@@ -190,7 +195,12 @@ function LineConnectPage() {
               onClick={async () => {
                 const { default: liff } = await import("@line/liff");
                 if (liff.isInClient()) {
-                  liff.openWindow({ url: "https://lin.ee/ZbCYdSN", external: true });
+                  try {
+                    await liff.sendMessages([{ type: "text", text: "เริ่มใช้งาน" }]);
+                  } catch (err) {
+                    console.error("Failed to send message", err);
+                  }
+                  liff.closeWindow();
                 } else {
                   window.location.href = "https://lin.ee/ZbCYdSN";
                 }
