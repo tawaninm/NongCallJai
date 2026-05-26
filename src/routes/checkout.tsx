@@ -9,6 +9,11 @@ import { subscriptionPlans } from "@/lib/voicemed-data";
 
 export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
+  validateSearch: (search: Record<string, unknown>): { plan?: string } => {
+    return {
+      plan: search.plan as string | undefined,
+    };
+  },
 });
 
 function CheckoutPage() {

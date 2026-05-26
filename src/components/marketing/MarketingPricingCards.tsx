@@ -30,7 +30,7 @@ const planVisuals: Record<string, PlanVisual> = {
   family: {
     label: "Care setup",
     mascot: "heart",
-    tone: "bg-[#fff1ea]",
+    tone: "bg-[#eef3ef]",
   },
 };
 
@@ -56,15 +56,17 @@ function MarketingPricingCard({ plan }: { plan: SubscriptionPlan }) {
   const visual = planVisuals[plan.id] ?? planVisuals.basic;
 
   return (
-    <article className={`vm-pricing-card ${plan.highlighted ? "vm-pricing-card-featured" : ""}`}>
-      {plan.highlighted && <span className="vm-recommend-badge">แนะนำ</span>}
+    <article className="vm-pricing-card">
       <div className="flex items-start justify-between gap-4">
         <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${visual.tone}`}>
           <MascotIcon variant={visual.mascot} size="2.5rem" />
         </div>
-        <span className="rounded-full border border-[#dce6de] bg-white px-3 py-1 text-xs font-bold text-[#52625a]">
-          {visual.label}
-        </span>
+        <div className="flex items-center gap-2">
+          {plan.highlighted && <span className="vm-recommend-badge">แนะนำ</span>}
+          <span className="rounded-full border border-[#dce6de] bg-white px-3 py-1 text-xs font-bold text-[#52625a]">
+            {visual.label}
+          </span>
+        </div>
       </div>
 
       <div className="mt-6">
@@ -89,11 +91,7 @@ function MarketingPricingCard({ plan }: { plan: SubscriptionPlan }) {
         ))}
       </ul>
 
-      <Link
-        to="/checkout"
-        search={{ plan: plan.id }}
-        className={plan.highlighted ? "vm-primary-btn mt-7 w-full" : "vm-secondary-btn mt-7 w-full"}
-      >
+      <Link to="/checkout" search={{ plan: plan.id }} className="vm-secondary-btn mt-7 w-full">
         เริ่มแพ็กเกจนี้
         <ArrowRight className="h-4 w-4" />
       </Link>

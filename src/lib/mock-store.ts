@@ -10,6 +10,7 @@ import {
   type Patient,
   type AIFollowUp,
   type CaseStatus,
+  type CarePlanType,
   type RiskLevel,
 } from "./mock-data";
 

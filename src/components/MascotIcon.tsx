@@ -149,10 +149,10 @@ export function MascotIcon({
       draggable={false}
       whileHover={{ scale: 1.15, rotate: [-3, 3, -3, 0] }}
       whileTap={{ scale: 0.9 }}
-      transition={{ 
-        type: "spring", 
-        stiffness: 400, 
-        damping: 17
+      transition={{
+        type: "spring",
+        stiffness: 400,
+        damping: 17,
       }}
     />
   );
