@@ -12,17 +12,17 @@ import {
   runDueAutomationJobs,
 } from "./store.js";
 import type { AlertLevel, ApiResponse, AutomationJobStatus } from "./contracts.js";
- 
+
 // ============================================================
-// Port — ✅ แก้ให้อ่าน process.env.PORT ก่อน (สำคัญสำหรับ Render)
+// Port
 // ============================================================
- 
+
 const port = Number(process.env.PORT) || 8787;
- 
+
 // ============================================================
 // MongoDB Connection
 // ============================================================
- 
+
 async function connectDB() {
   if (mongoose.connection.readyState >= 1) return;
   const uri = process.env.DATABASE_URL;
@@ -30,18 +30,18 @@ async function connectDB() {
   await mongoose.connect(uri);
   console.log("✅ MongoDB connected:", mongoose.connection.host);
 }
- 
+
 connectDB().catch((err) => {
   console.error("❌ MongoDB connection failed:", err.message);
   process.exit(1);
 });
- 
+
 // ============================================================
 // Mongoose Schemas & Models
 // ============================================================
- 
+
 const { Schema, model, models, Types } = mongoose;
- 
+
 // --- Customer ---
 const CustomerSchema = new Schema(
   {
@@ -58,7 +58,7 @@ const CustomerSchema = new Schema(
   { timestamps: true },
 );
 const Customer = models.customers || model("customers", CustomerSchema);
- 
+
 // --- Subscription ---
 const SubscriptionSchema = new Schema(
   {
@@ -69,7 +69,7 @@ const SubscriptionSchema = new Schema(
   { timestamps: true },
 );
 const Subscription = models.subscriptions || model("subscriptions", SubscriptionSchema);
- 
+
 // --- ElderProfile ---
 const ElderProfileSchema = new Schema(
   {
@@ -84,7 +84,7 @@ const ElderProfileSchema = new Schema(
   { timestamps: true },
 );
 const ElderProfile = models.elderprofiles || model("elderprofiles", ElderProfileSchema);
- 
+
 // --- LineConnection ---
 const LineConnectionSchema = new Schema(
   {
@@ -105,7 +105,7 @@ const LineConnectionSchema = new Schema(
   { timestamps: true },
 );
 const LineConnection = models.lineconnections || model("lineconnections", LineConnectionSchema);
- 
+
 // --- BotnoiMapping ---
 const BotnoiMappingSchema = new Schema(
   {
@@ -118,7 +118,7 @@ const BotnoiMappingSchema = new Schema(
   { timestamps: true },
 );
 const BotnoiMapping = models.botnoimappings || model("botnoimappings", BotnoiMappingSchema);
- 
+
 // --- CallFeedbackLog ---
 const CallFeedbackLogSchema = new Schema(
   {
@@ -141,7 +141,7 @@ const CallFeedbackLogSchema = new Schema(
 );
 const CallFeedbackLog =
   models.callfeedbacklogs || model("callfeedbacklogs", CallFeedbackLogSchema);
- 
+
 // --- NotificationLog ---
 const NotificationLogSchema = new Schema(
   {
@@ -159,11 +159,11 @@ const NotificationLogSchema = new Schema(
 );
 const NotificationLog =
   models.notificationlogs || model("notificationlogs", NotificationLogSchema);
- 
+
 // ============================================================
 // Express Setup
 // ============================================================
- 
+
 const app = express();
 type RawBodyRequest = express.Request & { rawBody?: Buffer };
 app.use(
@@ -174,7 +174,7 @@ app.use(
     },
   }),
 );
- 
+
 function ok<T>(data: T, meta?: ApiResponse<T>["meta"]): ApiResponse<T> {
   return { ok: true, data, meta };
 }
@@ -196,17 +196,17 @@ function route<T>(handler: (req: express.Request) => T | Promise<T>) {
     }
   };
 }
- 
+
 // ============================================================
 // Static Data
 // ============================================================
- 
+
 const plans = [
   { id: "basic", name: "Basic", priceThb: 300, billingCycle: "monthly" },
   { id: "standard", name: "Standard", priceThb: 590, billingCycle: "monthly", highlighted: true },
   { id: "family", name: "Family", priceThb: 990, billingCycle: "monthly" },
 ];
- 
+
 const apiEndpointCatalog = [
   {
     group: "LINE QR Connect",
@@ -235,6 +235,14 @@ const apiEndpointCatalog = [
       displayName: "Caregiver",
       pictureUrl: "https://profile.line-scdn.net/...",
     },
+  },
+  {
+    group: "Voicebot/Botnoi",
+    method: "GET",
+    path: "/api/botnoi/elder/:phone",
+    auth: "botnoi-webhook-secret",
+    description: "ดึงข้อมูลผู้สูงอายุก่อนโทร เช่น ชื่อ, ความสัมพันธ์, ชื่อลูกหลาน",
+    sampleBody: null,
   },
   {
     group: "Voicebot/Botnoi",
@@ -305,18 +313,18 @@ const apiEndpointCatalog = [
     description: "Check queue counts and LINE/Botnoi credential configuration status.",
   },
 ];
- 
+
 // ============================================================
 // Zod Schemas
 // ============================================================
- 
+
 const checkoutSchema = z.object({
   payerName: z.string().min(1),
   phone: z.string().min(6),
   email: z.string().email().optional().or(z.literal("")),
   planId: z.string().min(1),
 });
- 
+
 const onboardingSchema = z.object({
   customerId: z.string().min(1),
   name: z.string().min(1),
@@ -326,7 +334,7 @@ const onboardingSchema = z.object({
   note: z.string().optional(),
   consentGranted: z.boolean(),
 });
- 
+
 const lineWebhookSchema = z.object({
   destination: z.string().optional(),
   events: z
@@ -350,7 +358,7 @@ const lineWebhookSchema = z.object({
     )
     .default([]),
 });
- 
+
 const linePushTestSchema = z.object({
   customerId: z.string().min(1),
   elderName: z.string().min(1),
@@ -365,7 +373,7 @@ const linePushTestSchema = z.object({
       "NongCallJai is a family check-in and summary service. It does not diagnose, prescribe, or change medication. If symptoms are severe, contact an appropriate medical professional or emergency channel.",
     ),
 });
- 
+
 const callFeedbackSchema = z.object({
   botnoiBotId: z.string().min(1),
   botnoiContactId: z.string().min(1),
@@ -386,11 +394,11 @@ const callFeedbackSchema = z.object({
     })
     .optional(),
 });
- 
+
 // ============================================================
 // LINE Signature Helper
 // ============================================================
- 
+
 function verifyLineSignature(req: RawBodyRequest) {
   const channelSecret = readConfiguredEnv("LINE_CHANNEL_SECRET");
   if (!channelSecret) {
@@ -428,11 +436,11 @@ function verifyLineSignature(req: RawBodyRequest) {
         message: "Invalid LINE webhook signature.",
       };
 }
- 
+
 // ============================================================
 // ROUTES
 // ============================================================
- 
+
 // ✅ Health check
 app.get("/api/health", (_req, res) => {
   res.json(
@@ -445,12 +453,12 @@ app.get("/api/health", (_req, res) => {
     }),
   );
 });
- 
+
 // ✅ Plans
 app.get("/api/plans", (_req, res) => {
   res.json(ok(plans));
 });
- 
+
 // ✅ Mongoose — Mock checkout
 app.post(
   "/api/checkout/mock-complete",
@@ -471,7 +479,7 @@ app.post(
     return { customer, subscription };
   }),
 );
- 
+
 // ✅ Mongoose — Service onboarding
 app.post(
   "/api/onboarding/service-request",
@@ -492,7 +500,7 @@ app.post(
     return { customer, elder, setupStatus: "waiting_botnoi" };
   }),
 );
- 
+
 // ✅ Mongoose — Setup status
 app.get(
   "/api/customer/setup-status",
@@ -508,7 +516,7 @@ app.get(
     return { customerId, setupStatus };
   }),
 );
- 
+
 // ✅ Mongoose — LINE link start
 app.post(
   "/api/line/link/start",
@@ -516,13 +524,12 @@ app.post(
     const input = z.object({ customerId: z.string().min(1) }).parse(req.body);
     const customer = await Customer.findById(input.customerId);
     if (!customer) throw new Error("Customer not found");
- 
-    // expire pending links เดิม
+
     await LineConnection.updateMany(
       { customerId: customer._id, status: "pending" },
       { status: "expired" },
     );
- 
+
     const token = crypto.randomBytes(18).toString("base64url");
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
     const link = await LineConnection.create({
@@ -540,7 +547,7 @@ app.post(
     };
   }),
 );
- 
+
 // ✅ Mongoose — LINE link status
 app.get(
   "/api/line/link/status",
@@ -563,7 +570,7 @@ app.get(
     };
   }),
 );
- 
+
 // ✅ Mongoose — LINE link complete
 app.post(
   "/api/line/link/complete",
@@ -576,7 +583,7 @@ app.post(
         pictureUrl: z.string().url().optional(),
       })
       .parse(req.body);
- 
+
     const link = await LineConnection.findOne({ token: input.token });
     if (!link) throw new Error("Line link not_found");
     if (link.usedAt) throw new Error("Line link used");
@@ -584,7 +591,7 @@ app.post(
       await LineConnection.findByIdAndUpdate(link._id, { status: "expired" });
       throw new Error("Line link expired");
     }
- 
+
     const now = new Date();
     const updated = await LineConnection.findByIdAndUpdate(
       link._id,
@@ -598,7 +605,7 @@ app.post(
       },
       { new: true },
     );
- 
+
     const hasBotnoi = await BotnoiMapping.findOne({
       customerId: link.customerId,
       status: "active",
@@ -608,7 +615,7 @@ app.post(
     return { lineConnection: updated, setupStatus };
   }),
 );
- 
+
 // ✅ Mongoose — Admin customers list
 app.get(
   "/api/admin/customers",
@@ -627,12 +634,12 @@ app.get(
     return { customers: result, total: result.length };
   }),
 );
- 
+
 // ✅ API endpoint catalog
 app.get("/api/admin/api-endpoints", (_req, res) => {
   res.json(ok(apiEndpointCatalog, { total: apiEndpointCatalog.length }));
 });
- 
+
 // ✅ Automation jobs (in-memory)
 app.get(
   "/api/admin/automation/jobs",
@@ -646,7 +653,7 @@ app.get(
     return { jobs, total: jobs.length };
   }),
 );
- 
+
 app.post(
   "/api/admin/automation/jobs/:id/retry",
   route((req) => {
@@ -655,7 +662,7 @@ app.post(
     return result;
   }),
 );
- 
+
 app.post(
   "/api/admin/automation/jobs/:id/cancel",
   route((req) => {
@@ -664,12 +671,12 @@ app.post(
     return result;
   }),
 );
- 
+
 app.post(
   "/api/admin/automation/run-now",
   route(() => runDueAutomationJobs()),
 );
- 
+
 app.get(
   "/api/admin/automation/health",
   route(() => ({
@@ -689,7 +696,7 @@ app.get(
     },
   })),
 );
- 
+
 // ✅ Mongoose — Admin botnoi mapping
 app.patch(
   "/api/admin/customers/:id/botnoi-mapping",
@@ -701,16 +708,16 @@ app.patch(
         botnoiContactId: z.string().min(1),
       })
       .parse(req.body);
- 
+
     const customer = await Customer.findById(req.params.id);
     if (!customer) throw new Error("Customer not found");
- 
+
     const existing = await BotnoiMapping.findOne({
       customerId: customer._id,
       botnoiBotId: input.botnoiBotId,
       botnoiContactId: input.botnoiContactId,
     });
- 
+
     const mapping = existing
       ? await BotnoiMapping.findByIdAndUpdate(
           existing._id,
@@ -728,33 +735,60 @@ app.patch(
           elderProfileId: input.elderProfileId || null,
           status: "active",
         });
- 
+
     const hasLine = await LineConnection.findOne({ customerId: customer._id, status: "linked" });
     const setupStatus = hasLine ? "ready" : "waiting_line";
     await Customer.findByIdAndUpdate(customer._id, { setupStatus });
     return { mapping, setupStatus };
   }),
 );
- 
+
+// ============================================================
+// ✅ NEW — Botnoi ดึงข้อมูลผู้สูงอายุก่อนโทร
+// ============================================================
+
+app.get(
+  "/api/botnoi/elder/:phone",
+  route(async (req) => {
+    const phone = req.params.phone;
+
+    const elder = await ElderProfile.findOne({ phone });
+    if (!elder) throw new Error("Elder not found");
+
+    const customer = await Customer.findById(elder.customerId);
+    if (!customer) throw new Error("Customer not found");
+
+    return {
+      elder_phone:    elder.phone,
+      relationship:   elder.relationship,  // <<Relatives>> เช่น "ยาย", "แม่", "พ่อ"
+      elder_name:     elder.name,          // <<Relative_name>> ชื่อเต็มผู้สูงอายุ
+      elder_nickname: elder.nickname,      // ชื่อเล่น (ใช้เรียกในบทสนทนาถ้ามี)
+      customer_name:  customer.payerName,  // <<Customer_name>> ชื่อลูกหลาน
+      ai_name:        "น้องคอลใจ",         // <<AI_name>>
+      note:           elder.note,          // โน้ตพิเศษ เช่น ยาที่ต้องกิน
+    };
+  }),
+);
+
 // ✅ Mongoose — Botnoi call-feedback
 app.post(
   "/api/botnoi/call-feedback",
   route(async (req) => {
     const input = callFeedbackSchema.parse(req.body);
- 
+
     const mapping = await BotnoiMapping.findOne({
       botnoiBotId: input.botnoiBotId,
       botnoiContactId: input.botnoiContactId,
     });
- 
+
     if (!mapping) throw new Error("Botnoi mapping not found");
- 
+
     const elderProfile = await ElderProfile.findById(mapping.elderProfileId);
     const elderName = elderProfile?.nickname || elderProfile?.name || "ผู้สูงอายุ";
- 
+
     const alertLevel: AlertLevel =
       input.callStatus !== "answered" ? "watch" : input.tags?.symptom ? "urgent" : "info";
- 
+
     const log = await CallFeedbackLog.create({
       botnoiBotId: input.botnoiBotId,
       botnoiContactId: input.botnoiContactId,
@@ -771,7 +805,7 @@ app.post(
       today_activity: input.tags?.today_activity ?? null,
       caring_message: input.tags?.caring_message ?? null,
     });
- 
+
     const notification = await NotificationLog.create({
       customerId: mapping.customerId,
       elderName,
@@ -790,7 +824,7 @@ app.post(
         "NongCallJai เป็นบริการถามไถ่และส่งสรุปให้ครอบครัว ไม่วินิจฉัยโรค ไม่สั่งยา และไม่ปรับยา",
       deliveryStatus: "pending",
     });
- 
+
     createAutomationJob({
       type: "call_feedback_process",
       customerId: mapping.customerId.toString(),
@@ -809,11 +843,11 @@ app.post(
       scheduledAt: new Date().toISOString(),
       payload: { notificationId: notification._id.toString(), alertLevel },
     });
- 
+
     return { log, notification, alertLevel };
   }),
 );
- 
+
 // ✅ Mongoose — Notification payload
 app.get(
   "/api/line/notification-payloads/:id",
@@ -823,7 +857,7 @@ app.get(
     return notification;
   }),
 );
- 
+
 // ✅ LINE Webhook (signature verify)
 app.post("/api/line/webhook", (req: RawBodyRequest, res) => {
   const signature = verifyLineSignature(req);
@@ -850,13 +884,13 @@ app.post("/api/line/webhook", (req: RawBodyRequest, res) => {
     res.status(500).json(fail("INTERNAL_ERROR", message));
   }
 });
- 
+
 // ✅ Mongoose — LINE push test
 app.post(
   "/api/line/push-test",
   route(async (req) => {
     const input = linePushTestSchema.parse(req.body);
- 
+
     const notification = await NotificationLog.create({
       customerId: new Types.ObjectId(input.customerId),
       elderName: input.elderName,
@@ -867,7 +901,7 @@ app.post(
       safeNote: input.safeNote,
       deliveryStatus: "pending",
     });
- 
+
     let lineSent = false;
     const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
     if (accessToken && !accessToken.includes("...")) {
@@ -895,7 +929,7 @@ app.post(
         lineSent = true;
       }
     }
- 
+
     return {
       notification,
       lineSent,
@@ -905,12 +939,12 @@ app.post(
     };
   }),
 );
- 
+
 // ✅ Mongoose — Botnoi Webhook (format ตรงจาก Botnoi)
 app.post("/api/botnoi/webhook", async (req, res) => {
   try {
     const body = req.body;
- 
+
     const log = await CallFeedbackLog.create({
       botnoiBotId: body.bot_id ?? "",
       botnoiContactId: body.contact_id ?? "",
@@ -923,23 +957,23 @@ app.post("/api/botnoi/webhook", async (req, res) => {
       meal: body.tags?.meal ?? null,
       meal_detail: body.tags?.meal_detail ?? null,
       medication_status: body.tags?.medication_status ?? null,
-      medication_detail: body.tags?.medication_detail ?? null,
+      medication_detail: body.tags?.meal_detail ?? null,
       today_activity: body.tags?.today_activity ?? null,
       caring_message: body.tags?.caring_message ?? null,
     });
- 
+
     const mapping = await BotnoiMapping.findOne({
       botnoiBotId: body.bot_id ?? "",
       botnoiContactId: body.contact_id ?? "",
     });
- 
+
     let lineSent = false;
     if (mapping) {
       const [lineConnection, elderProfile] = await Promise.all([
         LineConnection.findOne({ customerId: mapping.customerId, status: "linked" }),
         ElderProfile.findById(mapping.elderProfileId),
       ]);
- 
+
       if (lineConnection?.lineUserId) {
         const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
         if (accessToken && !accessToken.includes("...")) {
@@ -951,7 +985,7 @@ app.post("/api/botnoi/webhook", async (req, res) => {
           const act = body.tags?.today_activity ? `📝 ${body.tags.today_activity}` : "-";
           const msg = body.tags?.caring_message ? `\n💌 ${body.tags.caring_message}` : "";
           const text = `🔔 น้องคอลใจรายงานสุขภาพ ${elderName}\n\n${meal}\n${med}\n🏃 กิจวัตร: ${act}${msg}\n\n⚠️ NongCallJai เป็นบริการถามไถ่ ไม่วินิจฉัยโรค`;
- 
+
           await fetch("https://api.line.me/v2/bot/message/push", {
             method: "POST",
             headers: {
@@ -967,18 +1001,17 @@ app.post("/api/botnoi/webhook", async (req, res) => {
         }
       }
     }
- 
+
     res.json({ ok: true, data: log, lineSent });
   } catch (err: any) {
     res.status(500).json({ ok: false, error: err.message });
   }
 });
- 
+
 // ============================================================
-// Start Server — ✅ ใช้ port จาก process.env.PORT (Render)
+// Start Server
 // ============================================================
- 
+
 app.listen(port, () => {
   console.log(`✅ NongCallJai API listening on port ${port}`);
 });
- 
