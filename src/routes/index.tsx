@@ -97,6 +97,15 @@ const faqs = [
 ] as const;
 
 function LandingPage() {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = new URLSearchParams(window.location.search).get("token");
+      if (token && token.startsWith("line-")) {
+        window.location.replace(`/line-connect?token=${token}`);
+      }
+    }
+  }, []);
+
   return (
     <main className="vm-public-shell text-[#17221c]">
       <TopNav />
