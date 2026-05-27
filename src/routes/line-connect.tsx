@@ -1,5 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2, Clock, Copy, RefreshCw, Smartphone } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  Copy,
+  MessageCircle,
+  RefreshCw,
+  Smartphone,
+} from "lucide-react";
 import { MascotIcon } from "@/components/MascotIcon";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -65,7 +73,8 @@ function LineConnectPage() {
             }
             liff.closeWindow();
           } else {
-            window.location.href = "https://lin.ee/ZbCYdSN";
+            window.location.href =
+              import.meta.env.VITE_LINE_OA_ADD_FRIEND_URL || "https://lin.ee/ZbCYdSN";
           }
         }, 1200);
       } catch (error) {
@@ -202,7 +211,8 @@ function LineConnectPage() {
                   }
                   liff.closeWindow();
                 } else {
-                  window.location.href = "https://lin.ee/ZbCYdSN";
+                  window.location.href =
+                    import.meta.env.VITE_LINE_OA_ADD_FRIEND_URL || "https://lin.ee/ZbCYdSN";
                 }
               }}
               className="vm-primary-btn mt-6 w-full"
@@ -328,6 +338,16 @@ function LineConnectPage() {
               ไปหน้ารอสถานะ
               <ArrowRight className="h-4 w-4" />
             </button>
+
+            <a
+              href={import.meta.env.VITE_LINE_OA_ADD_FRIEND_URL || "https://lin.ee/ZbCYdSN"}
+              target="_blank"
+              rel="noreferrer"
+              className="vm-primary-btn mt-3 w-full border-none bg-[#06c755] text-white hover:bg-[#05b34c]"
+            >
+              <MessageCircle className="h-4 w-4" />
+              เพิ่มเพื่อน LINE Bot (NongCallJai)
+            </a>
 
             <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <span className="h-2 w-2 rounded-full bg-[#06c755]" />
