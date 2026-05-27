@@ -10,6 +10,12 @@ import type { MascotVariant } from "@/components/MascotIcon";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      token: search.token as string | undefined,
+      "liff.state": search["liff.state"] as string | undefined,
+    };
+  },
   component: LandingPage,
 });
 
@@ -99,7 +105,15 @@ const faqs = [
 function LandingPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const token = new URLSearchParams(window.location.search).get("token");
+      const searchParams = new URLSearchParams(window.location.search);
+      let token = searchParams.get("token");
+      
+      const liffState = searchParams.get("liff.state");
+      if (liffState) {
+        const stateParams = new URLSearchParams(liffState.startsWith('?') ? liffState : `?${liffState}`);
+        if (!token) token = stateParams.get("token");
+      }
+
       if (token && token.startsWith("line-")) {
         window.location.replace(`/line-connect?token=${token}`);
       }
