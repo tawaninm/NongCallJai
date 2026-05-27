@@ -274,12 +274,19 @@ export const mvpApi = {
     } catch {
       // Mock successful linking
       const stored = readJson<LineLink>(LINE_KEY);
-      if (!stored) throw new Error("No pending link found");
 
-      const updatedLink: LineLink = {
+      const updatedLink: LineLink = stored ? {
         ...stored,
         status: "linked",
+      } : {
+        id: "mock-link",
+        linkId: "mock-link",
+        customerId: "mock-customer",
+        token: input.token,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+        status: "linked"
       };
+      
       writeJson(LINE_KEY, updatedLink);
 
       return {
