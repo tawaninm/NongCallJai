@@ -72,7 +72,8 @@ function LineConnectPage() {
               console.error("Failed to send message", err);
             }
           }
-          window.location.href = import.meta.env.VITE_LINE_OA_ADD_FRIEND_URL || "https://lin.ee/ZbCYdSN";
+          window.location.href =
+            import.meta.env.VITE_LINE_OA_ADD_FRIEND_URL || "https://lin.ee/ZbCYdSN";
         }, 1200);
       } catch (error) {
         if (cancelled) return;
@@ -207,7 +208,8 @@ function LineConnectPage() {
                     console.error("Failed to send message", err);
                   }
                 }
-                window.location.href = import.meta.env.VITE_LINE_OA_ADD_FRIEND_URL || "https://lin.ee/ZbCYdSN";
+                window.location.href =
+                  import.meta.env.VITE_LINE_OA_ADD_FRIEND_URL || "https://lin.ee/ZbCYdSN";
               }}
               className="vm-primary-btn mt-6 w-full"
             >

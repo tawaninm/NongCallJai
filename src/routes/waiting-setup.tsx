@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { MessageCircle } from "lucide-react";
 import { MascotIcon } from "@/components/MascotIcon";
 import type { MascotVariant } from "@/components/MascotIcon";
 import { NongCallJaiMascot } from "@/components/NongCallJaiMascot";
@@ -35,7 +36,14 @@ function WaitingSetupPage() {
                 <Step mascot="bot" title="ตั้งค่า Botnoi" text="รอ mapping bot/contact" />
               </div>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link to="/admin/customers" className="vm-primary-btn">
+                <a
+                  href={import.meta.env.VITE_LINE_OA_ADD_FRIEND_URL || "https://lin.ee/ZbCYdSN"}
+                  className="vm-primary-btn border-none bg-[#06c755] text-white hover:bg-[#05b34c]"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  เปิดเข้าแชทบอท LINE
+                </a>
+                <Link to="/admin/customers" className="vm-secondary-btn">
                   เปิดหน้า admin setup
                 </Link>
                 <Link to="/" className="vm-secondary-btn">
