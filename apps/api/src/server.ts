@@ -73,15 +73,17 @@ const Subscription = models.subscriptions || model("subscriptions", Subscription
 // --- ElderProfile ---
 const ElderProfileSchema = new Schema(
   {
-    customerId: { type: Schema.Types.ObjectId, ref: "customers", required: true },
+    familyAccountId: { type: Schema.Types.ObjectId, default: null },
     name: { type: String, required: true },
-    nickname: { type: String, default: null },
+    Relative_name: { type: String, default: null },  // ชื่อเล่น <<Relative_name>>
     phone: { type: String, required: true },
-    relationship: { type: String, required: true },
-    note: { type: String, default: null },
-    consentGranted: { type: Boolean, default: false },
+    relatives: { type: String, default: null },       // ความสัมพันธ์ <<Relatives>>
+    Customer_name: { type: String, default: null },   // ชื่อลูกหลาน <<Customer_name>>
+    regCode: { type: String, default: null },
+    careNote: { type: String, default: null },
+    age: { type: Number, default: null },
   },
-  { timestamps: true },
+  { timestamps: true, strict: false },
 );
 const ElderProfile = models.elderprofiles || model("elderprofiles", ElderProfileSchema);
 
@@ -755,17 +757,14 @@ app.get(
     const elder = await ElderProfile.findOne({ phone });
     if (!elder) throw new Error("Elder not found");
 
-    const customer = await Customer.findById(elder.customerId);
-    if (!customer) throw new Error("Customer not found");
-
     return {
       elder_phone:    elder.phone,
-      relationship:   elder.relationship,  // <<Relatives>> เช่น "ยาย", "แม่", "พ่อ"
-      elder_name:     elder.name,          // <<Relative_name>> ชื่อเต็มผู้สูงอายุ
-      elder_nickname: elder.nickname,      // ชื่อเล่น (ใช้เรียกในบทสนทนาถ้ามี)
-      customer_name:  customer.payerName,  // <<Customer_name>> ชื่อลูกหลาน
-      ai_name:        "น้องคอลใจ",         // <<AI_name>>
-      note:           elder.note,          // โน้ตพิเศษ เช่น ยาที่ต้องกิน
+      Relatives:      (elder as any).relatives,      // <<Relatives>> เช่น "ยาย", "แม่"
+      Relative_name:  (elder as any).Relative_name,  // <<Relative_name>> ชื่อเล่น
+      elder_name:     elder.name,                    // ชื่อเต็ม
+      Customer_name:  (elder as any).Customer_name,  // <<Customer_name>> ชื่อลูกหลาน
+      ai_name:        "น้องคอลใจ",                   // <<AI_name>>
+      note:           (elder as any).careNote,       // โน้ตพิเศษ
     };
   }),
 );
@@ -799,18 +798,15 @@ app.get(
     const elder = await ElderProfile.findById(mapping.elderProfileId);
     if (!elder) throw new Error("Elder profile not found");
 
-    const customer = await Customer.findById(mapping.customerId);
-    if (!customer) throw new Error("Customer not found");
-
     return {
-      elder_phone:      elder.phone,
-      relationship:     elder.relationship,   // <<Relatives>>
-      elder_name:       elder.name,           // <<Relative_name>>
-      elder_nickname:   elder.nickname,       // ชื่อเล่น
-      customer_name:    customer.payerName,   // <<Customer_name>>
-      ai_name:          "น้องคอลใจ",          // <<AI_name>>
-      note:             elder.note,           // โน้ตพิเศษ เช่น ยาที่ต้องกิน
-      botnoi_bot_id:    mapping.botnoiBotId,
+      elder_phone:       elder.phone,
+      Relatives:         (elder as any).relatives,      // <<Relatives>>
+      Relative_name:     (elder as any).Relative_name,  // <<Relative_name>>
+      elder_name:        elder.name,                    // ชื่อเต็ม
+      Customer_name:     (elder as any).Customer_name,  // <<Customer_name>>
+      ai_name:           "น้องคอลใจ",                   // <<AI_name>>
+      note:              (elder as any).careNote,       // โน้ตพิเศษ
+      botnoi_bot_id:     mapping.botnoiBotId,
       botnoi_contact_id: mapping.botnoiContactId,
     };
   }),
