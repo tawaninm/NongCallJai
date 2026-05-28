@@ -770,6 +770,52 @@ app.get(
   }),
 );
 
+// ============================================================
+// ✅ NEW — Botnoi ดึงข้อมูลคนถัดไปที่ต้องโทร (Outbound)
+// ============================================================
+
+app.get(
+  "/api/botnoi/next-call",
+  route(async () => {
+    // หา elder ที่ยังไม่ได้โทรวันนี้
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    // หา contactId ที่โทรไปแล้ววันนี้
+    const calledTodayLogs = await CallFeedbackLog.find({
+      startedAt: { $gte: todayStart },
+    }).select("botnoiContactId");
+
+    const calledContactIds = calledTodayLogs.map((log: any) => log.botnoiContactId);
+
+    // หา mapping ที่ยังไม่ได้โทรวันนี้ และ status active
+    const mapping = await BotnoiMapping.findOne({
+      status: "active",
+      botnoiContactId: { $nin: calledContactIds },
+    }).sort({ createdAt: 1 });
+
+    if (!mapping) throw new Error("No pending calls for today");
+
+    const elder = await ElderProfile.findById(mapping.elderProfileId);
+    if (!elder) throw new Error("Elder profile not found");
+
+    const customer = await Customer.findById(mapping.customerId);
+    if (!customer) throw new Error("Customer not found");
+
+    return {
+      elder_phone:      elder.phone,
+      relationship:     elder.relationship,   // <<Relatives>>
+      elder_name:       elder.name,           // <<Relative_name>>
+      elder_nickname:   elder.nickname,       // ชื่อเล่น
+      customer_name:    customer.payerName,   // <<Customer_name>>
+      ai_name:          "น้องคอลใจ",          // <<AI_name>>
+      note:             elder.note,           // โน้ตพิเศษ เช่น ยาที่ต้องกิน
+      botnoi_bot_id:    mapping.botnoiBotId,
+      botnoi_contact_id: mapping.botnoiContactId,
+    };
+  }),
+);
+
 // ✅ Mongoose — Botnoi call-feedback
 app.post(
   "/api/botnoi/call-feedback",
