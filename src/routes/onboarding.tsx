@@ -11,11 +11,11 @@ export const Route = createFileRoute("/onboarding")({
 function OnboardingPage() {
   const navigate = useNavigate();
   const customer = mvpApi.getStoredCustomer();
-  const [name, setName] = useState("สมชาย วงศ์สุวรรณ");
-  const [nickname, setNickname] = useState("คุณตาชาย");
+  const [name, setName] = useState("นางละออง ศรีวิชัย");
+  const [nickname, setNickname] = useState("ละออง");
   const [age, setAge] = useState("");
-  const [phone, setPhone] = useState("081-234-5678");
-  const [relationship, setRelationship] = useState("ตา");
+  const [phone, setPhone] = useState("0968985614 ");
+  const [relationship, setRelationship] = useState("ยาย");
   const [note, setNote] = useState(
     "ชอบให้โทรช่วงเช้า ใช้น้ำเสียงอ่อนโยน และส่งสรุปให้ครอบครัวผ่าน LINE",
   );
