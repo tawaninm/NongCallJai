@@ -61,6 +61,20 @@ function AdminCustomersPage() {
                 <p className="mt-2 text-xs text-muted-foreground">
                   {customer.lineConnections[0]?.status ?? "not started"}
                 </p>
+                {customer.lineConnections[0]?.displayName && (
+                  <div className="mt-3 flex items-center gap-2">
+                    {customer.lineConnections[0].pictureUrl && (
+                      <img
+                        src={customer.lineConnections[0].pictureUrl}
+                        alt="Profile"
+                        className="h-6 w-6 rounded-full"
+                      />
+                    )}
+                    <span className="text-xs font-semibold">
+                      {customer.lineConnections[0].displayName}
+                    </span>
+                  </div>
+                )}
                 <p className="mt-2 break-all text-xs text-muted-foreground">
                   {customer.lineConnections[0]?.token ?? "no token"}
                 </p>

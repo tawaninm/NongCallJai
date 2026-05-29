@@ -75,10 +75,10 @@ const ElderProfileSchema = new Schema(
   {
     familyAccountId: { type: Schema.Types.ObjectId, default: null },
     name: { type: String, required: true },
-    Relative_name: { type: String, default: null },  // ชื่อเล่น <<Relative_name>>
+    Relative_name: { type: String, default: null }, // ชื่อเล่น <<Relative_name>>
     phone: { type: String, required: true },
-    relatives: { type: String, default: null },       // ความสัมพันธ์ <<Relatives>>
-    Customer_name: { type: String, default: null },   // ชื่อลูกหลาน <<Customer_name>>
+    relatives: { type: String, default: null }, // ความสัมพันธ์ <<Relatives>>
+    Customer_name: { type: String, default: null }, // ชื่อลูกหลาน <<Customer_name>>
     regCode: { type: String, default: null },
     careNote: { type: String, default: null },
     age: { type: Number, default: null },
@@ -141,8 +141,7 @@ const CallFeedbackLogSchema = new Schema(
   },
   { timestamps: true },
 );
-const CallFeedbackLog =
-  models.callfeedbacklogs || model("callfeedbacklogs", CallFeedbackLogSchema);
+const CallFeedbackLog = models.callfeedbacklogs || model("callfeedbacklogs", CallFeedbackLogSchema);
 
 // --- NotificationLog ---
 const NotificationLogSchema = new Schema(
@@ -159,8 +158,7 @@ const NotificationLogSchema = new Schema(
   },
   { timestamps: true },
 );
-const NotificationLog =
-  models.notificationlogs || model("notificationlogs", NotificationLogSchema);
+const NotificationLog = models.notificationlogs || model("notificationlogs", NotificationLogSchema);
 
 // ============================================================
 // Express Setup
@@ -427,8 +425,7 @@ function verifyLineSignature(req: RawBodyRequest) {
     .digest("base64");
   const expected = Buffer.from(expectedSignature);
   const received = Buffer.from(signature);
-  const matches =
-    expected.length === received.length && crypto.timingSafeEqual(expected, received);
+  const matches = expected.length === received.length && crypto.timingSafeEqual(expected, received);
   return matches
     ? { ok: true as const }
     : {
@@ -758,13 +755,13 @@ app.get(
     if (!elder) throw new Error("Elder not found");
 
     return {
-      elder_phone:    elder.phone,
-      Relatives:      (elder as any).relatives,      // <<Relatives>> เช่น "ยาย", "แม่"
-      Relative_name:  (elder as any).Relative_name,  // <<Relative_name>> ชื่อเล่น
-      elder_name:     elder.name,                    // ชื่อเต็ม
-      Customer_name:  (elder as any).Customer_name,  // <<Customer_name>> ชื่อลูกหลาน
-      ai_name:        "น้องคอลใจ",                   // <<AI_name>>
-      note:           (elder as any).careNote,       // โน้ตพิเศษ
+      elder_phone: elder.phone,
+      Relatives: (elder as any).relatives, // <<Relatives>> เช่น "ยาย", "แม่"
+      Relative_name: (elder as any).Relative_name, // <<Relative_name>> ชื่อเล่น
+      elder_name: elder.name, // ชื่อเต็ม
+      Customer_name: (elder as any).Customer_name, // <<Customer_name>> ชื่อลูกหลาน
+      ai_name: "น้องคอลใจ", // <<AI_name>>
+      note: (elder as any).careNote, // โน้ตพิเศษ
     };
   }),
 );
@@ -799,14 +796,14 @@ app.get(
     if (!elder) throw new Error("Elder profile not found");
 
     return {
-      elder_phone:       elder.phone,
-      Relatives:         (elder as any).relatives,      // <<Relatives>>
-      Relative_name:     (elder as any).Relative_name,  // <<Relative_name>>
-      elder_name:        elder.name,                    // ชื่อเต็ม
-      Customer_name:     (elder as any).Customer_name,  // <<Customer_name>>
-      ai_name:           "น้องคอลใจ",                   // <<AI_name>>
-      note:              (elder as any).careNote,       // โน้ตพิเศษ
-      botnoi_bot_id:     mapping.botnoiBotId,
+      elder_phone: elder.phone,
+      Relatives: (elder as any).relatives, // <<Relatives>>
+      Relative_name: (elder as any).Relative_name, // <<Relative_name>>
+      elder_name: elder.name, // ชื่อเต็ม
+      Customer_name: (elder as any).Customer_name, // <<Customer_name>>
+      ai_name: "น้องคอลใจ", // <<AI_name>>
+      note: (elder as any).careNote, // โน้ตพิเศษ
+      botnoi_bot_id: mapping.botnoiBotId,
       botnoi_contact_id: mapping.botnoiContactId,
     };
   }),
@@ -852,9 +849,7 @@ app.post(
       customerId: mapping.customerId,
       elderName,
       title:
-        input.callStatus === "answered"
-          ? "น้องคอลใจโทรสำเร็จแล้ว"
-          : "น้องคอลใจมีสายที่ควรตรวจสอบ",
+        input.callStatus === "answered" ? "น้องคอลใจโทรสำเร็จแล้ว" : "น้องคอลใจมีสายที่ควรตรวจสอบ",
       summary:
         input.summary ||
         (input.callStatus === "answered"
