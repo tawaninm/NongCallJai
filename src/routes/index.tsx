@@ -10,7 +10,7 @@ import type { MascotVariant } from "@/components/MascotIcon";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
-  validateSearch: (search: Record<string, unknown>) => {
+  validateSearch: (search: Record<string, unknown>): { token?: string; "liff.state"?: string } => {
     return {
       token: search.token as string | undefined,
       "liff.state": search["liff.state"] as string | undefined,
@@ -107,10 +107,12 @@ function LandingPage() {
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);
       let token = searchParams.get("token");
-      
+
       const liffState = searchParams.get("liff.state");
       if (liffState) {
-        const stateParams = new URLSearchParams(liffState.startsWith('?') ? liffState : `?${liffState}`);
+        const stateParams = new URLSearchParams(
+          liffState.startsWith("?") ? liffState : `?${liffState}`,
+        );
         if (!token) token = stateParams.get("token");
       }
 

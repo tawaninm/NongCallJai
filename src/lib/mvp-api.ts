@@ -49,6 +49,9 @@ export type LineLink = {
   status: "pending" | "linked" | "expired" | "used" | "failed";
   liffUrl?: string;
   pollIntervalMs?: number;
+  lineUserId?: string;
+  displayName?: string;
+  pictureUrl?: string;
 };
 
 export type LineLinkStatus = {
@@ -279,6 +282,9 @@ export const mvpApi = {
         ? {
             ...stored,
             status: "linked",
+            lineUserId: input.lineUserId,
+            displayName: input.displayName,
+            pictureUrl: input.pictureUrl,
           }
         : {
             id: "mock-link",
@@ -287,6 +293,9 @@ export const mvpApi = {
             token: input.token,
             expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
             status: "linked",
+            lineUserId: input.lineUserId,
+            displayName: input.displayName,
+            pictureUrl: input.pictureUrl,
           };
 
       writeJson(LINE_KEY, updatedLink);
