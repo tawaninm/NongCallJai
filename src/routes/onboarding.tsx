@@ -100,21 +100,31 @@ function OnboardingPage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={() => setNote("ชอบให้โทรช่วงเช้า (08:00-10:00 น.), ชอบคุยเรื่องต้นไม้และข่าวสาร, ไม่ชอบเสียงดัง, มีอาการเข่าปวดเวลาเดินนาน, ส่งสรุปผลให้ครอบครัวผ่าน LINE")}
+                  onClick={() =>
+                    setNote(
+                      "ชอบให้โทรช่วงเช้า (08:00-10:00 น.), ชอบคุยเรื่องต้นไม้และข่าวสาร, ไม่ชอบเสียงดัง, มีอาการเข่าปวดเวลาเดินนาน, ส่งสรุปผลให้ครอบครัวผ่าน LINE",
+                    )
+                  }
                   className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
                 >
                   + แบบผู้สูงอายุทั่วไป
                 </button>
                 <button
                   type="button"
-                  onClick={() => setNote("สะดวกติดต่อช่วงเย็น (16:00-18:00 น.), ต้องเตือนทานยาหลังอาหาร, มีโรคประจำตัว (เบาหวาน), ส่งสรุปผลให้ครอบครัว")}
+                  onClick={() =>
+                    setNote(
+                      "สะดวกติดต่อช่วงเย็น (16:00-18:00 น.), ต้องเตือนทานยาหลังอาหาร, มีโรคประจำตัว (เบาหวาน), ส่งสรุปผลให้ครอบครัว",
+                    )
+                  }
                   className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
                 >
                   + เน้นการดูแล / ทานยา
                 </button>
                 <button
                   type="button"
-                  onClick={() => setNote("เวลาที่สะดวกติดต่อ: \nสิ่งที่ชอบ/ไม่ชอบ: \nข้อควรระวัง: ")}
+                  onClick={() =>
+                    setNote("เวลาที่สะดวกติดต่อ: \nสิ่งที่ชอบ/ไม่ชอบ: \nข้อควรระวัง: ")
+                  }
                   className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
                 >
                   + โครงสร้างแบบสั้น
