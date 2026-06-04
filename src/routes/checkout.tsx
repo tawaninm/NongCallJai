@@ -20,7 +20,7 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState("standard");
-  const [payerName, setPayerName] = useState("คุณภัทร");
+  const [payerName, setPayerName] = useState("วุ้น");
   const [phone, setPhone] = useState("089-111-2244");
   const [email, setEmail] = useState("family@example.com");
   const [loading, setLoading] = useState(false);
@@ -75,11 +75,10 @@ function CheckoutPage() {
                     <button
                       key={item.id}
                       onClick={() => setSelectedPlan(item.id)}
-                      className={`rounded-2xl border p-4 text-left transition ${
-                        item.id === selectedPlan
+                      className={`rounded-2xl border p-4 text-left transition ${item.id === selectedPlan
                           ? "border-primary bg-primary/10"
                           : "bg-white/70 hover:bg-white"
-                      }`}
+                        }`}
                     >
                       <p className="font-extrabold">{item.name}</p>
                       <p className="mt-2 text-2xl font-extrabold">฿{item.priceThb}</p>
