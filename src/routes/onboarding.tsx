@@ -16,9 +16,7 @@ function OnboardingPage() {
   const [age, setAge] = useState("");
   const [phone, setPhone] = useState("081-234-5678");
   const [relationship, setRelationship] = useState("ตา");
-  const [note, setNote] = useState(
-    "ชอบให้โทรช่วงเช้า ใช้น้ำเสียงอ่อนโยน และส่งสรุปให้ครอบครัวผ่าน LINE",
-  );
+  const [note, setNote] = useState("");
   const [consentGranted, setConsentGranted] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -94,18 +92,42 @@ function OnboardingPage() {
               />
             </div>
 
-            <label className="mt-6 block">
+            <div className="mt-6 block">
               <span className="flex items-center gap-2 text-sm font-bold">
                 <MascotIcon variant="user" size="1.2rem" />
                 Note สำหรับทีมตั้งค่า
               </span>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setNote("ชอบให้โทรช่วงเช้า (08:00-10:00 น.), ชอบคุยเรื่องต้นไม้และข่าวสาร, ไม่ชอบเสียงดัง, มีอาการเข่าปวดเวลาเดินนาน, ส่งสรุปผลให้ครอบครัวผ่าน LINE")}
+                  className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+                >
+                  + แบบผู้สูงอายุทั่วไป
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNote("สะดวกติดต่อช่วงเย็น (16:00-18:00 น.), ต้องเตือนทานยาหลังอาหาร, มีโรคประจำตัว (เบาหวาน), ส่งสรุปผลให้ครอบครัว")}
+                  className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+                >
+                  + เน้นการดูแล / ทานยา
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNote("เวลาที่สะดวกติดต่อ: \nสิ่งที่ชอบ/ไม่ชอบ: \nข้อควรระวัง: ")}
+                  className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+                >
+                  + โครงสร้างแบบสั้น
+                </button>
+              </div>
               <textarea
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
+                placeholder="ตัวอย่าง: ชอบให้โทรช่วงเช้า (08:00-10:00 น.), ชอบคุยเรื่องต้นไม้และข่าวสาร, ไม่ชอบเสียงดัง, มีอาการเข่าปวดเวลาเดินนาน, ส่งสรุปผลให้ครอบครัวผ่าน LINE"
                 rows={5}
-                className="mt-2 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                className="mt-3 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
               />
-            </label>
+            </div>
 
             <label className="mt-5 flex items-start gap-3 rounded-2xl border bg-white/70 p-4">
               <input
@@ -166,7 +188,7 @@ function Field({
           type={type}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="mt-2 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+          className="mt-2 w-full rounded-2xl border bg-white/80 px-4 py-3 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
       )}
     </label>
