@@ -1,6 +1,56 @@
 # Patch Log
 
-Current version: v0.3.3
+Current version: v0.3.4
+
+## v0.3.4 - 2026-06-05
+
+Type:
+Backend / Deployment / Data / Docs
+
+Summary:
+
+- Added `api/backend.ts` as the dedicated Vercel Express API function while preserving `api/index.js` as the TanStack Start SSR bridge.
+- Updated `vercel.json` so `/api/*` routes to the backend function and all other paths continue to route to the frontend SSR handler.
+- Refactored the API into serverless-safe modules with `app.ts`, `db.ts`, `models.ts`, and local-only `server.ts`.
+- Added cached MongoDB Atlas/Mongoose connection handling with `MONGODB_URI` and Mongo-backed persistence for setup records, LINE links, Botnoi mappings, call feedback, notification payloads, automation jobs, and audit logs.
+- Changed the frontend MVP API client to call same-origin `/api` by default instead of the previous Render fallback URL.
+- Updated API docs, project structure docs, agent backend rules, env examples, and Prettier line-ending config for the Vercel/Mongo deployment path.
+
+Updated Markdown files:
+
+- .env.example
+- .agents/rules/01-target-architecture.md
+- .agents/rules/03-backend-api-rules.md
+- .agents/workflows/api-express-setup.md
+- docs/API_CONTRACTS.md
+- docs/CHANGELOG.md
+- docs/PATCH_LOG.md
+- docs/PROJECT_STRUCTURE.md
+
+Updated app/config files:
+
+- .prettierrc
+- api/backend.ts
+- apps/api/src/app.ts
+- apps/api/src/config.ts
+- apps/api/src/db.ts
+- apps/api/src/models.ts
+- apps/api/src/server.ts
+- package-lock.json
+- src/lib/mvp-api.ts
+- src/lib/patch-log.ts
+- src/routes/checkout.tsx
+- vercel.json
+
+Verification:
+
+- Dependency install: `npm install` completed; npm reported 11 moderate audit warnings.
+- API TypeScript: passed with `npx tsc -p apps/api/tsconfig.json --noEmit`.
+- Lint: passed with `npm run lint` and 9 existing fast-refresh warnings.
+- Build: passed with `npm run build`; Vite reported the existing large chunk warning and TanStack external import warnings.
+- API smoke: passed local Express checks for `GET /api/health`, `GET /api/plans`, `GET /api/admin/api-endpoints`, and no-secret `POST /api/line/webhook` returning `503 LINE_SECRET_MISSING`.
+- Vercel entrypoint smoke: passed `api/backend.ts` import check returning an Express handler function.
+- MongoDB-backed checkout/onboarding/LINE-link smoke was not run locally because no real `MONGODB_URI` is configured in this environment.
 
 ## v0.3.3 - 2026-05-18
 

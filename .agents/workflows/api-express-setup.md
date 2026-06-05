@@ -1,6 +1,6 @@
-# Workflow: Future Express API
+# Workflow: Vercel Express API
 
-Purpose: gradually replace frontend mock data.
+Purpose: maintain the Express API that gradually replaces frontend mock data and runs on Vercel Serverless.
 
 Steps:
 
@@ -10,6 +10,8 @@ Steps:
 4. Add family account, elder profile, bot config, call log, alert, report endpoints.
 5. Validate with Zod.
 6. Authorize by family role.
+7. Keep the serverless entrypoint under `api/backend.ts`.
+8. Cache Mongoose connections and use `MONGODB_URI` for MongoDB Atlas.
 
 Acceptance:
 

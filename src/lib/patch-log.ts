@@ -11,9 +11,49 @@ export type PatchLogEntry = {
   notes?: string[];
 };
 
-export const APP_VERSION = "v0.3.3";
+export const APP_VERSION = "v0.3.4";
 
 export const patchLogs: PatchLogEntry[] = [
+  {
+    version: "v0.3.4",
+    date: "2026-06-05",
+    category: "Architecture",
+    title: "Vercel serverless backend with MongoDB Atlas",
+    summary:
+      "Added a dedicated Vercel Express API function, preserved the TanStack Start SSR bridge, moved the API into serverless-safe app/db/models modules, persisted automation and audit data with Mongoose, and switched the frontend MVP client to same-origin /api calls.",
+    markdownFiles: [
+      ".env.example",
+      ".agents/rules/01-target-architecture.md",
+      ".agents/rules/03-backend-api-rules.md",
+      ".agents/workflows/api-express-setup.md",
+      "docs/API_CONTRACTS.md",
+      "docs/CHANGELOG.md",
+      "docs/PATCH_LOG.md",
+      "docs/PROJECT_STRUCTURE.md",
+    ],
+    appFiles: [
+      ".prettierrc",
+      "api/backend.ts",
+      "apps/api/src/app.ts",
+      "apps/api/src/config.ts",
+      "apps/api/src/db.ts",
+      "apps/api/src/models.ts",
+      "apps/api/src/server.ts",
+      "package-lock.json",
+      "src/lib/mvp-api.ts",
+      "src/lib/patch-log.ts",
+      "src/routes/checkout.tsx",
+      "vercel.json",
+    ],
+    status: "Completed",
+    buildResult:
+      "Passed: npm install (11 moderate audit warnings), npx tsc -p apps/api/tsconfig.json --noEmit, npm run lint (9 existing fast-refresh warnings), npm run build (existing Vite large chunk and TanStack external import warnings), local Express smoke for /api/health, /api/plans, /api/admin/api-endpoints, no-secret /api/line/webhook returning 503 LINE_SECRET_MISSING, and api/backend.ts import smoke returning an Express handler.",
+    notes: [
+      "Set MONGODB_URI in Vercel to a MongoDB Atlas URI before testing DB-backed checkout, onboarding, LINE link, Botnoi, and automation endpoints.",
+      "DATABASE_URL is only a legacy alias when it contains a MongoDB URI.",
+      "Family-facing web still does not expose raw transcripts, audio, diagnosis, prescriptions, or medication changes.",
+    ],
+  },
   {
     version: "v0.3.3",
     date: "2026-05-18",

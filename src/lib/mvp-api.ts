@@ -105,8 +105,12 @@ const ELDER_KEY = "voicemed_mvp_elder";
 const LINE_KEY = "voicemed_mvp_line";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const BASE_URL = import.meta.env?.VITE_PUBLIC_API_BASE_URL || "https://nongcalljai-api.onrender.com";
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const configuredBaseUrl = import.meta.env?.VITE_PUBLIC_API_BASE_URL?.trim();
+  const baseUrl =
+    configuredBaseUrl && !configuredBaseUrl.includes("your-domain.com")
+      ? configuredBaseUrl.replace(/\/$/, "")
+      : "";
+  const response = await fetch(`${baseUrl}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
