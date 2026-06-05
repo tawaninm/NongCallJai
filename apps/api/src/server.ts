@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import express from "express";
+import cors from "cors";
 import { z } from "zod";
 import mongoose from "mongoose";
 import { getLiffBaseUrl, isConfiguredEnv, readConfiguredEnv } from "./config.js";
@@ -165,6 +166,7 @@ const NotificationLog = models.notificationlogs || model("notificationlogs", Not
 // ============================================================
 
 const app = express();
+app.use(cors({ origin: ["https://nongcalljai.vercel.app", "http://localhost:5173"], credentials: true }));
 type RawBodyRequest = express.Request & { rawBody?: Buffer };
 app.use(
   express.json({
