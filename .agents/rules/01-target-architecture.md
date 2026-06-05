@@ -13,6 +13,6 @@ Prototype boundaries:
 Future backend:
 
 - Express.js + TypeScript.
-- PostgreSQL + Prisma.
+- MongoDB Atlas + Mongoose for the Vercel Serverless MVP backend.
 - Zod validation.
 - Typed API response shape under `/api`.

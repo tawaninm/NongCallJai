@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
-dotenv.config({ path: ".env.local", override: false });
-dotenv.config({ override: false });
+dotenv.config({ path: ".env.local", override: false, quiet: true });
+dotenv.config({ override: false, quiet: true });
 
 export function readConfiguredEnv(key: string) {
   const value = process.env[key]?.trim();

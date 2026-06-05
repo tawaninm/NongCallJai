@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.3.4 - 2026-06-05
+
+### Added
+
+- Added a dedicated Vercel backend function entrypoint for the Express API while preserving the existing TanStack Start SSR bridge for web routes.
+- Added serverless-safe MongoDB Atlas/Mongoose connection caching and persistent Mongoose models for customers, elders, LINE links, Botnoi mappings, call feedback, notification payloads, automation jobs, and audit logs.
+- Added Mongo-backed automation queue handling so jobs survive Vercel cold starts.
+
+### Changed
+
+- Routed `/api/*` to the new backend function and kept all other paths routed to the existing frontend SSR handler.
+- Changed the frontend API client to use same-origin `/api` calls by default instead of the previous Render fallback URL.
+- Updated environment docs and agent rules to use `MONGODB_URI` for MongoDB Atlas.
+- Allowed Prettier to respect checked-out line endings so Windows CRLF files do not break lint.
+
+### Notes
+
+- Real MongoDB, LINE, and Botnoi values must be configured in Vercel environment variables, not committed files.
+- Local DB-backed smoke tests require a real `MONGODB_URI`; non-DB API smoke tests passed without secrets.
+
 ## v0.3.3 - 2026-05-18
 
 ### Added

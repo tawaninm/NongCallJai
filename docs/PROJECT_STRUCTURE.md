@@ -1,8 +1,11 @@
 # Project Structure
 
-Current repository structure is a Vite/TanStack/React app with an MVP Express API added under `apps/api`.
+Current repository structure is a Vite/TanStack/React app with an MVP Express API added under `apps/api` and deployed through a dedicated Vercel Function.
 
 ```txt
+api/
+  backend.ts
+  index.js
 src/
   components/
     AppSidebar.tsx
@@ -35,7 +38,10 @@ src/
 apps/
   api/
     src/
+      app.ts
       contracts.ts
+      db.ts
+      models.ts
       server.ts
       store.ts
     tsconfig.json
@@ -45,4 +51,4 @@ prisma/
 
 Compatibility routes exist for old CareGo paths and should guide users to VoiceMed pages.
 
-The MVP API uses Express routes under `/api`, Zod validation, and an in-memory development store. `prisma/schema.prisma` defines the intended PostgreSQL data model for production database work.
+The MVP API uses Express routes under `/api`, Zod validation, Mongoose, and MongoDB Atlas. `api/backend.ts` exposes the serverless Vercel backend while `api/index.js` preserves the TanStack Start SSR bridge for normal website routes.
