@@ -10,7 +10,7 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       "/api": {
-        target: "http://localhost:8787",
+        target: "https://nongcalljai-api.onrender.com",
         changeOrigin: true,
       },
     },

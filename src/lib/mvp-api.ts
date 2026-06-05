@@ -105,7 +105,9 @@ const ELDER_KEY = "voicemed_mvp_elder";
 const LINE_KEY = "voicemed_mvp_line";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, {
+  const baseUrl = import.meta.env?.VITE_API_URL || "";
+  const url = path.startsWith("http") ? path : `${baseUrl}${path}`;
+  const response = await fetch(url, {
     ...init,
     headers: {
       "Content-Type": "application/json",
