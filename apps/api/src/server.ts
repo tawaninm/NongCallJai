@@ -2,15 +2,7 @@ import crypto from "node:crypto";
 import express from "express";
 import { z } from "zod";
 import mongoose from "mongoose";
-import { getLiffBaseUrl, isConfiguredEnv, readConfiguredEnv } from "./config.js";
-import {
-  db,
-  cancelAutomationJob,
-  createAutomationJob,
-  listAutomationJobs,
-  retryAutomationJob,
-  runDueAutomationJobs,
-} from "./store.js";
+import { isConfiguredEnv, readConfiguredEnv } from "./config.js";
 import type { AlertLevel, ApiResponse, AutomationJobStatus } from "./contracts.js";
 
 // ============================================================
@@ -25,8 +17,8 @@ const port = Number(process.env.PORT) || 8787;
 
 async function connectDB() {
   if (mongoose.connection.readyState >= 1) return;
-  const uri = process.env.DATABASE_URL;
-  if (!uri) throw new Error("DATABASE_URL is not set in .env");
+  const uri = process.env.MONGODB_URI || process.env.DATABASE_URL;
+  if (!uri) throw new Error("MONGODB_URI or DATABASE_URL is not set in .env");
   await mongoose.connect(uri);
   console.log("✅ MongoDB connected:", mongoose.connection.host);
 }
@@ -159,6 +151,29 @@ const NotificationLogSchema = new Schema(
   { timestamps: true },
 );
 const NotificationLog = models.notificationlogs || model("notificationlogs", NotificationLogSchema);
+
+// --- AutomationJob ---
+const AutomationJobSchema = new Schema(
+  {
+    type: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["queued", "running", "success", "failed", "retrying", "cancelled", "blocked"],
+      default: "queued",
+    },
+    customerId: { type: Schema.Types.ObjectId, ref: "customers", default: null },
+    elderProfileId: { type: Schema.Types.ObjectId, ref: "elderprofiles", default: null },
+    scheduledAt: { type: Date, required: true },
+    startedAt: { type: Date, default: null },
+    finishedAt: { type: Date, default: null },
+    attemptCount: { type: Number, default: 0 },
+    maxAttempts: { type: Number, default: 3 },
+    lastError: { type: String, default: null },
+    payload: { type: Schema.Types.Mixed, default: {} },
+  },
+  { timestamps: true },
+);
+const AutomationJob = models.automationjobs || model("automationjobs", AutomationJobSchema);
 
 // ============================================================
 // Express Setup
@@ -537,7 +552,7 @@ app.post(
       expiresAt,
       status: "pending",
     });
-    const liffBaseUrl = getLiffBaseUrl();
+    const liffBaseUrl = import.meta.env?.VITE_LIFF_BASE_URL || "https://liff.line.me/2010122231-05nw3NWg";
     return {
       ...link.toObject(),
       linkId: link._id.toString(),
@@ -639,61 +654,80 @@ app.get("/api/admin/api-endpoints", (_req, res) => {
   res.json(ok(apiEndpointCatalog, { total: apiEndpointCatalog.length }));
 });
 
-// ✅ Automation jobs (in-memory)
+// ✅ Automation jobs (Mongoose)
 app.get(
   "/api/admin/automation/jobs",
-  route((req) => {
+  route(async (req) => {
     const status = req.query.status
       ? z
           .enum(["queued", "running", "success", "failed", "retrying", "cancelled", "blocked"])
           .parse(req.query.status)
       : undefined;
-    const jobs = listAutomationJobs(status as AutomationJobStatus | undefined);
+    const filter = status ? { status } : {};
+    const jobs = await AutomationJob.find(filter).sort({ createdAt: -1 });
     return { jobs, total: jobs.length };
   }),
 );
 
 app.post(
   "/api/admin/automation/jobs/:id/retry",
-  route((req) => {
-    const result = retryAutomationJob(String(req.params.id));
-    if ("error" in result) throw new Error(`Automation retry ${result.error}`);
-    return result;
+  route(async (req) => {
+    const job = await AutomationJob.findById(req.params.id);
+    if (!job) throw new Error("Automation retry not_found");
+    if (job.status === "cancelled" || job.status === "running") {
+      throw new Error(`Automation retry not_retryable`);
+    }
+    job.status = "queued";
+    job.scheduledAt = new Date();
+    job.lastError = null;
+    await job.save();
+    return { job };
   }),
 );
 
 app.post(
   "/api/admin/automation/jobs/:id/cancel",
-  route((req) => {
-    const result = cancelAutomationJob(String(req.params.id));
-    if ("error" in result) throw new Error(`Automation cancel ${result.error}`);
-    return result;
+  route(async (req) => {
+    const job = await AutomationJob.findById(req.params.id);
+    if (!job) throw new Error("Automation cancel not_found");
+    if (job.status === "success") throw new Error(`Automation cancel already_completed`);
+    job.status = "cancelled";
+    job.finishedAt = new Date();
+    await job.save();
+    return { job };
   }),
 );
 
 app.post(
   "/api/admin/automation/run-now",
-  route(() => runDueAutomationJobs()),
+  route(async () => {
+    // Mock run-now for MVP Mongoose since actual runner might be an external cron.
+    const queuedCount = await AutomationJob.countDocuments({ status: "queued" });
+    return { total: queuedCount, results: [] };
+  }),
 );
 
 app.get(
   "/api/admin/automation/health",
-  route(() => ({
-    storage: "mongoose",
-    queue: {
-      total: db.automationJobs.length,
-      queued: db.automationJobs.filter((job) => job.status === "queued").length,
-      blocked: db.automationJobs.filter((job) => job.status === "blocked").length,
-      failed: db.automationJobs.filter((job) => job.status === "failed").length,
-    },
-    integrations: {
-      line:
-        isConfiguredEnv("LINE_CHANNEL_ACCESS_TOKEN") && isConfiguredEnv("LINE_CHANNEL_SECRET")
-          ? "configured"
-          : "needs_config",
-      botnoi: isConfiguredEnv("BOTNOI_WEBHOOK_SECRET") ? "configured" : "needs_config",
-    },
-  })),
+  route(async () => {
+    const [total, queued, blocked, failed] = await Promise.all([
+      AutomationJob.countDocuments(),
+      AutomationJob.countDocuments({ status: "queued" }),
+      AutomationJob.countDocuments({ status: "blocked" }),
+      AutomationJob.countDocuments({ status: "failed" }),
+    ]);
+    return {
+      storage: "mongoose",
+      queue: { total, queued, blocked, failed },
+      integrations: {
+        line:
+          isConfiguredEnv("LINE_CHANNEL_ACCESS_TOKEN") && isConfiguredEnv("LINE_CHANNEL_SECRET")
+            ? "configured"
+            : "needs_config",
+        botnoi: isConfiguredEnv("BOTNOI_WEBHOOK_SECRET") ? "configured" : "needs_config",
+      },
+    };
+  }),
 );
 
 // ✅ Mongoose — Admin botnoi mapping
@@ -756,12 +790,12 @@ app.get(
 
     return {
       elder_phone: elder.phone,
-      Relatives: (elder as any).relatives, // <<Relatives>> เช่น "ยาย", "แม่"
-      Relative_name: (elder as any).Relative_name, // <<Relative_name>> ชื่อเล่น
+      Relatives: (elder as unknown as Record<string, unknown>).relatives, // <<Relatives>> เช่น "ยาย", "แม่"
+      Relative_name: (elder as unknown as Record<string, unknown>).Relative_name, // <<Relative_name>> ชื่อเล่น
       elder_name: elder.name, // ชื่อเต็ม
-      Customer_name: (elder as any).Customer_name, // <<Customer_name>> ชื่อลูกหลาน
+      Customer_name: (elder as unknown as Record<string, unknown>).Customer_name, // <<Customer_name>> ชื่อลูกหลาน
       ai_name: "น้องคอลใจ", // <<AI_name>>
-      note: (elder as any).careNote, // โน้ตพิเศษ
+      note: (elder as unknown as Record<string, unknown>).careNote, // โน้ตพิเศษ
     };
   }),
 );
@@ -782,7 +816,9 @@ app.get(
       startedAt: { $gte: todayStart },
     }).select("botnoiContactId");
 
-    const calledContactIds = calledTodayLogs.map((log: any) => log.botnoiContactId);
+    const calledContactIds = calledTodayLogs.map(
+      (log: unknown) => (log as Record<string, unknown>).botnoiContactId,
+    );
 
     // หา mapping ที่ยังไม่ได้โทรวันนี้ และ status active
     const mapping = await BotnoiMapping.findOne({
@@ -797,12 +833,12 @@ app.get(
 
     return {
       elder_phone: elder.phone,
-      Relatives: (elder as any).relatives, // <<Relatives>>
-      Relative_name: (elder as any).Relative_name, // <<Relative_name>>
+      Relatives: (elder as unknown as Record<string, unknown>).relatives, // <<Relatives>>
+      Relative_name: (elder as unknown as Record<string, unknown>).Relative_name, // <<Relative_name>>
       elder_name: elder.name, // ชื่อเต็ม
-      Customer_name: (elder as any).Customer_name, // <<Customer_name>>
+      Customer_name: (elder as unknown as Record<string, unknown>).Customer_name, // <<Customer_name>>
       ai_name: "น้องคอลใจ", // <<AI_name>>
-      note: (elder as any).careNote, // โน้ตพิเศษ
+      note: (elder as unknown as Record<string, unknown>).careNote, // โน้ตพิเศษ
       botnoi_bot_id: mapping.botnoiBotId,
       botnoi_contact_id: mapping.botnoiContactId,
     };
@@ -1040,8 +1076,8 @@ app.post("/api/botnoi/webhook", async (req, res) => {
     }
 
     res.json({ ok: true, data: log, lineSent });
-  } catch (err: any) {
-    res.status(500).json({ ok: false, error: err.message });
+  } catch (err: unknown) {
+    res.status(500).json({ ok: false, error: err instanceof Error ? err.message : String(err) });
   }
 });
 
@@ -1049,6 +1085,10 @@ app.post("/api/botnoi/webhook", async (req, res) => {
 // Start Server
 // ============================================================
 
-app.listen(port, () => {
-  console.log(`✅ NongCallJai API listening on port ${port}`);
-});
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`✅ NongCallJai API listening on port ${port}`);
+  });
+}
+
+export default app;

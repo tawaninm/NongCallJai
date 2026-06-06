@@ -2,6 +2,10 @@
   "outputDirectory": "dist/client",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api/backend"
+    },
+    {
       "source": "/(.*)",
       "destination": "/api/index"
     }
