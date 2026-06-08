@@ -2,20 +2,8 @@
   "outputDirectory": "dist/client",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/backend"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/api/index"
+      "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "api/index.js": {
-      "includeFiles": "../dist/server/**"
-    },
-    "api/backend.ts": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }
