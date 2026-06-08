@@ -109,7 +109,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const baseUrl =
     configuredBaseUrl && !configuredBaseUrl.includes("your-domain.com")
       ? configuredBaseUrl.replace(/\/$/, "")
-      : "";
+      : "https://nongcalljai-api.onrender.com";
   const response = await fetch(`${baseUrl}${path}`, {
     ...init,
     headers: {
