@@ -708,6 +708,7 @@ app.use(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://nongcalljai.vercel.app",
+        "https://nongcalljai.onrender.com",
         readConfiguredEnv("PUBLIC_API_BASE_URL"),
       ].filter(Boolean);
       callback(null, allowedOrigins.includes(origin));
