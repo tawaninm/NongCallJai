@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://nongcalljai-api.onrender.com/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
