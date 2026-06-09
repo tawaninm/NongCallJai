@@ -3,7 +3,6 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import basicSsl from "@vitejs/plugin-basic-ssl";
 
 export default defineConfig({
   server: {
@@ -16,10 +15,11 @@ export default defineConfig({
     },
   },
   plugins: [
-    tanstackStart(),
+    tanstackStart({
+      target: "vercel",
+    }),
     react(),
     tailwindcss(),
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
-    basicSsl(),
   ],
 });
