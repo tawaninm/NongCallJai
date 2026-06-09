@@ -911,6 +911,7 @@ app.post(
       },
       { new: true },
     );
+    await CustomerModel.findByIdAndUpdate(linkDoc.customerId, { lineUserId: input.lineUserId });
     const setupStatus = await updateSetupStatus(linkDoc.customerId);
     await audit("line.link_completed", linkDoc.customerId, { lineUserId: input.lineUserId });
     await createAutomationJob({

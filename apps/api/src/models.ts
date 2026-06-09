@@ -11,6 +11,7 @@ const CustomerSchema = new Schema(
     phone: { type: String, required: true },
     email: { type: String, default: null },
     planId: { type: String, required: true },
+    lineUserId: { type: String, default: null, index: true },
     setupStatus: {
       type: String,
       enum: ["waiting_line", "waiting_botnoi", "ready"],
