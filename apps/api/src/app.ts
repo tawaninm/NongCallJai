@@ -1327,6 +1327,51 @@ async function handleCallFeedback(input: {
   };
 }
 
+
+app.get(
+  "/api/customer/by-line-user-id",
+  route(async (req) => {
+    const lineUserId = String(req.query.lineUserId ?? "");
+    if (!lineUserId) throw new ApiError(400, "MISSING_PARAM", "lineUserId is required");
+    const customer = await CustomerModel.findOne({ lineUserId });
+    if (!customer) throw new ApiError(404, "CUSTOMER_NOT_FOUND", "Customer not found");
+    const customerId = idOf(doc(customer)._id);
+    const elders = await ElderProfileModel.find({
+      customerId: objectId(customerId, "customerId"),
+    });
+    return {
+      customer: serializeCustomer(customer),
+      elders: elders.map(serializeElder),
+    };
+  }),
+);
+
+app.get(
+  "/api/customer/:customerId/latest-summary",
+  route(async (req) => {
+    const customerId = String(req.params.customerId ?? "");
+    const customer = await CustomerModel.findById(customerId);
+    if (!customer) throw new ApiError(404, "CUSTOMER_NOT_FOUND", "Customer not found");
+    const log = await CallFeedbackLogModel.findOne({
+      customerId: objectId(customerId, "customerId"),
+    }).sort({ startedAt: -1 });
+    if (!log) throw new ApiError(404, "NO_SUMMARY_FOUND", "No call summary found");
+    const logDoc = doc(log);
+    return {
+      callStatus: String(logDoc.callStatus ?? ""),
+      startedAt: requiredIso(logDoc.startedAt),
+      summary: logDoc.summary ? String(logDoc.summary) : null,
+      meal: logDoc.meal ?? null,
+      meal_detail: logDoc.meal_detail ? String(logDoc.meal_detail) : null,
+      medication_status: logDoc.medication_status ?? null,
+      medication_detail: logDoc.medication_detail ? String(logDoc.medication_detail) : null,
+      today_activity: logDoc.today_activity ? String(logDoc.today_activity) : null,
+      caring_message: logDoc.caring_message ? String(logDoc.caring_message) : null,
+      audioUrl: logDoc.audioUrl ? String(logDoc.audioUrl) : null,
+    };
+  }),
+);
+
 app.use((_req: Request, res: Response) => {
   res.status(404).json(fail("NOT_FOUND", "API route not found"));
 });
