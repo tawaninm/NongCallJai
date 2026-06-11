@@ -25,7 +25,7 @@ function ProfilePage() {
     let mounted = true;
     const loadLineProfile = async () => {
       try {
-        const liffId = import.meta.env.VITE_LIFF_ID || "2010206295-oRygsH1x";
+        const liffId = import.meta.env.VITE_LIFF_ID || "2010346605-YNruenVb";
         const { default: liff } = await import("@line/liff");
         await liff.init({ liffId });
         if (liff.isLoggedIn() && mounted) {

@@ -230,7 +230,7 @@ export const mvpApi = {
     } catch {
       const token = uid("line");
       const linkId = uid("line");
-      const liffId = import.meta.env?.VITE_LIFF_ID || "2010206295-oRygsH1x";
+      const liffId = import.meta.env?.VITE_LIFF_ID || "2010346605-YNruenVb";
       const link: LineLink = {
         id: linkId,
         linkId,
