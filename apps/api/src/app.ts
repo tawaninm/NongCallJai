@@ -1372,6 +1372,7 @@ app.get(
     };
   }),
 );
+app.get("/api/deploy-check", (_req, res) => res.json({ deployed: true, ts: Date.now() }));
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json(fail("NOT_FOUND", "API route not found"));
@@ -1382,3 +1383,4 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 export default app;
+
