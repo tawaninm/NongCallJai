@@ -1372,16 +1372,6 @@ app.get(
   }),
 );
 
-app.use((_req: Request, res: Response) => {
-  res.status(404).json(fail("NOT_FOUND", "API route not found"));
-});
-
-app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
-  sendError(res, error);
-});
-
-export default app;
-
 // ===== Chatbot APIs =====
 
 app.get(
@@ -1391,13 +1381,8 @@ app.get(
     if (!lineUserId) throw new ApiError(400, "MISSING_LINE_USER_ID", "lineUserId is required");
     const customer = await CustomerModel.findOne({ lineUserId });
     if (!customer) throw new ApiError(404, "CUSTOMER_NOT_FOUND", "Customer not found");
-    const elder = await ElderProfileModel.findOne({
-      customerId: objectId(idOf(doc(customer)._id), "customerId"),
-    });
-    return {
-      customer: serializeCustomer(customer),
-      elder: elder ? serializeElder(elder) : null,
-    };
+    const elder = await ElderProfileModel.findOne({ customerId: objectId(idOf(doc(customer)._id), "customerId") });
+    return { customer: serializeCustomer(customer), elder: elder ? serializeElder(elder) : null };
   }),
 );
 
@@ -1407,9 +1392,7 @@ app.get(
     const customerId = String(req.params.customerId ?? "");
     const customer = await CustomerModel.findById(customerId);
     if (!customer) throw new ApiError(404, "CUSTOMER_NOT_FOUND", "Customer not found");
-    const summary = await CallFeedbackLogModel.findOne({
-      customerId: objectId(customerId, "customerId"),
-    }).sort({ createdAt: -1 });
+    const summary = await CallFeedbackLogModel.findOne({ customerId: objectId(customerId, "customerId") }).sort({ createdAt: -1 });
     if (!summary) throw new ApiError(404, "SUMMARY_NOT_FOUND", "No summary found");
     return { summary: serializeJob(summary) };
   }),
@@ -1423,3 +1406,14 @@ app.delete(
     return { deleted: result.deletedCount };
   }),
 );
+
+app.use((_req: Request, res: Response) => {
+  res.status(404).json(fail("NOT_FOUND", "API route not found"));
+});
+
+app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  sendError(res, error);
+});
+
+export default app;
+
