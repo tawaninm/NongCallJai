@@ -1329,34 +1329,6 @@ async function handleCallFeedback(input: {
 
 
 
-app.post(
-  "/api/line/link/complete",
-  route(async (req) => {
-    const input = z
-      .object({
-        token: z.string().min(1),
-        lineUserId: z.string().min(1),
-        displayName: z.string().optional(),
-        pictureUrl: z.string().url().optional(),
-      })
-      .parse(req.body);
-    const link = await LineConnectionModel.findOne({ token: input.token });
-    if (!link) throw new ApiError(404, "LINE_LINK_NOT_FOUND", "Line link not found");
-    const linkDoc = doc(link);
-    if (linkDoc.usedAt) throw new ApiError(409, "LINE_LINK_USED", "Line link already used");
-    if (new Date(linkDoc.expiresAt as Date).getTime() < Date.now()) {
-      await LineConnectionModel.findByIdAndUpdate(linkDoc._id, { status: "expired" });
-      throw new ApiError(410, "LINE_LINK_EXPIRED", "Line link expired");
-    }
-    const now = new Date();
-    await LineConnectionModel.findByIdAndUpdate(linkDoc._id, { lineUserId: input.lineUserId, displayName: input.displayName || null, pictureUrl: input.pictureUrl || null, usedAt: now, linkedAt: now, status: "linked" }, { new: true });
-    await CustomerModel.findByIdAndUpdate(linkDoc.customerId, { lineUserId: input.lineUserId });
-    const setupStatus = await updateSetupStatus(linkDoc.customerId);
-    await audit("line.link_completed", linkDoc.customerId, { lineUserId: input.lineUserId });
-    return { success: true, customerId: idOf(linkDoc.customerId), setupStatus };
-  }),
-);
-
 app.get(
   "/api/customer/by-line-user-id",
   route(async (req) => {
