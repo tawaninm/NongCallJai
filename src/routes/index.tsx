@@ -116,7 +116,7 @@ function LandingPage() {
         if (!token) token = stateParams.get("token");
       }
 
-      if (token && token.startsWith("line-")) {
+      if (token) {
         window.location.replace(`/line-connect?token=${token}`);
       }
     }
