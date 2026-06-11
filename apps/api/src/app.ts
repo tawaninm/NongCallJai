@@ -1373,6 +1373,15 @@ app.get(
 );
 
 
+app.delete(
+  "/api/admin/cleanup-expired-connections",
+  route(async () => {
+    const result = await LineConnectionModel.deleteMany({ status: "expired" });
+    await audit("admin.cleanup_expired_connections", null, { deleted: result.deletedCount });
+    return { deleted: result.deletedCount };
+  }),
+);
+
 app.use((_req: Request, res: Response) => {
   res.status(404).json(fail("NOT_FOUND", "API route not found"));
 });
