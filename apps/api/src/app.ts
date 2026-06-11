@@ -1372,40 +1372,6 @@ app.get(
   }),
 );
 
-// ===== Chatbot APIs =====
-
-app.get(
-  "/api/customer/by-line-user-id",
-  route(async (req) => {
-    const lineUserId = String(req.query.lineUserId ?? "");
-    if (!lineUserId) throw new ApiError(400, "MISSING_LINE_USER_ID", "lineUserId is required");
-    const customer = await CustomerModel.findOne({ lineUserId });
-    if (!customer) throw new ApiError(404, "CUSTOMER_NOT_FOUND", "Customer not found");
-    const elder = await ElderProfileModel.findOne({ customerId: objectId(idOf(doc(customer)._id), "customerId") });
-    return { customer: serializeCustomer(customer), elder: elder ? serializeElder(elder) : null };
-  }),
-);
-
-app.get(
-  "/api/customer/:customerId/latest-summary",
-  route(async (req) => {
-    const customerId = String(req.params.customerId ?? "");
-    const customer = await CustomerModel.findById(customerId);
-    if (!customer) throw new ApiError(404, "CUSTOMER_NOT_FOUND", "Customer not found");
-    const summary = await CallFeedbackLogModel.findOne({ customerId: objectId(customerId, "customerId") }).sort({ createdAt: -1 });
-    if (!summary) throw new ApiError(404, "SUMMARY_NOT_FOUND", "No summary found");
-    return { summary: serializeJob(summary) };
-  }),
-);
-
-app.delete(
-  "/api/admin/cleanup-expired-connections",
-  route(async () => {
-    const result = await LineConnectionModel.deleteMany({ status: "expired" });
-    await audit("admin.cleanup_expired_connections", null, { deleted: result.deletedCount });
-    return { deleted: result.deletedCount };
-  }),
-);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json(fail("NOT_FOUND", "API route not found"));
@@ -1416,4 +1382,3 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 export default app;
-
