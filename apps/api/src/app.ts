@@ -1328,8 +1328,7 @@ async function handleCallFeedback(input: {
 }
 
 
-app.get(
-  const lineLinkCompleteSchema = z.object({
+const lineLinkCompleteSchema = z.object({
   token: z.string().min(1),
   lineUserId: z.string().min(1),
   displayName: z.string().optional(),
