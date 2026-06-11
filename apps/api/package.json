@@ -1,0 +1,9 @@
+{
+  "name": "nongcalljai-api",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "build": "echo ok"
+  },
+  "dependencies": {}
+}
