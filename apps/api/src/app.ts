@@ -1329,6 +1329,59 @@ async function handleCallFeedback(input: {
 
 
 app.get(
+  const lineLinkCompleteSchema = z.object({
+  token: z.string().min(1),
+  lineUserId: z.string().min(1),
+  displayName: z.string().optional(),
+  pictureUrl: z.string().url().optional(),
+});
+
+app.post(
+  "/api/line/link/complete",
+  route(async (req) => {
+    const input = lineLinkCompleteSchema.parse(req.body);
+
+    const connection = await LineConnectionModel.findOne({ token: input.token });
+    if (!connection) {
+      throw new ApiError(404, "TOKEN_NOT_FOUND", "Link token not found or already used");
+    }
+
+    const connDoc = doc(connection);
+
+    if (String(connDoc.status) !== "pending") {
+      throw new ApiError(400, "TOKEN_ALREADY_USED", "Link token has already been used");
+    }
+    if (new Date(connDoc.expiresAt as Date).getTime() < Date.now()) {
+      await LineConnectionModel.findByIdAndUpdate(idOf(connDoc._id), { status: "expired" });
+      throw new ApiError(400, "TOKEN_EXPIRED", "Link token has expired");
+    }
+
+    await LineConnectionModel.findByIdAndUpdate(idOf(connDoc._id), {
+      status: "linked",
+      lineUserId: input.lineUserId,
+      displayName: input.displayName ?? null,
+      pictureUrl: input.pictureUrl ?? null,
+      linkedAt: new Date(),
+      usedAt: new Date(),
+    });
+
+    await CustomerModel.findByIdAndUpdate(connDoc.customerId, {
+      lineUserId: input.lineUserId,
+    });
+
+    const setupStatus = await updateSetupStatus(connDoc.customerId);
+
+    await audit("line.link_complete", connDoc.customerId, {
+      lineUserId: input.lineUserId,
+    });
+
+    return {
+      success: true,
+      customerId: idOf(connDoc.customerId),
+      setupStatus,
+    };
+  }),
+);
   "/api/customer/by-line-user-id",
   route(async (req) => {
     const lineUserId = String(req.query.lineUserId ?? "");
