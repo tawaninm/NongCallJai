@@ -1328,59 +1328,7 @@ async function handleCallFeedback(input: {
 }
 
 
-const lineLinkCompleteSchema = z.object({
-  token: z.string().min(1),
-  lineUserId: z.string().min(1),
-  displayName: z.string().optional(),
-  pictureUrl: z.string().url().optional(),
-});
-
-app.post(
-  "/api/line/link/complete",
-  route(async (req) => {
-    const input = lineLinkCompleteSchema.parse(req.body);
-
-    const connection = await LineConnectionModel.findOne({ token: input.token });
-    if (!connection) {
-      throw new ApiError(404, "TOKEN_NOT_FOUND", "Link token not found or already used");
-    }
-
-    const connDoc = doc(connection);
-
-    if (String(connDoc.status) !== "pending") {
-      throw new ApiError(400, "TOKEN_ALREADY_USED", "Link token has already been used");
-    }
-    if (new Date(connDoc.expiresAt as Date).getTime() < Date.now()) {
-      await LineConnectionModel.findByIdAndUpdate(idOf(connDoc._id), { status: "expired" });
-      throw new ApiError(400, "TOKEN_EXPIRED", "Link token has expired");
-    }
-
-    await LineConnectionModel.findByIdAndUpdate(idOf(connDoc._id), {
-      status: "linked",
-      lineUserId: input.lineUserId,
-      displayName: input.displayName ?? null,
-      pictureUrl: input.pictureUrl ?? null,
-      linkedAt: new Date(),
-      usedAt: new Date(),
-    });
-
-    await CustomerModel.findByIdAndUpdate(connDoc.customerId, {
-      lineUserId: input.lineUserId,
-    });
-
-    const setupStatus = await updateSetupStatus(connDoc.customerId);
-
-    await audit("line.link_complete", connDoc.customerId, {
-      lineUserId: input.lineUserId,
-    });
-
-    return {
-      success: true,
-      customerId: idOf(connDoc.customerId),
-      setupStatus,
-    };
-  }),
-);
+app.get(
   "/api/customer/by-line-user-id",
   route(async (req) => {
     const lineUserId = String(req.query.lineUserId ?? "");
@@ -1421,16 +1369,6 @@ app.get(
       caring_message: logDoc.caring_message ? String(logDoc.caring_message) : null,
       audioUrl: logDoc.audioUrl ? String(logDoc.audioUrl) : null,
     };
-  }),
-);
-
-
-app.delete(
-  "/api/admin/cleanup-expired-connections",
-  route(async () => {
-    const result = await LineConnectionModel.deleteMany({ status: "expired" });
-    await audit("admin.cleanup_expired_connections", null, { deleted: result.deletedCount });
-    return { deleted: result.deletedCount };
   }),
 );
 
