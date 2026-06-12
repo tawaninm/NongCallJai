@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WaitingSetupRouteImport } from './routes/waiting-setup'
+import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PatientsRouteImport } from './routes/patients'
 import { Route as PatchLogRouteImport } from './routes/patch-log'
@@ -45,6 +47,11 @@ const WaitingSetupRoute = WaitingSetupRouteImport.update({
   path: '/waiting-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsOfUseRoute = TermsOfUseRouteImport.update({
+  id: '/terms-of-use',
+  path: '/terms-of-use',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -63,6 +70,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -212,10 +224,12 @@ export interface FileRoutesByFullPath {
   '/patch-log': typeof PatchLogRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pricing': typeof PricingRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/waiting-setup': typeof WaitingSetupRoute
   '/admin/api-manager': typeof AdminApiManagerRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -243,10 +257,12 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/patch-log': typeof PatchLogRoute
   '/pricing': typeof PricingRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/waiting-setup': typeof WaitingSetupRoute
   '/admin/api-manager': typeof AdminApiManagerRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -276,10 +292,12 @@ export interface FileRoutesById {
   '/patch-log': typeof PatchLogRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pricing': typeof PricingRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/waiting-setup': typeof WaitingSetupRoute
   '/admin/api-manager': typeof AdminApiManagerRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -310,10 +328,12 @@ export interface FileRouteTypes {
     | '/patch-log'
     | '/patients'
     | '/pricing'
+    | '/privacy-policy'
     | '/profile'
     | '/register'
     | '/reports'
     | '/settings'
+    | '/terms-of-use'
     | '/waiting-setup'
     | '/admin/api-manager'
     | '/admin/customers'
@@ -341,10 +361,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/patch-log'
     | '/pricing'
+    | '/privacy-policy'
     | '/profile'
     | '/register'
     | '/reports'
     | '/settings'
+    | '/terms-of-use'
     | '/waiting-setup'
     | '/admin/api-manager'
     | '/admin/customers'
@@ -373,10 +395,12 @@ export interface FileRouteTypes {
     | '/patch-log'
     | '/patients'
     | '/pricing'
+    | '/privacy-policy'
     | '/profile'
     | '/register'
     | '/reports'
     | '/settings'
+    | '/terms-of-use'
     | '/waiting-setup'
     | '/admin/api-manager'
     | '/admin/customers'
@@ -406,10 +430,12 @@ export interface RootRouteChildren {
   PatchLogRoute: typeof PatchLogRoute
   PatientsRoute: typeof PatientsRouteWithChildren
   PricingRoute: typeof PricingRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
+  TermsOfUseRoute: typeof TermsOfUseRoute
   WaitingSetupRoute: typeof WaitingSetupRoute
   AdminApiManagerRoute: typeof AdminApiManagerRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
@@ -422,6 +448,13 @@ declare module '@tanstack/react-router' {
       path: '/waiting-setup'
       fullPath: '/waiting-setup'
       preLoaderRoute: typeof WaitingSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms-of-use': {
+      id: '/terms-of-use'
+      path: '/terms-of-use'
+      fullPath: '/terms-of-use'
+      preLoaderRoute: typeof TermsOfUseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -450,6 +483,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -677,10 +717,12 @@ const rootRouteChildren: RootRouteChildren = {
   PatchLogRoute: PatchLogRoute,
   PatientsRoute: PatientsRouteWithChildren,
   PricingRoute: PricingRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
+  TermsOfUseRoute: TermsOfUseRoute,
   WaitingSetupRoute: WaitingSetupRoute,
   AdminApiManagerRoute: AdminApiManagerRoute,
   AdminCustomersRoute: AdminCustomersRoute,
