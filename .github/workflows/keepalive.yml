@@ -1,0 +1,15 @@
+name: Keep Render Awake
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend
+        run: curl -sf https://nongcalljai-api.onrender.com/api/plans || true
+      - name: Ping frontend
+        run: curl -sf https://nongcalljai.onrender.com/ || true
