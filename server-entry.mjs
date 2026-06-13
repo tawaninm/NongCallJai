@@ -21,7 +21,7 @@ const mimeTypes = {
 
 createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const filePath = join(staticDir, url.pathname);
+  const filePath = join(staticDir, decodeURIComponent(url.pathname));
 
   if (existsSync(filePath) && statSync(filePath).isFile()) {
     const ext = extname(filePath);
